@@ -24,7 +24,7 @@ all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
 	@echo LINK $@
-	@$(CXX) $^ $(LDFLAGS) -o $@
+	@$(CC) $^ $(LDFLAGS) -o $@
 
 %.o: %.c
 	@echo CC $@
