@@ -14,14 +14,7 @@ uint8_t* optimASS_checkLine( const int, const int*, const unsigned int );
 void optimASS_cleanup( void );
 ]]
 
-suffix = '.so'
-if 'OSX' == ffi.os
-	suffix = '.dylib'
-elseif 'Windows' == ffi.os
-	suffix = '.dll'
-
-optimASSLibPath = aegisub.decode_path("?user/automation/include/OptimASS/libOptimASS#{suffix}")
-optimASS = ffi.load optimASSLibPath
+optimASS = ffi.load aegisub.decode_path "?user/automation/include/OptimASS/libOptimASS" .. (('OSX' == ffi.os) and '.dylib' or ('Windows' == ffi.os) and '.dll' or '.so')
 
 getDirty = ( subtitle, selectedLines, activeLine ) ->
 	local eventOffset, resX, resY, lineLengths, lines, eventCount
