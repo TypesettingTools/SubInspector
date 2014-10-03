@@ -53,11 +53,10 @@ void optimASS_cleanup( void ) {
 }
 
 // Takes the index (0-based) of the line to render and an array of times
-// (corresponding to the frames of the line). Returns an array of
-// zeros/ones, each corresponding to a frame in the input array.
-uint8_t* optimASS_checkLine( const int lineIndex, const int *times, const unsigned int timesLength ) {
-	uint8_t *result = calloc( timesLength, sizeof *result );
-
+// (corresponding to the frames of the line). Modifies the array
+// `result` that is passed in. Returns an error if libass fails to read
+// the line.
+int optimASS_checkLine( const int lineIndex, const int *times, const unsigned int timesLength, uint8_t *result ) {
 	// Merge the header and the desired line. None of this needs to be
 	// null terminated because we have the length of everything.
 	int scriptLength = headerLength + lineLengths[lineIndex];
@@ -67,19 +66,19 @@ uint8_t* optimASS_checkLine( const int lineIndex, const int *times, const unsign
 
 	ASS_Track *assTrack = ass_read_memory( assLibrary, script, scriptLength, NULL );
 	if ( NULL == assTrack ) {
-		puts( "Failed to read ASS file." );
-		return NULL;
+		return 1;
 	}
 
 	for ( int timeIdx = 0; timeIdx < timesLength; ++ timeIdx ) {
 		result[timeIdx] = processFrame( assTrack, times[timeIdx] );
+		result[timesLength] |= result[timeIdx];
 	}
 
 	ass_free_track( assTrack );
 	free( script );
 	script = NULL;
 
-	return result;
+	return 0;
 }
 
 static uint8_t findDirty( ASS_Image *img ) {

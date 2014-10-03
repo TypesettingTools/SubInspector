@@ -7,10 +7,10 @@ ffi = require 'ffi'
 log = require 'a-mo.log'
 
 ffi.cdef [[
-int optimASS_init( int, int );
+int  optimASS_init( int, int );
 void optimASS_addHeader( const char*, unsigned int );
 void optimASS_addEvents( const char**, unsigned int*, unsigned int );
-uint8_t* optimASS_checkLine( const int, const int*, const unsigned int );
+int  optimASS_checkLine( const int, const int*, const unsigned int, uint8_t* );
 void optimASS_cleanup( void );
 ]]
 
@@ -91,6 +91,7 @@ getDirty = ( subtitle, selectedLines, activeLine ) ->
 	msff = aegisub.ms_from_frame
 	for eventIndex = eventOffset, subtitleLen
 		index = eventIndex - eventOffset
+		humanIndex = index + 1
 		with event = subtitle[eventIndex]
 			unless .comment or ("" == .text)
 				startFrame = ffms .start_time
@@ -98,17 +99,25 @@ getDirty = ( subtitle, selectedLines, activeLine ) ->
 				numFrames  = endFrame - startFrame
 
 				times = ffi.new "int[?]", numFrames
+				-- ffi initializes arrays to 0
+				results = ffi.new "uint8_t[?]", numFrames + 1
 
 				for frame = 0, numFrames-1
 					frameTime = msff startFrame + frame
 					nextFrameTime = msff startFrame + frame + 1
 					times[frame] = math.floor 0.5*(frameTime + nextFrameTime)
 
-				results = optimASS.optimASS_checkLine index, times, numFrames
+				status = optimASS.optimASS_checkLine index, times, numFrames, results
+				if status != 0
+					log.debug "Line #{humanIndex} could not be rendered. Skipping."
+					continue
 
-				for resIdx = 0, numFrames - 1
-					if 0 == results[resIdx]
-						log.warn "Line #{index+1} is invisible on frame #{startFrame+resIdx}."
+				if 0 == results[numFrames]
+					log.warn "Line #{humanIndex} is invisible for its duration."
+				else
+					for resIdx = 0, numFrames-1
+						if 0 == results[resIdx]
+							log.warn "Line #{humanIndex} is invisible on frame #{startFrame+resIdx}."
 
 	optimASS.optimASS_cleanup!
 
