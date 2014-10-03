@@ -8,8 +8,8 @@ log = require 'a-mo.log'
 
 ffi.cdef [[
 int  optimASS_init( int, int );
-void optimASS_addHeader( char*, unsigned int );
-void optimASS_addEvents( char**, unsigned int*, unsigned int );
+void optimASS_addHeader( const char*, unsigned int );
+void optimASS_addEvents( const char**, unsigned int*, unsigned int );
 uint8_t* optimASS_checkLine( const int, const int*, const unsigned int );
 void optimASS_cleanup( void );
 ]]
@@ -63,12 +63,12 @@ getDirty = ( subtitle, selectedLines, activeLine ) ->
 					-- in C.
 					eventCount = subtitleLen - eventOffset + 1
 					lineLengths = ffi.new "unsigned int[?]", eventCount
-					lines = ffi.new "char*[?]", eventCount
+					lines = ffi.new "const char*[?]", eventCount
 					seenDialogue = true
 
 				arrayIndex = index - eventOffset
-				lineLengths[arrayIndex] = ffi.cast "unsigned int", #.raw
-				lines[arrayIndex] = ffi.cast "char*", .raw
+				lineLengths[arrayIndex] =  #.raw
+				lines[arrayIndex] = .raw
 
 	vidResX, vidResY = aegisub.video_size!
 
@@ -80,15 +80,12 @@ getDirty = ( subtitle, selectedLines, activeLine ) ->
 	minimalHeader = table.concat( scriptHeader, '\n' ) .. '\n'
 	minimalHeaderLength = #minimalHeader
 
-	minHead_char = ffi.cast "char *", minimalHeader
-	minHeadLen_uint = ffi.cast "unsigned int", minimalHeaderLength
-
-	result = optimASS.optimASS_init ffi.cast( "unsigned int", resX ), ffi.cast( "int", resY )
+	result = optimASS.optimASS_init resX, resY
 	if result != 0
 		log.windowError "optimASS C library init failed."
 
-	optimASS.optimASS_addHeader minHead_char, minHeadLen_uint
-	optimASS.optimASS_addEvents lines, lineLengths, ffi.cast( "unsigned int", eventCount )
+	optimASS.optimASS_addHeader minimalHeader, minimalHeaderLength
+	optimASS.optimASS_addEvents lines, lineLengths, eventCount
 
 	ffms = aegisub.frame_from_ms
 	msff = aegisub.ms_from_frame
@@ -105,12 +102,12 @@ getDirty = ( subtitle, selectedLines, activeLine ) ->
 				for frame = 0, numFrames-1
 					frameTime = msff startFrame + frame
 					nextFrameTime = msff startFrame + frame + 1
-					times[frame] = ffi.cast "int", math.floor 0.5*(frameTime + nextFrameTime)
+					times[frame] = math.floor 0.5*(frameTime + nextFrameTime)
 
-				results = optimASS.optimASS_checkLine ffi.cast( "int", index ), times, ffi.cast( "unsigned int", numFrames )
+				results = optimASS.optimASS_checkLine index, times, numFrames
 
 				for resIdx = 0, numFrames - 1
-					if 0 == tonumber results[resIdx]
+					if 0 == results[resIdx]
 						log.warn "Line #{index+1} is invisible on frame #{startFrame+resIdx}."
 
 	optimASS.optimASS_cleanup!

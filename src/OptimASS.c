@@ -37,13 +37,12 @@ int optimASS_init( int width, int height ) {
 	return 0;
 }
 
-void optimASS_addHeader( char *newHeader, unsigned int length ) {
-	header = newHeader;
+void optimASS_addHeader( const char *newHeader, unsigned int length ) {
+	header = (char *)newHeader;
 	headerLength = length;
 }
 
-void optimASS_addEvents( char **events, unsigned int *lengths, unsigned int count ) {
-	lines = events;
+	lines = (char **)events;
 	lineLengths = lengths;
 	lineCount = count;
 }
