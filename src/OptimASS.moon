@@ -92,7 +92,7 @@ getDirty = ( subtitle, selectedLines, activeLine ) ->
 	for eventIndex = eventOffset, subtitleLen
 		index = eventIndex - eventOffset
 		with event = subtitle[eventIndex]
-			unless .comment
+			unless .comment or ("" == .text)
 				startFrame = ffms .start_time
 				endFrame   = ffms .end_time
 				numFrames  = endFrame - startFrame
