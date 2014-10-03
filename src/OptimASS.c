@@ -77,6 +77,8 @@ uint8_t* optimASS_checkLine( const int lineIndex, const int *times, const unsign
 	}
 
 	ass_free_track( assTrack );
+	free( script );
+	script = NULL;
 
 	return result;
 }
