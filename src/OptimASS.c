@@ -89,16 +89,34 @@ static uint8_t findDirty( ASS_Image *img ) {
 		return 0;
 	}
 
-	uint8_t *src = img->bitmap;
-	for ( int row = 0; row < img->h; ++row ) {
-		for ( int col = 0; col < img->w; ++col ) {
-			// Any source pixels with a value > 0 are dirty. If even one pixel
-			// is found to be dirty, the frame is considered to be dirty.
-			if ( src[col] > 0 ) {
+	uint8_t *bitmap = img->bitmap,
+	        *endOfRow,
+	         widthRemainder = img->w % 4;
+
+	const uint8_t *endOfBitmap = bitmap + img->h * img->stride;
+
+	const uint16_t padding = img->stride - img->w,
+	               width32 = img->w / 4;
+
+	uint32_t *bitmap_32,
+	         *endOfRow_32;
+
+	while ( bitmap < endOfBitmap ) {
+		bitmap_32   = (uint32_t *)bitmap;
+		endOfRow_32 = bitmap_32 + width32;
+		while ( bitmap_32 < endOfRow_32 ) {
+			if ( *bitmap_32++ ) {
 				return 1;
 			}
 		}
-		src += img->stride;
+		bitmap = (uint8_t *)bitmap_32;
+		endOfRow = bitmap + widthRemainder;
+		while ( bitmap < endOfRow ) {
+			if ( *bitmap++ ) {
+				return 1;
+			}
+		}
+		bitmap += padding;
 	}
 	return 0;
 }
