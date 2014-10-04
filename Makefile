@@ -1,6 +1,6 @@
 CC      := clang
-CFLAGS  := -Wall -ggdb -std=c99 -D_XOPEN_SOURCE=600
-LDFLAGS := -shared -fPIC -lass -ggdb
+CFLAGS  := -Wpedantic -Wall -O3 -std=c99
+LDFLAGS := -shared -fPIC -lass
 
 UNAME   := $(shell uname -s)
 
