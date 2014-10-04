@@ -1,7 +1,7 @@
 export script_name        = "OptimASS"
 export script_description = "Allow me to optimize your ass."
 export script_author      = "torque"
-export script_version     = "0.0.1"
+export script_version     = "0.0.2"
 
 ffi = require 'ffi'
 log = require 'a-mo.log'
