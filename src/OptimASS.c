@@ -42,6 +42,7 @@ void optimASS_addHeader( const char *newHeader, unsigned int length ) {
 	headerLength = length;
 }
 
+void optimASS_addEvents( const char **events, unsigned int *lengths, unsigned int count ) {
 	lines = (char **)events;
 	lineLengths = lengths;
 	lineCount = count;
