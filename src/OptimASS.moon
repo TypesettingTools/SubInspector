@@ -89,11 +89,18 @@ getDirty = ( subtitle, selectedLines, activeLine ) ->
 
 	ffms = aegisub.frame_from_ms
 	msff = aegisub.ms_from_frame
+	indicesToDelete = { }
 	for eventIndex = eventOffset, subtitleLen
-		index = eventIndex - eventOffset
-		humanIndex = index + 1
 		with event = subtitle[eventIndex]
-			unless .comment or ("" == .text)
+			unless .comment
+				index = eventIndex - eventOffset
+				humanIndex = index + 1
+
+				if "" == .text
+					log.debug "Line #{humanIndex} has no text and will be removed."
+					table.insert indicesToDelete, eventIndex
+					continue
+
 				startFrame = ffms .start_time
 				endFrame   = ffms .end_time
 				numFrames  = endFrame - startFrame
@@ -109,15 +116,18 @@ getDirty = ( subtitle, selectedLines, activeLine ) ->
 
 				status = optimASS.optimASS_checkLine index, times, numFrames, results
 				if status != 0
-					log.debug "Line #{humanIndex} could not be rendered. Skipping."
+					log.warn "Line #{humanIndex} could not be rendered. Skipping."
 					continue
 
 				if 0 == results[numFrames]
-					log.warn "Line #{humanIndex} is invisible for its duration."
+					log.debug "Line #{humanIndex} is invisible for its duration and will be removed."
+					table.insert indicesToDelete, eventIndex
 				else
 					for resIdx = 0, numFrames-1
 						if 0 == results[resIdx]
-							log.warn "Line #{humanIndex} is invisible on frame #{startFrame+resIdx}."
+							log.debug "Line #{humanIndex} is invisible on frame #{startFrame+resIdx}."
+
+	subtitle.delete indicesToDelete
 
 	optimASS.optimASS_cleanup!
 
