@@ -21,13 +21,12 @@ static unsigned int  lineCount;
 int optimASS_init( int width, int height ) {
 	assLibrary = ass_library_init( );
 	if ( NULL == assLibrary) {
-		puts( "Failed to initialize assLibrary." );
 		return 1;
 	}
 
 	assRenderer = ass_renderer_init( assLibrary );
 	if ( NULL == assRenderer ) {
-		puts( "Failed to initialize assRenderer." );
+		ass_library_done( assLibrary );
 		return 1;
 	}
 
@@ -67,6 +66,7 @@ int optimASS_checkLine( const int lineIndex, const int *times, const unsigned in
 
 	ASS_Track *assTrack = ass_read_memory( assLibrary, script, scriptLength, NULL );
 	if ( NULL == assTrack ) {
+		free( script );
 		return 1;
 	}
 
@@ -77,7 +77,6 @@ int optimASS_checkLine( const int lineIndex, const int *times, const unsigned in
 
 	ass_free_track( assTrack );
 	free( script );
-	script = NULL;
 
 	return 0;
 }
