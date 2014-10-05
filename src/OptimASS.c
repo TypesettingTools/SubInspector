@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,6 +10,7 @@
 
 static uint8_t findDirty( ASS_Image* );
 static uint8_t processFrame( ASS_Track*, int );
+static void msgCallback( int, const char*, va_list, void* );
 
 static ASS_Library  *assLibrary;
 static ASS_Renderer *assRenderer;
@@ -18,11 +20,16 @@ static char        **lines;
 static unsigned int *lineLengths;
 static unsigned int  lineCount;
 
+static void msgCallback( int level, const char *fmt, va_list va, void *data ) {
+	return;
+}
+
 int optimASS_init( int width, int height ) {
 	assLibrary = ass_library_init( );
 	if ( NULL == assLibrary) {
 		return 1;
 	}
+	ass_set_message_cb( assLibrary, msgCallback, NULL );
 
 	assRenderer = ass_renderer_init( assLibrary );
 	if ( NULL == assRenderer ) {
