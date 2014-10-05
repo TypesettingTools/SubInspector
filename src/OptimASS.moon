@@ -17,7 +17,7 @@ void optimASS_cleanup( void );
 
 optimASS = ffi.load aegisub.decode_path "?user/automation/include/OptimASS/libOptimASS" .. (('OSX' == ffi.os) and '.dylib' or ('Windows' == ffi.os) and '.dll' or '.so')
 
-getDirty = ( subtitle, selectedLines, activeLine ) ->
+aegisub.register_macro script_name, script_description, ( subtitle, selectedLines, activeLine ) ->
 	local eventOffset, resX, resY
 
 	scriptHeader = {
@@ -126,5 +126,3 @@ getDirty = ( subtitle, selectedLines, activeLine ) ->
 	subtitle.delete indicesToDelete
 
 	optimASS.optimASS_cleanup!
-
-aegisub.register_macro "Optimize Script", "Get your ass optimized", getDirty
