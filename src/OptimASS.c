@@ -11,10 +11,9 @@ static void msgCallback( int, const char*, va_list, void* );
 static ASS_Library  *assLibrary;
 static ASS_Renderer *assRenderer;
 static char         *header;
-static unsigned int  headerLength;
 static char        **events;
 static unsigned int *eventLengths;
-static unsigned int  eventCount;
+static unsigned int  headerLength, eventCount;
 
 static void msgCallback( int level, const char *fmt, va_list va, void *data ) {
 	return;
@@ -85,9 +84,8 @@ int optimASS_checkLine( const int eventIndex, const int *times, const unsigned i
 		return 1;
 	}
 
-	for ( int timeIdx = 0; timeIdx < timesLength; ++ timeIdx ) {
-		result[timeIdx] = processFrame( assTrack, times[timeIdx] );
-		result[timesLength] |= result[timeIdx];
+	for ( int timeIdx = 0; timeIdx < timesLength; ++timeIdx ) {
+		result[timesLength] |= result[timeIdx] = processFrame( assTrack, times[timeIdx] );
 	}
 
 	ass_free_track( assTrack );
@@ -104,10 +102,10 @@ static uint8_t findDirty( ASS_Image *img ) {
 	}
 
 	uint8_t *bitmap = img->bitmap,
-	        *endOfRow,
-	         widthRemainder = img->w % 4;
+	        *endOfRow;
 
-	const uint8_t *endOfBitmap = bitmap + img->h * img->stride;
+	const uint8_t *endOfBitmap = bitmap + img->h * img->stride,
+		       widthRemainder = img->w % 4;
 
 	const uint16_t padding = img->stride - img->w,
 	               width32 = img->w / 4;

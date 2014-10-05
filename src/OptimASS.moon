@@ -15,7 +15,7 @@ int  optimASS_checkLine( const int, const int*, const unsigned int, uint8_t* );
 void optimASS_cleanup( void );
 ]]
 
-optimASS = ffi.load aegisub.decode_path "?user/automation/include/OptimASS/libOptimASS" .. (('OSX' == ffi.os) and '.dylib' or ('Windows' == ffi.os) and '.dll' or '.so')
+optimASS = ffi.load aegisub.decode_path "?user/automation/include/OptimASS/libOptimASS" .. ('OSX' == ffi.os and '.dylib' or 'Windows' == ffi.os and '.dll' or '.so')
 
 aegisub.register_macro script_name, script_description, ( subtitle, selectedLines, activeLine ) ->
 	local eventOffset, resX, resY
@@ -62,26 +62,20 @@ aegisub.register_macro script_name, script_description, ( subtitle, selectedLine
 					-- Since lua already has the lengths of the lines calculated,
 					-- it seems like it would be a waste to re-re-calculate them
 					-- in C.
-					eventCount = subtitleLen - eventOffset + 1
-					optimASS.optimASS_initEvents eventCount
+					optimASS.optimASS_initEvents subtitleLen - eventOffset + 1
 					seenDialogue = true
 
-				arrayIndex = index - eventOffset
-				optimASS.optimASS_addEvent .raw, #.raw, arrayIndex
+				optimASS.optimASS_addEvent .raw, #.raw, index - eventOffset
 
 	vidResX, vidResY = aegisub.video_size!
 
 	-- If a video is loaded, use its resolution instead of the script's
 	-- resolution.
-	resX = vidResX or resX or 640
-	resY = vidResY or resY or 480
-	result = optimASS.optimASS_init resX, resY
-	if result != 0
+	if 0 != optimASS.optimASS_init vidResX or resX or 640, vidResY or resY or 480
 		log.windowError "optimASS C library init failed."
 
 	minimalHeader = table.concat( scriptHeader, '\n' ) .. '\n'
-	minimalHeaderLength = #minimalHeader
-	optimASS.optimASS_addHeader minimalHeader, minimalHeaderLength
+	optimASS.optimASS_addHeader minimalHeader, #minimalHeader
 
 	ffms = aegisub.frame_from_ms
 	msff = aegisub.ms_from_frame
@@ -98,20 +92,16 @@ aegisub.register_macro script_name, script_description, ( subtitle, selectedLine
 					continue
 
 				startFrame = ffms .start_time
-				endFrame   = ffms .end_time
-				numFrames  = endFrame - startFrame
+				numFrames  = ffms(.end_time) - startFrame
 
 				times = ffi.new "int[?]", numFrames
 				-- ffi initializes arrays to 0
 				results = ffi.new "uint8_t[?]", numFrames + 1
 
 				for frame = 0, numFrames-1
-					frameTime = msff startFrame + frame
-					nextFrameTime = msff startFrame + frame + 1
-					times[frame] = math.floor 0.5*(frameTime + nextFrameTime)
+					times[frame] = math.floor 0.5*(msff(startFrame + frame) + msff(startFrame + frame + 1))
 
-				status = optimASS.optimASS_checkLine index, times, numFrames, results
-				if status != 0
+				if 0 != optimASS.optimASS_checkLine index, times, numFrames, results
 					log.warn "Line #{humanIndex} could not be rendered. Skipping."
 					continue
 
