@@ -16,9 +16,9 @@ static ASS_Library  *assLibrary;
 static ASS_Renderer *assRenderer;
 static char         *header;
 static unsigned int  headerLength;
-static char        **lines;
-static unsigned int *lineLengths;
-static unsigned int  lineCount;
+static char        **events;
+static unsigned int *eventLengths;
+static unsigned int  eventCount;
 
 static void msgCallback( int level, const char *fmt, va_list va, void *data ) {
 	return;
@@ -48,28 +48,40 @@ void optimASS_addHeader( const char *newHeader, unsigned int length ) {
 	headerLength = length;
 }
 
-void optimASS_addEvents( const char **events, unsigned int *lengths, unsigned int count ) {
-	lines = (char **)events;
-	lineLengths = lengths;
-	lineCount = count;
+void optimASS_initEvents( unsigned int count ) {
+	events = malloc( count * sizeof *events );
+	eventLengths = malloc( count * sizeof *eventLengths );
+	eventCount = count;
+}
+
+void optimASS_addEvent( const char *event, unsigned int length, unsigned int index ) {
+	char *tempEvent = malloc( length * sizeof *tempEvent );
+	memcpy( tempEvent, event, length );
+	events[index] = tempEvent;
+	eventLengths[index] = length;
 }
 
 void optimASS_cleanup( void ) {
+	for ( unsigned int index = 0; index < eventCount; ++index ) {
+		free( events[index] );
+	}
+	free( events );
+	free( eventLengths );
 	ass_renderer_done( assRenderer );
 	ass_library_done( assLibrary );
 }
 
-// Takes the index (0-based) of the line to render and an array of times
-// (corresponding to the frames of the line). Modifies the array
+// Takes the index (0-based) of the event to render and an array of times
+// (corresponding to the frames of the event). Modifies the array
 // `result` that is passed in. Returns an error if libass fails to read
-// the line.
-int optimASS_checkLine( const int lineIndex, const int *times, const unsigned int timesLength, uint8_t *result ) {
-	// Merge the header and the desired line. None of this needs to be
+// the event.
+int optimASS_checkLine( const int eventIndex, const int *times, const unsigned int timesLength, uint8_t *result ) {
+	// Merge the header and the desired event. None of this needs to be
 	// null terminated because we have the length of everything.
-	int scriptLength = headerLength + lineLengths[lineIndex];
+	int scriptLength = headerLength + eventLengths[eventIndex];
 	char *script = malloc( scriptLength * sizeof *script );
 	memcpy( script, header, headerLength );
-	memcpy( script + headerLength, lines[lineIndex], lineLengths[lineIndex] );
+	memcpy( script + headerLength, events[eventIndex], eventLengths[eventIndex] );
 
 	ASS_Track *assTrack = ass_read_memory( assLibrary, script, scriptLength, NULL );
 	if ( NULL == assTrack ) {

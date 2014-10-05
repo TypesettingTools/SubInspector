@@ -9,7 +9,8 @@ log = require 'a-mo.log'
 ffi.cdef [[
 int  optimASS_init( int, int );
 void optimASS_addHeader( const char*, unsigned int );
-void optimASS_addEvents( const char**, unsigned int*, unsigned int );
+void optimASS_initEvents( unsigned int );
+void optimASS_addEvent( const char*, unsigned int, unsigned int );
 int  optimASS_checkLine( const int, const int*, const unsigned int, uint8_t* );
 void optimASS_cleanup( void );
 ]]
@@ -17,7 +18,7 @@ void optimASS_cleanup( void );
 optimASS = ffi.load aegisub.decode_path "?user/automation/include/OptimASS/libOptimASS" .. (('OSX' == ffi.os) and '.dylib' or ('Windows' == ffi.os) and '.dll' or '.so')
 
 getDirty = ( subtitle, selectedLines, activeLine ) ->
-	local eventOffset, resX, resY, lineLengths, lines, eventCount
+	local eventOffset, resX, resY
 
 	scriptHeader = {
 		"[Script Info]"
@@ -62,30 +63,25 @@ getDirty = ( subtitle, selectedLines, activeLine ) ->
 					-- it seems like it would be a waste to re-re-calculate them
 					-- in C.
 					eventCount = subtitleLen - eventOffset + 1
-					lineLengths = ffi.new "unsigned int[?]", eventCount
-					lines = ffi.new "const char*[?]", eventCount
+					optimASS.optimASS_initEvents eventCount
 					seenDialogue = true
 
 				arrayIndex = index - eventOffset
-				lineLengths[arrayIndex] =  #.raw
-				lines[arrayIndex] = .raw
+				optimASS.optimASS_addEvent .raw, #.raw, arrayIndex
 
 	vidResX, vidResY = aegisub.video_size!
 
 	-- If a video is loaded, use its resolution instead of the script's
 	-- resolution.
-	resX = vidResX or resX
-	resY = vidResY or resY
-
-	minimalHeader = table.concat( scriptHeader, '\n' ) .. '\n'
-	minimalHeaderLength = #minimalHeader
-
+	resX = vidResX or resX or 640
+	resY = vidResY or resY or 480
 	result = optimASS.optimASS_init resX, resY
 	if result != 0
 		log.windowError "optimASS C library init failed."
 
+	minimalHeader = table.concat( scriptHeader, '\n' ) .. '\n'
+	minimalHeaderLength = #minimalHeader
 	optimASS.optimASS_addHeader minimalHeader, minimalHeaderLength
-	optimASS.optimASS_addEvents lines, lineLengths, eventCount
 
 	ffms = aegisub.frame_from_ms
 	msff = aegisub.ms_from_frame
