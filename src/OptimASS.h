@@ -1,3 +1,7 @@
+#pragma once
+
+#include <stdint.h>
+
 int  optimASS_init( int, int );
 void optimASS_addHeader( const char*, unsigned int );
 void optimASS_initEvents( unsigned int );

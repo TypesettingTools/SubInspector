@@ -1,12 +1,8 @@
-#include <stdarg.h>
-#include <stdint.h>
-#include <stdio.h>
+#include "OptimASS.h"
+
 #include <stdlib.h>
 #include <string.h>
-
 #include <ass/ass.h>
-
-#include "OptimASS.h"
 
 static uint8_t findDirty( ASS_Image* );
 static uint8_t processFrame( ASS_Track*, int );
