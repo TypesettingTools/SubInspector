@@ -1,4 +1,7 @@
+# Binary objects
+*.o
+
+# Dynamic libraries
 *.dylib
 *.so
 *.dll
-*.o

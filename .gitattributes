@@ -1,0 +1,16 @@
+# Auto detect text files and perform LF normalization
+*              text=auto
+
+# Git files
+.gitattributes text
+.gitignore     text
+.gitmodules    text
+
+# Documentations
+*.md           text
+
+# Source code
+Makefile       diff=bash
+*.moon         diff=moon
+*.c            diff=cpp
+*.h            diff=cpp
