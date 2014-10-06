@@ -7,6 +7,7 @@
 static uint8_t findDirty( ASS_Image* );
 static uint8_t processFrame( ASS_Track*, int );
 static void msgCallback( int, const char*, va_list, void* );
+static const void uint32_t version = 0x000003;
 
 static ASS_Library  *assLibrary;
 static ASS_Renderer *assRenderer;
@@ -17,6 +18,10 @@ static unsigned int  headerLength, eventCount;
 
 static void msgCallback( int level, const char *fmt, va_list va, void *data ) {
 	return;
+}
+
+uint32_t optimASS_getVersion( void ) {
+	return version;
 }
 
 int optimASS_init( int width, int height ) {
@@ -62,6 +67,7 @@ void optimASS_cleanup( void ) {
 	}
 	free( events );
 	free( eventLengths );
+
 	ass_renderer_done( assRenderer );
 	ass_library_done( assLibrary );
 }

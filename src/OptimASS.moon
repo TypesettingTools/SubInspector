@@ -1,23 +1,31 @@
 export script_name        = "OptimASS"
 export script_description = "Allow me to optimize your ass."
 export script_author      = "torque"
-export script_version     = "0.0.2"
+export script_version     = 0x000003
 
 ffi = require 'ffi'
 log = require 'a-mo.log'
 
 ffi.cdef [[
-int  optimASS_init( int, int );
-void optimASS_addHeader( const char*, unsigned int );
-void optimASS_initEvents( unsigned int );
-void optimASS_addEvent( const char*, unsigned int, unsigned int );
-int  optimASS_checkLine( const int, const int*, const unsigned int, uint8_t* );
-void optimASS_cleanup( void );
+uint32_t optimASS_getVersion( void );
+int      optimASS_init( int, int );
+void     optimASS_addHeader( const char*, unsigned int );
+void     optimASS_initEvents( unsigned int );
+void     optimASS_addEvent( const char*, unsigned int, unsigned int );
+int      optimASS_checkLine( const int, const int*, const unsigned int, uint8_t* );
+void     optimASS_cleanup( void );
 ]]
 
 optimASS = ffi.load aegisub.decode_path "?user/automation/include/OptimASS/libOptimASS" .. ('OSX' == ffi.os and '.dylib' or 'Windows' == ffi.os and '.dll' or '.so')
 
 aegisub.register_macro script_name, script_description, ( subtitle, selectedLines, activeLine ) ->
+	if optimASS.optimASS_getVersion! < script_version
+		log.windowError "Installed libOptimASS is outdated. Please update it."
+		return selectedLines
+	elseif optimASS.optimASS_getVersion! > script_version
+		log.windowError "Installed optimASS.moon is outdated. Please update it."
+		return selectedLines
+
 	local eventOffset, resX, resY
 
 	scriptHeader = {
