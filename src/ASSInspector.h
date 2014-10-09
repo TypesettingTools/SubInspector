@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 #ifdef _WIN32
-#	ifdef ASSI_STATIC
+#	ifdef ASS_INSPECTOR_STATIC
 #		define ASSI_EXPORT
 #	else
 #		ifdef BUILD_DLL
@@ -15,7 +15,7 @@
 #		else
 #			define ASSI_EXPORT __declspec(dllimport)
 #		endif
-#	endif // ASSI_STATIC
+#	endif // ASS_INSPECTOR_STATIC
 #else // Non-windows
 #	define ASSI_EXPORT
 #endif // _WIN32

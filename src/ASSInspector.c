@@ -53,7 +53,7 @@ ASSI_State* assi_init( int width, int height ) {
 
 	state->events = NULL;
 	state->eventLengths = NULL;
-	eventCount = 0;
+	state->eventCount = 0;
 
 	return state;
 }
@@ -142,10 +142,10 @@ static uint8_t findDirty( ASS_Image *img ) {
 			*endOfRow;
 
 		const uint8_t *endOfBitmap = bitmap + img->h * img->stride,
-			       widthRemainder = img->w % sizeof uintptr_t;
+			       widthRemainder = img->w % sizeof( uintptr_t );
 
 		const uint16_t padding = img->stride - img->w,
-			       widthX = img->w / sizeof uintptr_t;
+			       widthX = img->w / sizeof( uintptr_t );
 
 		uintptr_t *bitmap_X,
 			 *endOfRow_X;

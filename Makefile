@@ -9,7 +9,7 @@ AR := ar
 
 # Constants
 WARNINGS := -Wall -Wunreachable-code -Wfloat-equal -Wredundant-decls -Winit-self -Wpedantic
-OPTIMIZATIONS := -O3 -Os
+OPTIMIZATION := -O3
 ADDITIONAL := -std=c99
 LIBS := -lass
 CFLAGS := $(WARNINGS) $(OPTIMIZATIONS) $(DEFINES) $(ADDITIONAL)
@@ -20,7 +20,6 @@ LIB_NAME := libASSInspector
 ifeq ($(DEBUG),1)
 	CFLAGS += -DDEBUG -g
 else
-	CFLAGS += -s
 	LFLAGS += -s
 endif
 ifeq ($(OS),Windows_NT)
@@ -29,7 +28,7 @@ ifeq ($(OS),Windows_NT)
 		CFLAGS += -DBUILD_DLL
 		LIB_EXT :=.dll
 	else
-		CFLAGS += -DOPTIM_ASS_STATIC
+		CFLAGS += -DASS_INSPECTOR_STATIC
 		LIB_EXT :=.a
 	endif
 else
@@ -50,7 +49,7 @@ endif
 LIB_FULLNAME := $(LIB_NAME)$(LIB_EXT)
 
 # File shortcuts
-SOURCES := $(wildcard *.c)
+SOURCES := $(wildcard src/*.c)
 OBJECTS := $(SOURCES:.c=.o)
 
 # Build targets
