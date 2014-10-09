@@ -1,35 +1,75 @@
-CC      := clang
-CFLAGS  := -Wpedantic -Wall -O3 -std=c99
-LDFLAGS := -shared -fPIC -lass
+# Configuration
+SHARED := 1
+DEBUG := 0
 
-UNAME   := $(shell uname -s)
+# Programs
+UNAME := $(shell uname -s)
+CC := clang
+AR := ar
 
-ifeq ($(OS), Windows_NT)
-	TARGET  := libASSInspector.dll
+# Constants
+WARNINGS := -Wall -Wunreachable-code -Wfloat-equal -Wredundant-decls -Winit-self -Wpedantic
+OPTIMIZATIONS := -O3 -Os
+ADDITIONAL := -std=c99
+LIBS := -lass
+CFLAGS := $(WARNINGS) $(OPTIMIZATIONS) $(DEFINES) $(ADDITIONAL)
+LFLAGS := $(LIBS)
+LIB_NAME := libASSInspector
+
+# Modifications
+ifeq ($(DEBUG),1)
+	CFLAGS += -DDEBUG -g
 else
-	ifeq ($(UNAME), Darwin)
-		TARGET  := libASSInspector.dylib
+	CFLAGS += -s
+	LFLAGS += -s
+endif
+ifeq ($(OS),Windows_NT)
+	CFLAGS += -D_WIN32
+	ifeq ($(SHARED),1)
+		CFLAGS += -DBUILD_DLL
+		LIB_EXT :=.dll
 	else
-		# Do any other operating systems use weird extensions for their
-		# dynamic libraries?
-		TARGET  := libASSInspector.so
+		CFLAGS += -DOPTIM_ASS_STATIC
+		LIB_EXT :=.a
+	endif
+else
+	ifeq ($(SHARED),1)
+		CFLAGS += -fPIC
+		ifeq ($(UNAME),Darwin)
+			LIB_EXT :=.dylib
+		else
+			LIB_EXT :=.so
+		endif
+	else
+		LIB_EXT :=.a
 	endif
 endif
+ifeq ($(SHARED),1)
+	LFLAGS += -shared
+endif
+LIB_FULLNAME := $(LIB_NAME)$(LIB_EXT)
 
-SOURCES := $(wildcard src/*.c)
+# File shortcuts
+SOURCES := $(wildcard *.c)
 OBJECTS := $(SOURCES:.c=.o)
 
+# Build targets
 .PHONY: all clean
 
-all: $(TARGET)
+all: $(LIB_FULLNAME)
 
-$(TARGET): $(OBJECTS)
+$(LIB_FULLNAME): $(OBJECTS)
+ifeq ($(SHARED),1)
 	@echo LINK $@
-	@$(CC) $^ $(LDFLAGS) -o $@
+	@$(CC) $^ $(LFLAGS) -o $@
+else
+	@echo ARCHIVE $@
+	@$(AR) rcs $@ $^
+endif
 
 %.o: %.c
 	@echo CC $@
 	@$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(TARGET) $(OBJECTS)
+	rm -f $(LIB_FULLNAME) $(OBJECTS)
