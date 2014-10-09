@@ -20,6 +20,8 @@
 #	define ASSI_EXPORT
 #endif // _WIN32
 
+#define ASSI_VERSION 0x000003
+
 typedef struct ASSI_State_priv ASSI_State;
 
 ASSI_EXPORT uint32_t    assi_getVersion( void );

@@ -19,14 +19,13 @@ struct ASSI_State_priv{
 static uint8_t findDirty( ASS_Image* );
 static uint8_t processFrame( ASS_Renderer*, ASS_Track*, int );
 static void msgCallback( int, const char*, va_list, void* );
-static const uint32_t version = 0x000003;
 
 static void msgCallback( int level, const char *fmt, va_list va, void *data ) {
 	return;
 }
 
 uint32_t assi_getVersion( void ) {
-	return version;
+	return ASSI_VERSION;
 }
 
 ASSI_State* assi_init( int width, int height ) {
