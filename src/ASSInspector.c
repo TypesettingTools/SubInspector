@@ -17,11 +17,11 @@ static void msgCallback( int level, const char *fmt, va_list va, void *data ) {
 	return;
 }
 
-uint32_t ASSI_getVersion( void ) {
+uint32_t assi_getVersion( void ) {
 	return version;
 }
 
-ASSI_State* ASSI_init( int width, int height ) {
+ASSI_State* assi_init( int width, int height ) {
 	ASSI_State *state = malloc( sizeof *state );
 	if ( NULL == state ) {
 		return NULL;
@@ -46,26 +46,26 @@ ASSI_State* ASSI_init( int width, int height ) {
 	return state;
 }
 
-void ASSI_addHeader( ASSI_State *state, const char *newHeader, unsigned int length ) {
+void assi_addHeader( ASSI_State *state, const char *newHeader, unsigned int length ) {
 	// should probably be copied, too
 	state->header = (char *)newHeader;
 	state->headerLength = length;
 }
 
-void ASSI_initEvents( ASSI_State *state, unsigned int count ) {
+void assi_initEvents( ASSI_State *state, unsigned int count ) {
 	state->events = malloc( count * sizeof *state->events );
 	state->eventLengths = malloc( count * sizeof *state->eventLengths );
 	state->eventCount = count;
 }
 
-void ASSI_addEvent( ASSI_State *state, const char *event, unsigned int length, unsigned int index ) {
+void assi_addEvent( ASSI_State *state, const char *event, unsigned int length, unsigned int index ) {
 	char *tempEvent = malloc( length * sizeof *tempEvent );
 	memcpy( tempEvent, event, length );
 	state->events[index] = tempEvent;
 	state->eventLengths[index] = length;
 }
 
-void ASSI_cleanup( ASSI_State *state ) {
+void assi_cleanup( ASSI_State *state ) {
 	for ( unsigned int index = 0; index < state->eventCount; ++index ) {
 		free( state->events[index] );
 	}
@@ -80,7 +80,7 @@ void ASSI_cleanup( ASSI_State *state ) {
 // (corresponding to the frames of the event). Modifies the array
 // `result` that is passed in. Returns an error if libass fails to read
 // the event.
-int ASSI_checkLine( ASSI_State *state, const int eventIndex, const int *times, const unsigned int timesLength, uint8_t *result ) {
+int assi_checkLine( ASSI_State *state, const int eventIndex, const int *times, const unsigned int timesLength, uint8_t *result ) {
 	// Merge the header and the desired event. None of this needs to be
 	// null terminated because we have the length of everything.
 	int scriptLength = state->headerLength + state->eventLengths[eventIndex];
