@@ -5,14 +5,14 @@ LDFLAGS := -shared -fPIC -lass
 UNAME   := $(shell uname -s)
 
 ifeq ($(OS), Windows_NT)
-	TARGET  := libOptimASS.dll
+	TARGET  := libASSInspector.dll
 else
 	ifeq ($(UNAME), Darwin)
-		TARGET  := libOptimASS.dylib
+		TARGET  := libASSInspector.dylib
 	else
 		# Do any other operating systems use weird extensions for their
 		# dynamic libraries?
-		TARGET  := libOptimASS.so
+		TARGET  := libASSInspector.so
 	endif
 endif
 
