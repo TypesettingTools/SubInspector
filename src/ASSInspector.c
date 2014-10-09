@@ -8,6 +8,14 @@
 #include <string.h>
 #include <ass/ass.h>
 
+struct ASSI_State_priv{
+	ASS_Library   *assLibrary;
+	ASS_Renderer  *assRenderer;
+	char          *header;
+	char         **events;
+	unsigned int  *eventLengths, headerLength, eventCount;
+};
+
 static uint8_t findDirty( ASS_Image* );
 static uint8_t processFrame( ASS_Renderer*, ASS_Track*, int );
 static void msgCallback( int, const char*, va_list, void* );

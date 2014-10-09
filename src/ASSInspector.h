@@ -5,16 +5,8 @@
 #pragma once
 
 #include <stdint.h>
-#include <ass/ass.h>
 
-typedef struct {
-	ASS_Library   *assLibrary;
-	ASS_Renderer  *assRenderer;
-	char          *header;
-	char         **events;
-	unsigned int  *eventLengths, headerLength, eventCount;
-} ASSI_State;
-
+typedef struct ASSI_State_priv ASSI_State;
 
 uint32_t    assi_getVersion( void );
 ASSI_State* assi_init( int, int );
