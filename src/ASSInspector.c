@@ -50,6 +50,11 @@ ASSI_State* assi_init( int width, int height ) {
 
 	ass_set_frame_size( state->assRenderer, width, height );
 	ass_set_fonts( state->assRenderer, NULL, "Sans", 1, NULL, 1 );
+
+	state->events = NULL;
+	state->eventLengths = NULL;
+	eventCount = 0;
+
 	return state;
 }
 
@@ -59,17 +64,32 @@ void assi_addHeader( ASSI_State *state, const char *newHeader, unsigned int leng
 	state->headerLength = length;
 }
 
-void assi_initEvents( ASSI_State *state, unsigned int count ) {
+int assi_initEvents( ASSI_State *state, unsigned int count ) {
 	state->events = malloc( count * sizeof *state->events );
+	if( NULL == state->events ) {
+		return 1;
+	}
+	memset( state->events, 0, count * sizeof *state->events );
 	state->eventLengths = malloc( count * sizeof *state->eventLengths );
+	if( NULL == state->eventLengths ) {
+		free( state->events );
+		state->events = NULL;
+		return 1;
+	}
 	state->eventCount = count;
+	return 0;
 }
 
-void assi_addEvent( ASSI_State *state, const char *event, unsigned int length, unsigned int index ) {
+int assi_addEvent( ASSI_State *state, const char *event, unsigned int length, unsigned int index ) {
 	char *tempEvent = malloc( length * sizeof *tempEvent );
+	if( NULL == tempEvent ) {
+		return 1;
+	}
 	memcpy( tempEvent, event, length );
+	free( state->events[index] );
 	state->events[index] = tempEvent;
 	state->eventLengths[index] = length;
+	return 0;
 }
 
 void assi_cleanup( ASSI_State *state ) {
@@ -92,6 +112,9 @@ int assi_checkLine( ASSI_State *state, const int eventIndex, const int *times, c
 	// null terminated because we have the length of everything.
 	int scriptLength = state->headerLength + state->eventLengths[eventIndex];
 	char *script = malloc( scriptLength * sizeof *script );
+	if( NULL == script ) {
+		return 1;
+	}
 	memcpy( script, state->header, state->headerLength );
 	memcpy( script + state->headerLength, state->events[eventIndex], state->eventLengths[eventIndex] );
 
