@@ -112,40 +112,38 @@ int assi_checkLine( ASSI_State *state, const int eventIndex, const int *times, c
 }
 
 static uint8_t findDirty( ASS_Image *img ) {
-	// If alpha is 255, the image is fully transparent and we can
-	// determine it is not dirty immediately.
-	if ( 0xFF == (img->color & 0xFF) ) {
-		return 0;
-	}
+	// If alpha is not 255, the image is not fully transparent and we can
+	// determine something can be dirty.
+	if( ~(img->color & 0xFF) ) {
+		uint8_t *bitmap = img->bitmap,
+			*endOfRow;
 
-	uint8_t *bitmap = img->bitmap,
-	        *endOfRow;
+		const uint8_t *endOfBitmap = bitmap + img->h * img->stride,
+			       widthRemainder = img->w % sizeof uintptr_t;
 
-	const uint8_t *endOfBitmap = bitmap + img->h * img->stride,
-		       widthRemainder = img->w % 4;
+		const uint16_t padding = img->stride - img->w,
+			       widthX = img->w / sizeof uintptr_t;
 
-	const uint16_t padding = img->stride - img->w,
-	               width32 = img->w / 4;
+		uintptr_t *bitmap_X,
+			 *endOfRow_X;
 
-	uint32_t *bitmap_32,
-	         *endOfRow_32;
-
-	while ( bitmap < endOfBitmap ) {
-		bitmap_32   = (uint32_t *)bitmap;
-		endOfRow_32 = bitmap_32 + width32;
-		while ( bitmap_32 < endOfRow_32 ) {
-			if ( *bitmap_32++ ) {
-				return 1;
+		while ( bitmap < endOfBitmap ) {
+			bitmap_X   = (uintptr_t *)bitmap;
+			endOfRow_X = bitmap_X + widthX;
+			while ( bitmap_X < endOfRow_X ) {
+				if ( *bitmap_X++ ) {
+					return 1;
+				}
 			}
-		}
-		bitmap = (uint8_t *)bitmap_32;
-		endOfRow = bitmap + widthRemainder;
-		while ( bitmap < endOfRow ) {
-			if ( *bitmap++ ) {
-				return 1;
+			bitmap = (uint8_t *)bitmap_X;
+			endOfRow = bitmap + widthRemainder;
+			while ( bitmap < endOfRow ) {
+				if ( *bitmap++ ) {
+					return 1;
+				}
 			}
+			bitmap += padding;
 		}
-		bitmap += padding;
 	}
 	return 0;
 }
