@@ -11,6 +11,5 @@
 
 # Source code
 Makefile       diff=bash
-*.moon         diff=moon
 *.c            diff=cpp
 *.h            diff=cpp

@@ -8,20 +8,27 @@
 #include <string.h>
 #include <ass/ass.h>
 
+struct ASSI_State_priv{
+	ASS_Library   *assLibrary;
+	ASS_Renderer  *assRenderer;
+	char          *header;
+	char         **events;
+	unsigned int  *eventLengths, headerLength, eventCount;
+};
+
 static uint8_t findDirty( ASS_Image* );
 static uint8_t processFrame( ASS_Renderer*, ASS_Track*, int );
 static void msgCallback( int, const char*, va_list, void* );
-static const uint32_t version = 0x000003;
 
 static void msgCallback( int level, const char *fmt, va_list va, void *data ) {
 	return;
 }
 
-uint32_t ASSI_getVersion( void ) {
-	return version;
+uint32_t assi_getVersion( void ) {
+	return ASSI_VERSION;
 }
 
-ASSI_State* ASSI_init( int width, int height ) {
+ASSI_State* assi_init( int width, int height ) {
 	ASSI_State *state = malloc( sizeof *state );
 	if ( NULL == state ) {
 		return NULL;
@@ -43,29 +50,49 @@ ASSI_State* ASSI_init( int width, int height ) {
 
 	ass_set_frame_size( state->assRenderer, width, height );
 	ass_set_fonts( state->assRenderer, NULL, "Sans", 1, NULL, 1 );
+
+	state->events = NULL;
+	state->eventLengths = NULL;
+	state->eventCount = 0;
+
 	return state;
 }
 
-void ASSI_addHeader( ASSI_State *state, const char *newHeader, unsigned int length ) {
+void assi_addHeader( ASSI_State *state, const char *newHeader, unsigned int length ) {
 	// should probably be copied, too
 	state->header = (char *)newHeader;
 	state->headerLength = length;
 }
 
-void ASSI_initEvents( ASSI_State *state, unsigned int count ) {
+int assi_initEvents( ASSI_State *state, unsigned int count ) {
 	state->events = malloc( count * sizeof *state->events );
+	if( NULL == state->events ) {
+		return 1;
+	}
+	memset( state->events, 0, count * sizeof *state->events );
 	state->eventLengths = malloc( count * sizeof *state->eventLengths );
+	if( NULL == state->eventLengths ) {
+		free( state->events );
+		state->events = NULL;
+		return 1;
+	}
 	state->eventCount = count;
+	return 0;
 }
 
-void ASSI_addEvent( ASSI_State *state, const char *event, unsigned int length, unsigned int index ) {
+int assi_addEvent( ASSI_State *state, const char *event, unsigned int length, unsigned int index ) {
 	char *tempEvent = malloc( length * sizeof *tempEvent );
+	if( NULL == tempEvent ) {
+		return 1;
+	}
 	memcpy( tempEvent, event, length );
+	free( state->events[index] );
 	state->events[index] = tempEvent;
 	state->eventLengths[index] = length;
+	return 0;
 }
 
-void ASSI_cleanup( ASSI_State *state ) {
+void assi_cleanup( ASSI_State *state ) {
 	for ( unsigned int index = 0; index < state->eventCount; ++index ) {
 		free( state->events[index] );
 	}
@@ -80,11 +107,14 @@ void ASSI_cleanup( ASSI_State *state ) {
 // (corresponding to the frames of the event). Modifies the array
 // `result` that is passed in. Returns an error if libass fails to read
 // the event.
-int ASSI_checkLine( ASSI_State *state, const int eventIndex, const int *times, const unsigned int timesLength, uint8_t *result ) {
+int assi_checkLine( ASSI_State *state, const int eventIndex, const int *times, const unsigned int timesLength, uint8_t *result ) {
 	// Merge the header and the desired event. None of this needs to be
 	// null terminated because we have the length of everything.
 	int scriptLength = state->headerLength + state->eventLengths[eventIndex];
 	char *script = malloc( scriptLength * sizeof *script );
+	if( NULL == script ) {
+		return 1;
+	}
 	memcpy( script, state->header, state->headerLength );
 	memcpy( script + state->headerLength, state->events[eventIndex], state->eventLengths[eventIndex] );
 
@@ -105,40 +135,38 @@ int ASSI_checkLine( ASSI_State *state, const int eventIndex, const int *times, c
 }
 
 static uint8_t findDirty( ASS_Image *img ) {
-	// If alpha is 255, the image is fully transparent and we can
-	// determine it is not dirty immediately.
-	if ( 0xFF == (img->color & 0xFF) ) {
-		return 0;
-	}
+	// If alpha is not 255, the image is not fully transparent and we can
+	// determine something can be dirty.
+	if( ~(img->color & 0xFF) ) {
+		uint8_t *bitmap = img->bitmap,
+			*endOfRow;
 
-	uint8_t *bitmap = img->bitmap,
-	        *endOfRow;
+		const uint8_t *endOfBitmap = bitmap + img->h * img->stride,
+			       widthRemainder = img->w % sizeof( uintptr_t );
 
-	const uint8_t *endOfBitmap = bitmap + img->h * img->stride,
-		       widthRemainder = img->w % 4;
+		const uint16_t padding = img->stride - img->w,
+			       widthX = img->w / sizeof( uintptr_t );
 
-	const uint16_t padding = img->stride - img->w,
-	               width32 = img->w / 4;
+		uintptr_t *bitmap_X,
+			 *endOfRow_X;
 
-	uint32_t *bitmap_32,
-	         *endOfRow_32;
-
-	while ( bitmap < endOfBitmap ) {
-		bitmap_32   = (uint32_t *)bitmap;
-		endOfRow_32 = bitmap_32 + width32;
-		while ( bitmap_32 < endOfRow_32 ) {
-			if ( *bitmap_32++ ) {
-				return 1;
+		while ( bitmap < endOfBitmap ) {
+			bitmap_X   = (uintptr_t *)bitmap;
+			endOfRow_X = bitmap_X + widthX;
+			while ( bitmap_X < endOfRow_X ) {
+				if ( *bitmap_X++ ) {
+					return 1;
+				}
 			}
-		}
-		bitmap = (uint8_t *)bitmap_32;
-		endOfRow = bitmap + widthRemainder;
-		while ( bitmap < endOfRow ) {
-			if ( *bitmap++ ) {
-				return 1;
+			bitmap = (uint8_t *)bitmap_X;
+			endOfRow = bitmap + widthRemainder;
+			while ( bitmap < endOfRow ) {
+				if ( *bitmap++ ) {
+					return 1;
+				}
 			}
+			bitmap += padding;
 		}
-		bitmap += padding;
 	}
 	return 0;
 }
