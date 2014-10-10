@@ -135,9 +135,9 @@ int assi_checkLine( ASSI_State *state, const int eventIndex, const int *times, c
 }
 
 static uint8_t findDirty( ASS_Image *img ) {
-	// If alpha is not 255, the image is not fully transparent and we can
-	// determine something can be dirty.
-	if( ~(img->color & 0xFF) ) {
+	// If alpha is not 255, the image is not fully transparent and we need
+	// to check the bitmap blending mask to verify if it is dirty or not.
+	if( 0xFF != (img->color & 0xFF) ) {
 		uint8_t *bitmap = img->bitmap,
 			*endOfRow;
 
