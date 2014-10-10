@@ -60,7 +60,7 @@ ASSI_State* assi_init( int width, int height ) {
 }
 
 int assi_addHeader( ASSI_State *state, const char *header, unsigned int length ) {
-	char *tempHeader = malloc( length * sizeof *tempHeader );
+	char *tempHeader = malloc( length );
 	if( NULL == tempHeader ){
 		return 1;
 	}
@@ -88,7 +88,7 @@ int assi_initEvents( ASSI_State *state, unsigned int count ) {
 }
 
 int assi_addEvent( ASSI_State *state, const char *event, unsigned int length, unsigned int index ) {
-	char *tempEvent = malloc( length * sizeof *tempEvent );
+	char *tempEvent = malloc( length );
 	if( NULL == tempEvent ) {
 		return 1;
 	}
@@ -119,7 +119,7 @@ int assi_checkLine( ASSI_State *state, const int eventIndex, const int *times, c
 	// Merge the header and the desired event. None of this needs to be
 	// null terminated because we have the length of everything.
 	int scriptLength = state->headerLength + state->eventLengths[eventIndex];
-	char *script = malloc( scriptLength * sizeof *script );
+	char *script = malloc( scriptLength );
 	if( NULL == script ) {
 		return 1;
 	}
