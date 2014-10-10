@@ -14,6 +14,7 @@ struct ASSI_State_priv{
 	char          *header;
 	char         **events;
 	unsigned int  *eventLengths, headerLength, eventCount;
+	char error[128];
 };
 
 static uint8_t findDirty( ASS_Image* );
@@ -21,7 +22,11 @@ static uint8_t processFrame( ASS_Renderer*, ASS_Track*, int );
 static void msgCallback( int, const char*, va_list, void* );
 
 static void msgCallback( int level, const char *fmt, va_list va, void *data ) {
-	return;
+	if( level < 5 ){
+		ASSI_State *state = data;
+		int levelLength = sprintf( state->error, "%d: ", level );
+		vsnprintf( state->error + levelLength, sizeof state->error - levelLength, fmt, va );
+	}
 }
 
 uint32_t assi_getVersion( void ) {
@@ -39,7 +44,7 @@ ASSI_State* assi_init( int width, int height ) {
 		free( state );
 		return NULL;
 	}
-	ass_set_message_cb( state->assLibrary, msgCallback, NULL );
+	ass_set_message_cb( state->assLibrary, msgCallback, state );
 
 	state->assRenderer = ass_renderer_init( state->assLibrary );
 	if ( NULL == state->assRenderer ) {
@@ -54,6 +59,7 @@ ASSI_State* assi_init( int width, int height ) {
 	state->header = NULL;
 	state->events = NULL;
 	state->eventLengths = NULL;
+	state->error[0] = '\0';
 
 	return state;
 }
