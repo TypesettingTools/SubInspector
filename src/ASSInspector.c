@@ -51,6 +51,7 @@ ASSI_State* assi_init( int width, int height ) {
 	ass_set_frame_size( state->assRenderer, width, height );
 	ass_set_fonts( state->assRenderer, NULL, "Sans", 1, NULL, 1 );
 
+	state->header = NULL;
 	state->events = NULL;
 	state->eventLengths = NULL;
 	state->eventCount = 0;
@@ -58,10 +59,16 @@ ASSI_State* assi_init( int width, int height ) {
 	return state;
 }
 
-void assi_addHeader( ASSI_State *state, const char *newHeader, unsigned int length ) {
-	// should probably be copied, too
-	state->header = (char *)newHeader;
+int assi_addHeader( ASSI_State *state, const char *header, unsigned int length ) {
+	char *tempHeader = malloc( length * sizeof *tempHeader );
+	if( NULL == tempHeader ){
+		return 1;
+	}
+	memcpy( tempHeader, header, length );
+	free( state->header );
+	state->header = tempHeader;
 	state->headerLength = length;
+	return 0;
 }
 
 int assi_initEvents( ASSI_State *state, unsigned int count ) {
@@ -93,6 +100,7 @@ int assi_addEvent( ASSI_State *state, const char *event, unsigned int length, un
 }
 
 void assi_cleanup( ASSI_State *state ) {
+	free( state->header );
 	for ( unsigned int index = 0; index < state->eventCount; ++index ) {
 		free( state->events[index] );
 	}

@@ -26,7 +26,7 @@ typedef struct ASSI_State_priv ASSI_State;
 
 ASSI_EXPORT uint32_t    assi_getVersion( void );
 ASSI_EXPORT ASSI_State* assi_init( int, int );
-ASSI_EXPORT void        assi_addHeader( ASSI_State*, const char*, unsigned int );
+ASSI_EXPORT int         assi_addHeader( ASSI_State*, const char*, unsigned int );
 ASSI_EXPORT int         assi_initEvents( ASSI_State*, unsigned int count );
 ASSI_EXPORT int         assi_addEvent( ASSI_State*, const char*, unsigned int, unsigned int );
 ASSI_EXPORT int         assi_checkLine( ASSI_State*, const int, const int*, const unsigned int, uint8_t* );
