@@ -14,6 +14,7 @@ struct ASSI_State_priv{
 	char          *header;
 	char         **events;
 	unsigned int  *eventLengths, headerLength, eventCount;
+	char error[128];
 };
 
 static uint8_t findDirty( ASS_Image* );
@@ -21,7 +22,11 @@ static uint8_t processFrame( ASS_Renderer*, ASS_Track*, int );
 static void msgCallback( int, const char*, va_list, void* );
 
 static void msgCallback( int level, const char *fmt, va_list va, void *data ) {
-	return;
+	if( level < 5 ){
+		ASSI_State *state = data;
+		int levelLength = sprintf( state->error, "%d: ", level );
+		vsnprintf( state->error + levelLength, sizeof state->error - levelLength, fmt, va );
+	}
 }
 
 uint32_t assi_getVersion( void ) {
@@ -39,7 +44,7 @@ ASSI_State* assi_init( int width, int height ) {
 		free( state );
 		return NULL;
 	}
-	ass_set_message_cb( state->assLibrary, msgCallback, NULL );
+	ass_set_message_cb( state->assLibrary, msgCallback, state );
 
 	state->assRenderer = ass_renderer_init( state->assLibrary );
 	if ( NULL == state->assRenderer ) {
@@ -51,25 +56,45 @@ ASSI_State* assi_init( int width, int height ) {
 	ass_set_frame_size( state->assRenderer, width, height );
 	ass_set_fonts( state->assRenderer, NULL, "Sans", 1, NULL, 1 );
 
+	state->header = NULL;
 	state->events = NULL;
 	state->eventLengths = NULL;
-	state->eventCount = 0;
+	state->error[0] = '\0';
 
 	return state;
 }
 
-void assi_addHeader( ASSI_State *state, const char *newHeader, unsigned int length ) {
-	// should probably be copied, too
-	state->header = (char *)newHeader;
+int assi_addHeader( ASSI_State *state, const char *header, unsigned int length ) {
+	if( NULL == state ){
+		return 1;
+	}
+	char *tempHeader = malloc( length );
+	if( NULL == tempHeader ){
+		return 1;
+	}
+	memcpy( tempHeader, header, length );
+	free( state->header );
+	state->header = tempHeader;
 	state->headerLength = length;
+	return 0;
 }
 
 int assi_initEvents( ASSI_State *state, unsigned int count ) {
+	if( NULL == state ){
+		return 1;
+	}
+	if( state->events ) {
+		for ( unsigned int index = 0; index < state->eventCount; ++index ) {
+			free( state->events[index] );
+		}
+		free( state->events );
+	}
 	state->events = malloc( count * sizeof *state->events );
 	if( NULL == state->events ) {
 		return 1;
 	}
 	memset( state->events, 0, count * sizeof *state->events );
+	free( state->eventLengths );
 	state->eventLengths = malloc( count * sizeof *state->eventLengths );
 	if( NULL == state->eventLengths ) {
 		free( state->events );
@@ -81,7 +106,10 @@ int assi_initEvents( ASSI_State *state, unsigned int count ) {
 }
 
 int assi_addEvent( ASSI_State *state, const char *event, unsigned int length, unsigned int index ) {
-	char *tempEvent = malloc( length * sizeof *tempEvent );
+	if( NULL == state || NULL == state->events ){
+		return 1;
+	}
+	char *tempEvent = malloc( length );
 	if( NULL == tempEvent ) {
 		return 1;
 	}
@@ -93,14 +121,19 @@ int assi_addEvent( ASSI_State *state, const char *event, unsigned int length, un
 }
 
 void assi_cleanup( ASSI_State *state ) {
-	for ( unsigned int index = 0; index < state->eventCount; ++index ) {
-		free( state->events[index] );
+	if( state ){
+		free( state->header );
+		if( state->events) {
+			for ( unsigned int index = 0; index < state->eventCount; ++index ) {
+				free( state->events[index] );
+			}
+			free( state->events );
+		}
+		free( state->eventLengths );
+		ass_renderer_done( state->assRenderer );
+		ass_library_done( state->assLibrary );
+		free( state );
 	}
-	free( state->events );
-	free( state->eventLengths );
-	ass_renderer_done( state->assRenderer );
-	ass_library_done( state->assLibrary );
-	free( state );
 }
 
 // Takes the index (0-based) of the event to render and an array of times
@@ -108,10 +141,13 @@ void assi_cleanup( ASSI_State *state ) {
 // `result` that is passed in. Returns an error if libass fails to read
 // the event.
 int assi_checkLine( ASSI_State *state, const int eventIndex, const int *times, const unsigned int timesLength, uint8_t *result ) {
+	if( NULL == state || NULL == state->header || NULL == state->events || NULL == state->events[eventIndex] ){
+		return 1;
+	}
 	// Merge the header and the desired event. None of this needs to be
 	// null terminated because we have the length of everything.
 	int scriptLength = state->headerLength + state->eventLengths[eventIndex];
-	char *script = malloc( scriptLength * sizeof *script );
+	char *script = malloc( scriptLength );
 	if( NULL == script ) {
 		return 1;
 	}
