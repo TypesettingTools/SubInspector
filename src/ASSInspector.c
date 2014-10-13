@@ -32,7 +32,7 @@ uint32_t assi_getVersion( void ) {
 	return ASSI_VERSION;
 }
 
-ASSI_State* assi_init( int width, int height ) {
+ASSI_State* assi_init( int width, int height, const char *header, uint32_t headerLength ) {
 	ASSI_State *state = calloc( 1, sizeof(*state) );
 	if ( NULL == state ) {
 		return NULL;
@@ -55,23 +55,18 @@ ASSI_State* assi_init( int width, int height ) {
 	ass_set_frame_size( state->assRenderer, width, height );
 	ass_set_fonts( state->assRenderer, NULL, "Sans", 1, NULL, 1 );
 
-	return state;
-}
-
-int assi_addHeader( ASSI_State *state, const char *header, unsigned int length ) {
-	if( NULL == state ){
-		return 1;
+	uint8_t *tempHeader = calloc( headerLength, sizeof(*tempHeader) );
+	if ( NULL == tempHeader ) {
+		ass_renderer_done( state->assRenderer );
+		ass_library_done( state->assLibrary );
+		free( state );
+		return NULL;
 	}
-	char *tempHeader = malloc( length );
-	if( NULL == tempHeader ){
-		return 1;
-	}
-	memcpy( tempHeader, header, length );
-	free( state->header );
+	memcpy( tempHeader, header, headerLength );
 	state->header = tempHeader;
-	state->headerLength = length;
-	return 0;
+	state->headerLength = headerLength;
 
+	return state;
 }
 
 void assi_cleanup( ASSI_State *state ) {
