@@ -11,7 +11,7 @@
 struct ASSI_State_priv{
 	ASS_Library  *assLibrary;
 	ASS_Renderer *assRenderer;
-	uint8_t      *header,
+	char         *header,
 	             *currentScript;
 	uint32_t      headerLength,
 	              scriptLength;
@@ -56,7 +56,7 @@ ASSI_State* assi_init( int width, int height, const char *header, uint32_t heade
 	ass_set_frame_size( state->assRenderer, width, height );
 	ass_set_fonts( state->assRenderer, NULL, "Sans", 1, NULL, 1 );
 
-	uint8_t *tempHeader = calloc( headerLength, sizeof(*tempHeader) );
+	char *tempHeader = calloc( headerLength, sizeof(*tempHeader) );
 	if ( NULL == tempHeader ) {
 		ass_renderer_done( state->assRenderer );
 		ass_library_done( state->assLibrary );
@@ -89,7 +89,7 @@ int assi_setScript( ASSI_State *state, const char *styles, uint32_t stylesLength
 	}
 
 	uint32_t tempScriptLength = state->headerLength + stylesLength + eventsLength;
-	uint8_t *tempScript = malloc( tempScriptLength * sizeof(*tempScript) );
+	char *tempScript = malloc( tempScriptLength * sizeof(*tempScript) );
 	if ( NULL == tempScript ) {
 		state->currentScript = NULL;
 		state->error = "Memory allocation failure.";
