@@ -17,7 +17,6 @@ struct ASSI_State_priv{
 };
 
 static uint8_t findDirty( ASS_Image* );
-static uint8_t processFrame( ASS_Renderer*, ASS_Track*, int );
 static void msgCallback( int, const char*, va_list, void* );
 
 static void msgCallback( int level, const char *fmt, va_list va, void *data ) {
@@ -116,16 +115,3 @@ static uint8_t findDirty( ASS_Image *img ) {
 	return 0;
 }
 
-static uint8_t processFrame( ASS_Renderer *assRenderer, ASS_Track *assTrack, int frameTime ) {
-	ASS_Image *assImage = ass_render_frame( assRenderer, assTrack, frameTime, NULL );
-
-	// ASS_Image is apparently a linked list.
-	while ( assImage ) {
-		if ( findDirty( assImage ) ) {
-			return 1;
-		}
-		assImage = assImage->next;
-	}
-
-	return 0;
-}
