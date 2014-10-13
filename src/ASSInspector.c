@@ -11,9 +11,8 @@
 struct ASSI_State_priv{
 	ASS_Library   *assLibrary;
 	ASS_Renderer  *assRenderer;
-	char          *header;
-	char         **events;
-	unsigned int  *eventLengths, headerLength, eventCount;
+	uint8_t       *header;
+	uint32_t      headerLength;
 	char error[128];
 };
 
@@ -72,59 +71,12 @@ int assi_addHeader( ASSI_State *state, const char *header, unsigned int length )
 	state->header = tempHeader;
 	state->headerLength = length;
 	return 0;
-}
 
-int assi_initEvents( ASSI_State *state, unsigned int count ) {
-	if( NULL == state ){
-		return 1;
-	}
-	if( state->events ) {
-		for ( unsigned int index = 0; index < state->eventCount; ++index ) {
-			free( state->events[index] );
-		}
-		free( state->events );
-	}
-	state->events = malloc( count * sizeof *state->events );
-	if( NULL == state->events ) {
-		return 1;
-	}
-	memset( state->events, 0, count * sizeof *state->events );
-	free( state->eventLengths );
-	state->eventLengths = malloc( count * sizeof *state->eventLengths );
-	if( NULL == state->eventLengths ) {
-		free( state->events );
-		state->events = NULL;
-		return 1;
-	}
-	state->eventCount = count;
-	return 0;
-}
-
-int assi_addEvent( ASSI_State *state, const char *event, unsigned int length, unsigned int index ) {
-	if( NULL == state || NULL == state->events ){
-		return 1;
-	}
-	char *tempEvent = malloc( length );
-	if( NULL == tempEvent ) {
-		return 1;
-	}
-	memcpy( tempEvent, event, length );
-	free( state->events[index] );
-	state->events[index] = tempEvent;
-	state->eventLengths[index] = length;
-	return 0;
 }
 
 void assi_cleanup( ASSI_State *state ) {
-	if( state ){
+	if ( state ) {
 		free( state->header );
-		if( state->events) {
-			for ( unsigned int index = 0; index < state->eventCount; ++index ) {
-				free( state->events[index] );
-			}
-			free( state->events );
-		}
-		free( state->eventLengths );
 		ass_renderer_done( state->assRenderer );
 		ass_library_done( state->assLibrary );
 		free( state );
