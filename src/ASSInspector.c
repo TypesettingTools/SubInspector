@@ -72,6 +72,7 @@ ASSI_State* assi_init( int width, int height, const char *header, uint32_t heade
 void assi_cleanup( ASSI_State *state ) {
 	if ( state ) {
 		free( state->header );
+		free( state->currentScript );
 		ass_renderer_done( state->assRenderer );
 		ass_library_done( state->assLibrary );
 		free( state );
@@ -89,6 +90,7 @@ int assi_setScript( ASSI_State *state, const char *styles, uint32_t stylesLength
 	uint32_t tempScriptLength = state->headerLength + stylesLength + eventsLength;
 	uint8_t *tempScript = malloc( tempScriptLength * sizeof(*tempScript) );
 	if ( NULL == tempScript ) {
+		state->currentScript = NULL;
 		state->error = "Memory allocation failure.";
 		return 1;
 	}
