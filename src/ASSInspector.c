@@ -16,7 +16,6 @@ struct ASSI_State_priv{
 	char error[128];
 };
 
-static uint8_t findDirty( ASS_Image* );
 static void msgCallback( int, const char*, va_list, void* );
 
 static void msgCallback( int level, const char *fmt, va_list va, void *data ) {
@@ -75,43 +74,5 @@ void assi_cleanup( ASSI_State *state ) {
 		ass_library_done( state->assLibrary );
 		free( state );
 	}
-}
-
-
-static uint8_t findDirty( ASS_Image *img ) {
-	// If alpha is not 255, the image is not fully transparent and we need
-	// to check the bitmap blending mask to verify if it is dirty or not.
-	if( 0xFF != (img->color & 0xFF) ) {
-		uint8_t *bitmap = img->bitmap,
-			*endOfRow;
-
-		const uint8_t *endOfBitmap = bitmap + img->h * img->stride,
-			       widthRemainder = img->w % sizeof(uintptr_t);
-
-		const uint16_t padding = img->stride - img->w,
-			       widthX = img->w / sizeof(uintptr_t);
-
-		uintptr_t *bitmap_X,
-			 *endOfRow_X;
-
-		while ( bitmap < endOfBitmap ) {
-			bitmap_X   = (uintptr_t *)bitmap;
-			endOfRow_X = bitmap_X + widthX;
-			while ( bitmap_X < endOfRow_X ) {
-				if ( *bitmap_X++ ) {
-					return 1;
-				}
-			}
-			bitmap = (uint8_t *)bitmap_X;
-			endOfRow = bitmap + widthRemainder;
-			while ( bitmap < endOfRow ) {
-				if ( *bitmap++ ) {
-					return 1;
-				}
-			}
-			bitmap += padding;
-		}
-	}
-	return 0;
 }
 
