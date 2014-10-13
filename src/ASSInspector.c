@@ -78,39 +78,6 @@ void assi_cleanup( ASSI_State *state ) {
 	}
 }
 
-// Takes the index (0-based) of the event to render and an array of times
-// (corresponding to the frames of the event). Modifies the array
-// `result` that is passed in. Returns an error if libass fails to read
-// the event.
-int assi_checkLine( ASSI_State *state, const int eventIndex, const int *times, const unsigned int timesLength, uint8_t *result ) {
-	if( NULL == state || NULL == state->header || NULL == state->events || NULL == state->events[eventIndex] ){
-		return 1;
-	}
-	// Merge the header and the desired event. None of this needs to be
-	// null terminated because we have the length of everything.
-	int scriptLength = state->headerLength + state->eventLengths[eventIndex];
-	char *script = malloc( scriptLength );
-	if( NULL == script ) {
-		return 1;
-	}
-	memcpy( script, state->header, state->headerLength );
-	memcpy( script + state->headerLength, state->events[eventIndex], state->eventLengths[eventIndex] );
-
-	ASS_Track *assTrack = ass_read_memory( state->assLibrary, script, scriptLength, NULL );
-	if ( NULL == assTrack ) {
-		free( script );
-		return 1;
-	}
-
-	for ( int timeIdx = 0; timeIdx < timesLength; ++timeIdx ) {
-		result[timesLength] |= result[timeIdx] = processFrame( state->assRenderer, assTrack, times[timeIdx] );
-	}
-
-	ass_free_track( assTrack );
-	free( script );
-
-	return 0;
-}
 
 static uint8_t findDirty( ASS_Image *img ) {
 	// If alpha is not 255, the image is not fully transparent and we need
