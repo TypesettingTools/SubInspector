@@ -34,7 +34,7 @@ uint32_t assi_getVersion( void ) {
 }
 
 ASSI_State* assi_init( int width, int height ) {
-	ASSI_State *state = malloc( sizeof *state );
+	ASSI_State *state = calloc( 1, sizeof(*state) );
 	if ( NULL == state ) {
 		return NULL;
 	}
@@ -55,11 +55,6 @@ ASSI_State* assi_init( int width, int height ) {
 
 	ass_set_frame_size( state->assRenderer, width, height );
 	ass_set_fonts( state->assRenderer, NULL, "Sans", 1, NULL, 1 );
-
-	state->header = NULL;
-	state->events = NULL;
-	state->eventLengths = NULL;
-	state->error[0] = '\0';
 
 	return state;
 }
