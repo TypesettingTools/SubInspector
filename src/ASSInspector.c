@@ -9,10 +9,12 @@
 #include <ass/ass.h>
 
 struct ASSI_State_priv{
-	ASS_Library   *assLibrary;
-	ASS_Renderer  *assRenderer;
-	uint8_t       *header;
-	uint32_t      headerLength;
+	ASS_Library  *assLibrary;
+	ASS_Renderer *assRenderer;
+	uint8_t      *header,
+	             *currentScript;
+	uint32_t      headerLength,
+	              scriptLength;
 	char error[128];
 };
 
@@ -76,3 +78,29 @@ void assi_cleanup( ASSI_State *state ) {
 	}
 }
 
+int assi_setScript( ASSI_State *state, const char *styles, uint32_t stylesLength, const char *events, uint32_t eventsLength ) {
+	if ( !state ) {
+		return 1;
+	}
+	if ( state->currentScript ) {
+		free( state->currentScript );
+	}
+
+	uint32_t tempScriptLength = state->headerLength + stylesLength + eventsLength;
+	uint8_t *tempScript = malloc( tempScriptLength * sizeof(*tempScript) );
+	if ( NULL == tempScript ) {
+		state->error = "Memory allocation failure.";
+		return 1;
+	}
+	// Copy the header.
+	memcpy( tempScript, state->header, state->headerLength );
+	// If styles are provided, copy them.
+	if ( NULL != styles && stylesLength > 0 ) {
+		memcpy( tempScript + state->headerLength, styles, stylesLength );
+	}
+	// Copy the events.
+	memcpy( tempScript + state->headerLength + stylesLength, events, eventsLength );
+
+	state->currentScript = tempScript;
+	state->scriptLength = tempScriptLength;
+}
