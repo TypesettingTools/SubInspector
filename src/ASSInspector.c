@@ -120,10 +120,10 @@ static uint8_t findDirty( ASS_Image *img ) {
 			*endOfRow;
 
 		const uint8_t *endOfBitmap = bitmap + img->h * img->stride,
-			       widthRemainder = img->w % sizeof( uintptr_t );
+			       widthRemainder = img->w % sizeof(uintptr_t);
 
 		const uint16_t padding = img->stride - img->w,
-			       widthX = img->w / sizeof( uintptr_t );
+			       widthX = img->w / sizeof(uintptr_t);
 
 		uintptr_t *bitmap_X,
 			 *endOfRow_X;
