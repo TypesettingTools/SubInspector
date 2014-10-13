@@ -22,10 +22,10 @@ static uint8_t processFrame( ASS_Renderer*, ASS_Track*, int );
 static void msgCallback( int, const char*, va_list, void* );
 
 static void msgCallback( int level, const char *fmt, va_list va, void *data ) {
-	if( level < 5 ){
+	if ( level < 4 ) {
 		ASSI_State *state = data;
 		int levelLength = sprintf( state->error, "%d: ", level );
-		vsnprintf( state->error + levelLength, sizeof state->error - levelLength, fmt, va );
+		vsnprintf( state->error + levelLength, sizeof(state->error) - levelLength, fmt, va );
 	}
 }
 
