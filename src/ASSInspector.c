@@ -79,7 +79,7 @@ void assi_cleanup( ASSI_State *state ) {
 	}
 }
 
-int assi_setScript( ASSI_State *state, const char *styles, uint32_t stylesLength, const char *events, uint32_t eventsLength ) {
+int assi_setScript( ASSI_State *state, const char *styles, uint32_t stylesLength, const char *events, const uint32_t eventsLength ) {
 	if ( !state ) {
 		return 1;
 	}
@@ -109,7 +109,7 @@ int assi_setScript( ASSI_State *state, const char *styles, uint32_t stylesLength
 	return 0;
 }
 
-int assi_calculateBounds( ASSI_State *state, ASSI_Rect **rects, int32_t *times, uint32_t renderCount ) {
+int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *times, const uint32_t renderCount ) {
 	if ( !state ) {
 		return 1;
 	}

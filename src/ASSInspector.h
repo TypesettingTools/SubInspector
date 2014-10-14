@@ -31,6 +31,6 @@ typedef struct {
 
 ASSI_EXPORT uint32_t    assi_getVersion( void );
 ASSI_EXPORT ASSI_State* assi_init( int, int, const char*, uint32_t );
-ASSI_EXPORT int         assi_setScript( ASSI_State*, const char*, uint32_t, const char *, uint32_t );
-ASSI_EXPORT int         assi_calculateBounds( ASSI_State*, ASSI_Rect**, int32_t*, uint32_t );
+ASSI_EXPORT int         assi_setScript( ASSI_State*, const char*, uint32_t, const char *, const uint32_t );
+ASSI_EXPORT int         assi_calculateBounds( ASSI_State*, ASSI_Rect*, const int32_t*, const uint32_t );
 ASSI_EXPORT void        assi_cleanup( ASSI_State* );
