@@ -19,6 +19,7 @@ struct ASSI_State_priv{
 };
 
 static void msgCallback( int, const char*, va_list, void* );
+static void checkBounds( ASS_Image*, ASSI_Rect* );
 
 static void msgCallback( int level, const char *fmt, va_list va, void *data ) {
 	if ( level < 4 ) {
@@ -125,7 +126,10 @@ int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *ti
 			return 0;
 		}
 		// ASS_Image is apparently a linked list.
+		rects[i].x = assImage->dst_x;
+		rects[i].y = assImage->dst_y;
 		while ( assImage ) {
+			checkBounds( assImage, &rects[i] );
 			assImage = assImage->next;
 		}
 	}
@@ -134,3 +138,80 @@ int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *ti
 	return 0;
 }
 
+// Currently assumes that assImage->w is at least mod8 on 64-bit
+// platforms. This is not actually true on lines that have clips on
+// them, but should be true on pretty much anything else.
+static void checkBounds( ASS_Image *assImage, ASSI_Rect *rect ) {
+	if ( assImage->w < 16 || assImage->h < 16 ) {
+		// checkSmallBounds( ASS_Image, rect );
+	}
+	if ( 0xFF != (assImage->color & 0xFF) ) {
+		// Shift back from the end of the first row by 16 bytes.
+		// Theoretically only needs to be 15 because if all 15 are blank, it
+		// means that the one before that must be the boundary of the image.
+		// But this is easier.
+		uint8_t       *byte = assImage->bitmap + assImage->w - 16;
+
+		uintptr_t     *chunk;
+
+		const uint8_t  chunkSize = sizeof(*chunk),
+		              *start     = assImage->bitmap,
+		              *shortEnd  = start + (assImage->h - 16) * assImage->stride,
+		              *realEnd   = shortEnd + 15 * assImage->stride + assImage->w,
+		               padding   = assImage->stride - assImage->w;
+
+		const uint32_t chunksPerRow = assImage->w/chunkSize,
+		               chunksPerShortRow = 16/chunkSize;
+
+		// Process the rightmost 16 bytes of the first height-16 rows.
+		while ( byte < shortEnd ) {
+			chunk = (uintptr_t *)byte;
+			uintptr_t *endChunk = chunk + chunksPerShortRow;
+
+			uint32_t position = (byte - start),
+			         x = position%assImage->stride + 1,
+			         y = position/assImage->stride + 1;
+			while (chunk < endChunk) {
+				if ( *chunk ) {
+					for ( byte = (uint8_t *)chunk; byte < (uint8_t *)(chunk + 1); byte++ ) {
+						if ( *byte ) {
+							rect->w = (x > rect->w)? x: rect->w;
+						}
+						x++;
+					}
+					rect->h = (y > rect->h)? y: rect->h;
+				}
+				chunk++;
+				position = ((uint8_t*)chunk - start);
+				x = position%assImage->stride + 1;
+			}
+			byte = (uint8_t *)chunk + assImage->stride - 16;
+		}
+
+		// Process the bottom 16 rows.
+		byte = (uint8_t *)shortEnd;
+
+		while ( byte < realEnd ) {
+			chunk = (uintptr_t *)byte;
+			uintptr_t *endChunk = chunk + chunksPerRow;
+			uint32_t position = (byte - start),
+			         x = position%assImage->stride + 1,
+			         y = position/assImage->stride + 1;
+			while ( chunk < endChunk ) {
+				if ( *chunk ) {
+					for( byte = (uint8_t *)chunk; byte < (uint8_t *)(chunk + 1); byte++ ) {
+						if ( *byte ) {
+							rect->w = (x > rect->w)? x: rect->w;
+						}
+						x++;
+					}
+					rect->h = (y > rect->h)? y: rect->h;
+				}
+				chunk++;
+				position = ((uint8_t*)chunk - start);
+				x = position%assImage->stride + 1;
+			}
+			byte = (uint8_t *)chunk + padding;
+		}
+	}
+}
