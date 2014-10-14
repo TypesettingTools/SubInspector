@@ -8,14 +8,14 @@
 #include <string.h>
 #include <ass/ass.h>
 
-struct ASSI_State_priv{
+struct ASSI_State_priv {
 	ASS_Library  *assLibrary;
 	ASS_Renderer *assRenderer;
 	char         *header,
 	             *currentScript;
 	uint32_t      headerLength,
 	              scriptLength;
-	char error[128];
+	char          error[128];
 };
 
 static void msgCallback( int, const char*, va_list, void* );
