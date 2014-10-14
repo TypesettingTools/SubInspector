@@ -121,6 +121,9 @@ int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *ti
 
 	for ( int i = 0; i < renderCount; ++i ) {
 		ASS_Image *assImage = ass_render_frame( state->assRenderer, assTrack, times[i], NULL );
+		if ( NULL == assImage ) {
+			return 0;
+		}
 		// ASS_Image is apparently a linked list.
 		while ( assImage ) {
 			assImage = assImage->next;
