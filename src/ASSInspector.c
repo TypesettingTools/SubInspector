@@ -85,12 +85,12 @@ int assi_setScript( ASSI_State *state, const char *styles, uint32_t stylesLength
 	}
 	if ( state->currentScript ) {
 		free( state->currentScript );
+		state->currentScript = NULL;
 	}
 
 	uint32_t tempScriptLength = state->headerLength + stylesLength + eventsLength;
 	char *tempScript = malloc( tempScriptLength * sizeof(*tempScript) );
 	if ( NULL == tempScript ) {
-		state->currentScript = NULL;
 		strcpy( state->error, "Memory allocation failure." );
 		return 1;
 	}
