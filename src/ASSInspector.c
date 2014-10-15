@@ -70,6 +70,10 @@ ASSI_State* assi_init( int width, int height, const char *header, uint32_t heade
 	return state;
 }
 
+const char* assi_getErrorString( ASSI_State *state ) {
+	return state->error;
+}
+
 void assi_cleanup( ASSI_State *state ) {
 	if ( state ) {
 		free( state->header );
