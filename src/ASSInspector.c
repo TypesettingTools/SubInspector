@@ -129,11 +129,12 @@ int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *ti
 		if ( NULL == assImage ) {
 			return 0;
 		}
-		// ASS_Image is apparently a linked list.
 		rects[i].x = assImage->dst_x;
 		rects[i].y = assImage->dst_y;
 		while ( assImage ) {
-			checkBounds( assImage, &rects[i] );
+			if ( 0xFF != (assImage->color & 0xFF) ) {
+				checkBounds( assImage, &rects[i] );
+			}
 			assImage = assImage->next;
 		}
 	}
@@ -148,74 +149,101 @@ int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *ti
 static void checkBounds( ASS_Image *assImage, ASSI_Rect *rect ) {
 	if ( assImage->w < 16 || assImage->h < 16 ) {
 		// checkSmallBounds( ASS_Image, rect );
+		return;
 	}
-	if ( 0xFF != (assImage->color & 0xFF) ) {
-		// Shift back from the end of the first row by 16 bytes.
-		// Theoretically only needs to be 15 because if all 15 are blank, it
-		// means that the one before that must be the boundary of the image.
-		// But this is easier.
-		uint8_t       *byte = assImage->bitmap + assImage->w - 16;
+	// Shift back from the end of the first row by 16 bytes.
+	// Theoretically only needs to be 15 because if all 15 are blank, it
+	// means that the one before that must be the boundary of the image.
+	// But this is easier.
+	uint8_t       *byte = assImage->bitmap + assImage->w - 16;
 
-		uintptr_t     *chunk;
+	uintptr_t     *chunk;
 
-		const uint8_t  chunkSize = sizeof(*chunk),
-		              *start     = assImage->bitmap,
-		              *shortEnd  = start + (assImage->h - 16) * assImage->stride,
-		              *realEnd   = shortEnd + 15 * assImage->stride + assImage->w,
-		               padding   = assImage->stride - assImage->w;
+	const uint8_t  chunkSize  = sizeof(*chunk),
+	              *start      = assImage->bitmap,
+	              *shortEnd   = start + (assImage->h - 16) * assImage->stride,
+	              *realEnd    = shortEnd + 15 * assImage->stride + assImage->w,
+	               rowPadding = assImage->stride - assImage->w;
 
-		const uint32_t chunksPerRow = assImage->w/chunkSize,
-		               chunksPerShortRow = 16/chunkSize;
+	const uint32_t chunksPerRow = assImage->w/chunkSize,
+	               chunksPerShortRow = 16/chunkSize;
 
-		// Process the rightmost 16 bytes of the first height-16 rows.
-		while ( byte < shortEnd ) {
-			chunk = (uintptr_t *)byte;
-			uintptr_t *endChunk = chunk + chunksPerShortRow;
+	// Process the rightmost 16 bytes of the first height-16 rows. Because
+	// we are guaranteed to be processing 16 bytes here regardless of
+	// alignment, don't worry about being careful about chunks here. I
+	// don't think anyone has a system that's more than 128-bit.
+	while ( byte < shortEnd ) {
+		chunk = (uintptr_t *)byte;
+		uintptr_t *endChunk = chunk + chunksPerShortRow;
 
-			uint32_t position = (byte - start),
-			         x = position%assImage->stride + 1,
-			         y = position/assImage->stride + 1;
-			while (chunk < endChunk) {
-				if ( *chunk ) {
-					for ( byte = (uint8_t *)chunk; byte < (uint8_t *)(chunk + 1); byte++ ) {
-						if ( *byte ) {
-							rect->w = (x > rect->w)? x: rect->w;
-						}
-						x++;
+		uint32_t position = (byte - start),
+		         x = position%assImage->stride + 1,
+		         y = position/assImage->stride + 1;
+		while (chunk < endChunk) {
+			if ( *chunk ) {
+				// printf( "Chunk: %p; Value: %016lX, End: %p\n", chunk, *chunk, chunk + 1 );
+				for ( byte = (uint8_t *)chunk; byte < (uint8_t *)(chunk + 1); byte++ ) {
+					if ( *byte ) {
+						// printf( "Byte: %p; Value: %u (%3u, %3u)\n", byte, *byte, x, y );
+						rect->w = (x > rect->w)? x: rect->w;
 					}
-					rect->h = (y > rect->h)? y: rect->h;
+					x++;
 				}
-				chunk++;
-				position = ((uint8_t*)chunk - start);
-				x = position%assImage->stride + 1;
+				rect->h = (y > rect->h)? y: rect->h;
 			}
-			byte = (uint8_t *)chunk + assImage->stride - 16;
+			chunk++;
+			position = ((uint8_t*)chunk - start);
+			x = position%assImage->stride + 1;
+		}
+		byte = (uint8_t *)chunk + assImage->stride - 16;
+	}
+
+	// Process the bottom 16 rows. Should probably be combined into a
+	// function with checkSmallBounds, since they're identical, except the
+	// starting pointer and constants for this are already calculated.
+	byte = (uint8_t *)shortEnd;
+
+	while ( byte < realEnd ) {
+		chunk = (uintptr_t *)byte;
+
+		uint8_t   *endByte   = byte + assImage->w,
+		           addHeight = 0;
+
+		uintptr_t *endChunk = chunk + chunksPerRow;
+
+		uint32_t   position = (byte - start),
+		           x = position%assImage->stride + 1,
+		           y = position/assImage->stride + 1;
+
+		while ( chunk < endChunk ) {
+			if ( *chunk ) {
+				// printf( "Chunk: %p; Value: %016lX, End: %p\n", chunk, *chunk, chunk + 1 );
+				for( byte = (uint8_t *)chunk; byte < (uint8_t *)(chunk + 1); byte++ ) {
+					if ( *byte ) {
+						// printf( "Byte: %p; Value: %u (%3u, %3u)\n", byte, *byte, x, y );
+						rect->w = (x > rect->w)? x: rect->w;
+						addHeight = 1;
+					}
+					x++;
+				}
+			}
+			chunk++;
+			position = ((uint8_t*)chunk - start);
+			x = position%assImage->stride + 1;
 		}
 
-		// Process the bottom 16 rows.
-		byte = (uint8_t *)shortEnd;
-
-		while ( byte < realEnd ) {
-			chunk = (uintptr_t *)byte;
-			uintptr_t *endChunk = chunk + chunksPerRow;
-			uint32_t position = (byte - start),
-			         x = position%assImage->stride + 1,
-			         y = position/assImage->stride + 1;
-			while ( chunk < endChunk ) {
-				if ( *chunk ) {
-					for( byte = (uint8_t *)chunk; byte < (uint8_t *)(chunk + 1); byte++ ) {
-						if ( *byte ) {
-							rect->w = (x > rect->w)? x: rect->w;
-						}
-						x++;
-					}
-					rect->h = (y > rect->h)? y: rect->h;
-				}
-				chunk++;
-				position = ((uint8_t*)chunk - start);
-				x = position%assImage->stride + 1;
+		byte = (uint8_t *)chunk;
+		while ( byte < endByte ) {
+			if ( *byte ) {
+				// printf( "Byte: %p; Value: %u (%3u, %3u)\n", byte, *byte, x, y );
+				rect->w = (x > rect->w)? x: rect->w;
+				addHeight = 1;
 			}
-			byte = (uint8_t *)chunk + padding;
+			byte++;
+			// Can be lazy about incrementing x here.
+			x++;
 		}
+		rect->h = addHeight? y: rect->h;
+		byte += rowPadding;
 	}
 }
