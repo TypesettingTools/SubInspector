@@ -20,6 +20,7 @@ struct ASSI_State_priv {
 
 static void msgCallback( int, const char*, va_list, void* );
 static void checkBounds( ASS_Image*, ASSI_Rect* );
+static void checkSmallBounds( ASS_Image*, ASSI_Rect* );
 
 static void msgCallback( int level, const char *fmt, va_list va, void *data ) {
 	if ( level < 4 ) {
@@ -148,7 +149,7 @@ int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *ti
 // them, but should be true on pretty much anything else.
 static void checkBounds( ASS_Image *assImage, ASSI_Rect *rect ) {
 	if ( assImage->w < 16 || assImage->h < 16 ) {
-		// checkSmallBounds( ASS_Image, rect );
+		checkSmallBounds( assImage, rect );
 		return;
 	}
 	// Shift back from the end of the first row by 16 bytes.
@@ -229,6 +230,64 @@ static void checkBounds( ASS_Image *assImage, ASSI_Rect *rect ) {
 			}
 			chunk++;
 			position = ((uint8_t*)chunk - start);
+			x = position%assImage->stride + 1;
+		}
+
+		byte = (uint8_t *)chunk;
+		while ( byte < endByte ) {
+			if ( *byte ) {
+				// printf( "Byte: %p; Value: %u (%3u, %3u)\n", byte, *byte, x, y );
+				rect->w = (x > rect->w)? x: rect->w;
+				addHeight = 1;
+			}
+			byte++;
+			// Can be lazy about incrementing x here.
+			x++;
+		}
+		rect->h = addHeight? y: rect->h;
+		byte += rowPadding;
+	}
+}
+
+static void checkSmallBounds( ASS_Image *assImage, ASSI_Rect *rect ) {
+	uint8_t       *byte = assImage->bitmap;
+
+	uintptr_t     *chunk;
+
+	const uint8_t  chunkSize   = sizeof(*chunk),
+	              *bitmapStart = assImage->bitmap,
+	              *bitmapEnd   = bitmapStart + (assImage->h - 1) * assImage->stride + assImage->w,
+	               rowPadding  = assImage->stride - assImage->w;
+
+	const uint32_t chunksPerRow      = assImage->w/chunkSize;
+
+	// Let's write the same loop 3 times!
+	while ( byte < bitmapEnd ) {
+		chunk = (uintptr_t *)byte;
+
+		uint8_t   *endByte   = byte + assImage->w,
+		           addHeight = 0;
+
+		uintptr_t *endChunk = chunk + chunksPerRow;
+
+		uint32_t   position = (byte - bitmapStart),
+		           x = position%assImage->stride + 1,
+		           y = position/assImage->stride + 1;
+
+		while ( chunk < endChunk ) {
+			if ( *chunk ) {
+				// printf( "Chunk: %p; Value: %016lX, End: %p\n", chunk, *chunk, chunk + 1 );
+				for( byte = (uint8_t *)chunk; byte < (uint8_t *)(chunk + 1); byte++ ) {
+					if ( *byte ) {
+						// printf( "Byte: %p; Value: %u (%3u, %3u)\n", byte, *byte, x, y );
+						rect->w = (x > rect->w)? x: rect->w;
+						addHeight = 1;
+					}
+					x++;
+				}
+			}
+			chunk++;
+			position = ((uint8_t*)chunk - bitmapStart);
 			x = position%assImage->stride + 1;
 		}
 
