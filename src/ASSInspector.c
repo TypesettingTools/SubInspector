@@ -34,6 +34,10 @@ ASSI_EXPORT uint32_t assi_getVersion( void ) {
 	return ASSI_VERSION;
 }
 
+ASSI_EXPORT const char* assi_getErrorString( ASSI_State *state ) {
+	return state->error;
+}
+
 ASSI_EXPORT ASSI_State* assi_init( int width, int height, const char *header, uint32_t headerLength, const char* fontConfigConfig ) {
 	ASSI_State *state = calloc( 1, sizeof(*state) );
 	if ( NULL == state ) {
@@ -71,19 +75,6 @@ ASSI_EXPORT ASSI_State* assi_init( int width, int height, const char *header, ui
 	return state;
 }
 
-ASSI_EXPORT const char* assi_getErrorString( ASSI_State *state ) {
-	return state->error;
-}
-
-ASSI_EXPORT void assi_cleanup( ASSI_State *state ) {
-	if ( state ) {
-		free( state->header );
-		free( state->currentScript );
-		ass_renderer_done( state->assRenderer );
-		ass_library_done( state->assLibrary );
-		free( state );
-	}
-}
 
 ASSI_EXPORT int assi_setScript( ASSI_State *state, const char *styles, uint32_t stylesLength, const char *events, const uint32_t eventsLength ) {
 	if ( !state ) {
@@ -144,9 +135,16 @@ ASSI_EXPORT int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const
 	return 0;
 }
 
-// Currently assumes that assImage->w is at least mod8 on 64-bit
-// platforms. This is not actually true on lines that have clips on
-// them, but should be true on pretty much anything else.
+ASSI_EXPORT void assi_cleanup( ASSI_State *state ) {
+	if ( state ) {
+		free( state->header );
+		free( state->currentScript );
+		ass_renderer_done( state->assRenderer );
+		ass_library_done( state->assLibrary );
+		free( state );
+	}
+}
+
 static void checkBounds( ASS_Image *assImage, ASSI_Rect *rect ) {
 	if ( assImage->w < 16 || assImage->h < 16 ) {
 		checkSmallBounds( assImage, rect );
