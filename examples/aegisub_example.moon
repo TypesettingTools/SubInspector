@@ -33,6 +33,32 @@ if not success
 	if not success
 		error( "Could not load required libASSInspector library." )
 
+-- Script-wide local variables are stored until the script is reloaded,
+-- at which point they are garbage collected. We can abuse this system
+-- to create a persistent ASSInspector state that only gets deallocated
+-- when the automation script is reloaded or Aegisub is quit.
+
+-- NOTE: this can be somewhat risky. For example, loading a new subtitle
+-- file in Aegisub won't reset the automation scripts, and thus the old
+-- header information will continue being used. It would be better to
+-- make some uniqueness check on the loaded script. The full path to the
+-- script would be an option, except that doesn't work for scripts that
+-- have yet to be saved to disk. Appending some sort of UUID to the
+-- script header and checking that each run would probably be more
+-- foolproof. This implementation detail is left as an exercise to the
+-- user.
+inspector = nil
+initializeInspector = ( resX, resY, minimalHeader ) ->
+	if nil == inspector
+		inspector = ffi.gc( ASSInspector.assi_init( resX, resY, minimalHeader, #minimalHeader, aegisub.decode_path( libraryPath .. "/fonts.conf" ) ), ASSInspector.assi_cleanup )
+		if nil == inspector
+			log.windowError( "ASSInspector library init failed." )
+
+		-- Tell ASSInspector to tell fontconfig to search the fonts directory
+		-- in the script directory for fonts to load.
+		if '?script' != aegisub.decode_path( '?script' )
+			ASSInspector.assi_setFontDir( inspector, aegisub.decode_path( '?script/fonts' ) )
+
 dumpRect = ( event, rect ) ->
 	bounds = {
 		x:  tonumber( rect.x )
@@ -121,10 +147,8 @@ mainFunction = ( subtitle, selectedLines, activeLine ) ->
 	resY = vidResY or resY
 
 	minimalHeader = table.concat( scriptHeader, '\n' )
-	inspector = ASSInspector.assi_init( resX, resY, minimalHeader, #minimalHeader )
-	-- I honestly don't know if this comparison actually works.
-	if nil == inspector
-		log.windowError( "ASSInspector library init failed." )
+
+	initializeInspector( resX, resY, minimalHeader )
 
 	for eventIndex in *selectedLines
 		with event = subtitle[eventIndex]
@@ -175,7 +199,6 @@ mainFunction = ( subtitle, selectedLines, activeLine ) ->
 			-- Send the data in for rendering and bounds calculation.
 			if 0 < ASSInspector.assi_calculateBounds( inspector, rects, times, renderCount )
 				log.warn( inspector.error )
-				ASSInspector.assi_cleanup( inspector )
 				aegisub.cancel( )
 
 			-- Check out the calculated bounding rects
@@ -186,7 +209,5 @@ mainFunction = ( subtitle, selectedLines, activeLine ) ->
 
 			subtitle[eventIndex + renderCount] = event
 
-	-- That's all, folks.
-	ASSInspector.assi_cleanup( inspector )
 
 aegisub.register_macro( script_name, script_description, mainFunction )
