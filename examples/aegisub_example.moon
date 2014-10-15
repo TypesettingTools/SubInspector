@@ -24,7 +24,13 @@ void        assi_cleanup( void* );
 
 -- Figure out a better way to load this?
 extension = ('OSX' == ffi.os and '.dylib' or 'Windows' == ffi.os and '.dll' or '.so')
-ASSInspector = ffi.load( aegisub.decode_path( "?user/automation/include/OptimASS/libASSInspector" .. extension ) )
+libraryPath = "?user/automation/include/ASSInspector"
+success, ASSInspector = pcall( ffi.load, aegisub.decode_path( libraryPath .. "/libASSInspector" .. extension ) )
+if not success
+	libraryPath = "?data/automation/include/ASSInspector"
+	success, ASSInspector = pcall( ffi.load, aegisub.decode_path( libraryPath .. "/libASSInspector" .. extension ) )
+	if not success
+		error( "Could not load required libASSInspector library." )
 
 logRect = ( rect ) ->
 	log.dump( {
