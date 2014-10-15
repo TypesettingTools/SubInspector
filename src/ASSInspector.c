@@ -34,7 +34,7 @@ ASSI_EXPORT uint32_t assi_getVersion( void ) {
 	return ASSI_VERSION;
 }
 
-ASSI_EXPORT ASSI_State* assi_init( int width, int height, const char *header, uint32_t headerLength ) {
+ASSI_EXPORT ASSI_State* assi_init( int width, int height, const char *header, uint32_t headerLength, const char* fontConfigConfig ) {
 	ASSI_State *state = calloc( 1, sizeof(*state) );
 	if ( NULL == state ) {
 		return NULL;
@@ -55,7 +55,7 @@ ASSI_EXPORT ASSI_State* assi_init( int width, int height, const char *header, ui
 	}
 
 	ass_set_frame_size( state->assRenderer, width, height );
-	ass_set_fonts( state->assRenderer, NULL, "Sans", 1, NULL, 1 );
+	ass_set_fonts( state->assRenderer, NULL, "Sans", 1, fontConfigConfig, 1 );
 
 	char *tempHeader = calloc( headerLength, sizeof(*tempHeader) );
 	if ( NULL == tempHeader ) {
