@@ -1,0 +1,174 @@
+-- This example is unlicensed under CC0
+
+export script_name        = "ASSInspector Example"
+export script_description = "Calculates bounding rectangles on the start and end times of selected events."
+export script_author      = "torque"
+export script_version     = 0x000003
+
+ffi = require( 'ffi' )
+log = require( 'a-mo.log' )
+
+ffi.cdef( [[
+typedef struct {
+	int32_t x, y;
+	uint32_t w, h;
+} ASSI_Rect;
+
+uint32_t    assi_getVersion( void );
+void*       assi_init( int, int, const char*, uint32_t );
+const char* assi_getErrorString( void* );
+int         assi_setScript( void*, const char*, uint32_t, const char *, const uint32_t );
+int         assi_calculateBounds( void*, ASSI_Rect*, const int32_t*, const uint32_t );
+void        assi_cleanup( void* );
+]] )
+
+-- Figure out a better way to load this?
+extension = ('OSX' == ffi.os and '.dylib' or 'Windows' == ffi.os and '.dll' or '.so')
+ASSInspector = ffi.load( aegisub.decode_path( "?user/automation/include/OptimASS/libASSInspector" .. extension ) )
+
+logRect = ( rect ) ->
+	log.dump( {
+		x: rect.x
+		y: rect.y
+		w: rect.w
+		h: rect.h
+	} )
+
+mainFunction = ( subtitle, selectedLines, activeLine ) ->
+	if ASSInspector.assi_getVersion( ) < script_version
+		log.windowError( "Installed ASSInspector library is outdated. Please update it." )
+		return selectedLines
+	elseif ASSInspector.assi_getVersion( ) > script_version
+		log.windowError( "Installed OptimASS is outdated. Please update it." )
+		return selectedLines
+
+
+	scriptHeader = {
+		"[Script Info]"
+	}
+
+	-- These are the only header fields that actually affect the way ASS
+	-- is rendered. I don't actually know if ScriptType makes a matters.
+	infoFields = {
+		PlayResX:   true
+		PlayResY:   true
+		WrapStyle:  true
+		ScriptType: true
+		ScaledBorderAndShadow: true
+	}
+
+	styles = { }
+
+	-- If there is no video (or, at minimum, timecodes) loaded, this will
+	-- return nil.
+	hasTimecodes = aegisub.frame_from_ms( 0 )
+
+	-- Copy these functions into local variables to shorten them.
+	ffms = aegisub.frame_from_ms
+	msff = aegisub.ms_from_frame
+
+	subtitleLen = #subtitle
+	seenStyles = false
+	resX = 640
+	resY = 480
+
+	-- This loop assumes the subtitle script is nicely organized in the
+	-- order [Script Info] -> [V4+ Styles] -> [Events]. This isn't
+	-- guaranteed for scripts floating around in the wild, but fortunately
+	-- Aegisub 3.2 seems to do a very good job of ensuring this order when
+	-- the script is loaded. In other words, this loop is probably only
+	-- safe to do from within automation.
+	for index = 1, subtitleLen
+		with line = subtitle[index]
+			if "info" == .class
+				if infoFields[.key]
+					table.insert( scriptHeader, .raw )
+
+				if "PlayResX" == .key
+					resX = tonumber( .value )
+				elseif "PlayResY" == .key
+					resY = tonumber( .value )
+
+			elseif "style" == .class
+				unless seenStyles
+					table.insert( scriptHeader, "[V4+ Styles]\n" )
+					seenStyles = true
+
+				styles[.name] = .raw
+
+			elseif "dialogue" == .class
+				break
+
+	-- If a video is loaded, use its resolution instead of the script's
+	-- resolution. Not convinced this is a great idea because people may
+	-- use smaller workraws or something like that.
+	vidResX, vidResY = aegisub.video_size( )
+	resX = vidResX or resX
+	resY = vidResY or resY
+
+	minimalHeader = table.concat( scriptHeader, '\n' )
+	inspector = ASSInspector.assi_init( resX, resY, minimalHeader, #minimalHeader )
+	-- I honestly don't know if this comparison actually works.
+	if nil == inspector
+		log.windowError( "ASSInspector library init failed." )
+
+	for eventIndex in *selectedLines
+		with event = subtitle[eventIndex]
+			-- This does not account for \r[name] being in the line.
+			styles = (styles[.style] or "") .. "\n[Events]\n"
+			events = .raw
+
+			-- It occurs to me that perhaps having the user just pass in one
+			-- string that contains both styles and events may be easier.
+			if 0 < ASSInspector.assi_setScript( inspector, styles, #styles, events, #events )
+				log.warn( assi_getErrorString( inspector ) )
+				ASSInspector.assi_cleanup( inspector )
+				aegisub.cancel( )
+
+			-- We're going to render a line twice, once at its start and once
+			-- at its end.
+			renderCount = 2
+
+			renderTimes = { }
+
+			-- Cheat a bit when generating the times to render. This obviously
+			-- will not scale with a renderCount > 2.
+			if hasTimecodes
+				-- Using the aegisub.frame_from_ms function pointers we copied
+				-- earlier.
+				startFrame = ffms( .start_time )
+				endFrame   = ffms( .end_time ) - 1
+				renderTimes[0] = math.floor( 0.5*( msff( startFrame ) + msff( startFrame + 1 ) ) )
+				renderTimes[1] = math.floor( 0.5*( msff( endFrame ) + msff( endFrame + 1 ) ) )
+			else
+				renderTimes[0] = .start_time
+				-- Trying to render exactly at end_time will result in a
+				-- completely blank frame.
+				renderTimes[1] = .end_time - 1
+
+			-- Because we're rendering the line twice, we need two rects.
+			rects = ffi.new( "ASSI_Rect[?]", renderCount )
+
+			-- Allocate the array of times for rendering.
+			times = ffi.new( "int32_t[?]", renderCount )
+
+			-- Set up the render times. There's no real reason to do this in a
+			-- loop if you know beforehand you're only going to render the
+			-- line twice, but loops are more generic.
+			for render = 0, renderCount - 1
+				times[render] = renderTimes[render]
+
+			-- Send the data in for rendering and bounds calculation.
+			if 0 < ASSInspector.assi_calculateBounds( inspector, rects, times, renderCount )
+				log.warn( inspector.error )
+				ASSInspector.assi_cleanup( inspector )
+				aegisub.cancel( )
+
+			-- Check out the calculated bounding rects
+			for render = 0, renderCount - 1
+				logRect( rects[render] )
+
+	-- That's all, folks.
+	ASSInspector.assi_cleanup( inspector )
+
+aegisub.register_macro( script_name, script_description, mainFunction )
