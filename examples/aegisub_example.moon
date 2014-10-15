@@ -5,8 +5,9 @@ export script_description = "Calculates bounding rectangles on the start and end
 export script_author      = "torque"
 export script_version     = 0x000003
 
-ffi = require( 'ffi' )
-log = require( 'a-mo.log' )
+ffi  = require( 'ffi' )
+util = require( 'aegisub.util' )
+log  = require( 'a-mo.log' )
 
 ffi.cdef( [[
 typedef struct {
@@ -32,13 +33,20 @@ if not success
 	if not success
 		error( "Could not load required libASSInspector library." )
 
-logRect = ( rect ) ->
-	log.dump( {
-		x: rect.x
-		y: rect.y
-		w: rect.w
-		h: rect.h
-	} )
+dumpRect = ( event, rect ) ->
+	bounds = {
+		x:  tonumber( rect.x )
+		y:  tonumber( rect.y )
+		x2: tonumber( rect.w + rect.x )
+		y2: tonumber( rect.h + rect.y )
+	}
+
+	newEvent = util.deep_copy( event )
+	with bounds
+		newEvent.text = ([[{\an7\pos(0,0)\bord0\shad0\c&H0000FF&\1a&H00&\p1}m %d %d l %d %d %d %d %d %d]])\format( .x, .y, .x2, .y, .x2, .y2, .x, .y2 )
+
+	event.layer += 1
+	return newEvent
 
 mainFunction = ( subtitle, selectedLines, activeLine ) ->
 	if ASSInspector.assi_getVersion( ) < script_version
@@ -172,7 +180,11 @@ mainFunction = ( subtitle, selectedLines, activeLine ) ->
 
 			-- Check out the calculated bounding rects
 			for render = 0, renderCount - 1
-				logRect( rects[render] )
+				newEvent = dumpRect( event, rects[render] )
+				-- log.dump newEvent
+				subtitle.insert( eventIndex + render, newEvent )
+
+			subtitle[eventIndex + renderCount] = event
 
 	-- That's all, folks.
 	ASSInspector.assi_cleanup( inspector )
