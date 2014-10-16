@@ -161,7 +161,7 @@ mainFunction = ( subtitle, selectedLines, activeLine ) ->
 			-- It occurs to me that perhaps having the user just pass in one
 			-- string that contains both styles and events may be easier.
 			if 0 < ASSInspector.assi_setScript( inspector, styles, #styles, events, #events )
-				log.warn( assi_getErrorString( inspector ) )
+				log.warn( ASSInspector.assi_getErrorString( inspector ) )
 				ASSInspector.assi_cleanup( inspector )
 				aegisub.cancel( )
 
@@ -201,7 +201,7 @@ mainFunction = ( subtitle, selectedLines, activeLine ) ->
 
 			-- Send the data in for rendering and bounds calculation.
 			if 0 < ASSInspector.assi_calculateBounds( inspector, rects, times, renderCount )
-				log.warn( inspector.error )
+				log.warn( ASSInspector.assi_getErrorString( inspector ) )
 				aegisub.cancel( )
 
 			-- Check out the calculated bounding rects
