@@ -51,14 +51,13 @@ inspector = nil
 initializeInspector = ( resX, resY, minimalHeader ) ->
 	if nil == inspector
 		if '?script' != aegisub.decode_path( '?script' )
+			-- Tell ASSInspector to tell fontconfig to search the fonts
+			-- directory in the script directory for fonts to load.
 			inspector = ffi.gc( ASSInspector.assi_init( resX, resY, minimalHeader, #minimalHeader, aegisub.decode_path( libraryPath .. "/fonts.conf" ), aegisub.decode_path( '?script/fonts' ) ), ASSInspector.assi_cleanup )
 		else
 			inspector = ffi.gc( ASSInspector.assi_init( resX, resY, minimalHeader, #minimalHeader, aegisub.decode_path( libraryPath .. "/fonts.conf" ), nil ), ASSInspector.assi_cleanup )
 		if nil == inspector
 			log.windowError( "ASSInspector library init failed." )
-
-		-- Tell ASSInspector to tell fontconfig to search the fonts directory
-		-- in the script directory for fonts to load.
 
 dumpRect = ( event, rect ) ->
 	bounds = {
