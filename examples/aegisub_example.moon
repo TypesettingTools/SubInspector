@@ -16,8 +16,9 @@ typedef struct {
 } ASSI_Rect;
 
 uint32_t    assi_getVersion( void );
-void*       assi_init( int, int, const char*, uint32_t );
 const char* assi_getErrorString( void* );
+void*       assi_init( int, int, const char*, uint32_t, const char* );
+void        assi_setFontDir( void*, const char* );
 int         assi_setScript( void*, const char*, uint32_t, const char *, const uint32_t );
 int         assi_calculateBounds( void*, ASSI_Rect*, const int32_t*, const uint32_t );
 void        assi_cleanup( void* );
