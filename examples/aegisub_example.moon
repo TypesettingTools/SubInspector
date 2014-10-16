@@ -116,8 +116,8 @@ mainFunction = ( subtitle, selectedLines, activeLine ) ->
 	-- order [Script Info] -> [V4+ Styles] -> [Events]. This isn't
 	-- guaranteed for scripts floating around in the wild, but fortunately
 	-- Aegisub 3.2 seems to do a very good job of ensuring this order when
-	-- the script is loaded. In other words, this loop is probably only
-	-- safe to do from within automation.
+	-- a script is loaded. In other words, this loop is probably only safe
+	-- to do from within automation.
 	for index = 1, subtitleLen
 		with line = subtitle[index]
 			if "info" == .class
@@ -141,7 +141,8 @@ mainFunction = ( subtitle, selectedLines, activeLine ) ->
 
 	-- If a video is loaded, use its resolution instead of the script's
 	-- resolution. Not convinced this is a great idea because people may
-	-- use smaller workraws or something like that.
+	-- use smaller workraws or something like that. Well, hopefully they
+	-- don't do that for typesetting.
 	vidResX, vidResY = aegisub.video_size( )
 	resX = vidResX or resX
 	resY = vidResY or resY
@@ -170,7 +171,8 @@ mainFunction = ( subtitle, selectedLines, activeLine ) ->
 			renderTimes = { }
 
 			-- Cheat a bit when generating the times to render. This obviously
-			-- will not scale with a renderCount > 2.
+			-- will not scale with a renderCount > 2. Use 0-index arrays to
+			-- match up with C indices in a later loop.
 			if hasTimecodes
 				-- Using the aegisub.frame_from_ms function pointers we copied
 				-- earlier.
