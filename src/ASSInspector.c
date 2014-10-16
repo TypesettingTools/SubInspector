@@ -75,6 +75,12 @@ ASSI_EXPORT ASSI_State* assi_init( int width, int height, const char *header, ui
 	return state;
 }
 
+// There doesn't seem to be any way to get error reporting from these
+// functions, so there's no reason to return a status code.
+ASSI_EXPORT void assi_setFontDir( ASSI_State *state, const char *directory ) {
+	ass_set_fonts_dir( state->assLibrary, directory );
+	ass_fonts_update( state->assRenderer );
+}
 
 ASSI_EXPORT int assi_setScript( ASSI_State *state, const char *styles, uint32_t stylesLength, const char *events, const uint32_t eventsLength ) {
 	if ( !state ) {
