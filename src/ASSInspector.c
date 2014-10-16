@@ -125,7 +125,7 @@ ASSI_EXPORT int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const
 	for ( int i = 0; i < renderCount; ++i ) {
 		ASS_Image *assImage = ass_render_frame( state->assRenderer, assTrack, times[i], NULL );
 		if ( NULL == assImage ) {
-			return 0;
+			continue;
 		}
 		rects[i].x = assImage->dst_x;
 		rects[i].y = assImage->dst_y;
