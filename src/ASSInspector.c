@@ -15,6 +15,7 @@ struct ASSI_State_priv {
 	             *currentScript;
 	uint32_t      headerLength,
 	              scriptLength;
+	ASSI_Rect     lastRect;
 	char          error[128];
 };
 
@@ -123,10 +124,36 @@ ASSI_EXPORT int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const
 	}
 
 	for ( int i = 0; i < renderCount; ++i ) {
-		ASS_Image *assImage = ass_render_frame( state->assRenderer, assTrack, times[i], NULL );
+		// set to 1 if positions changed, or set to 2 if content changed.
+		int lineChanged = 0;
+
+		ASS_Image *assImage = ass_render_frame( state->assRenderer, assTrack, times[i], &lineChanged );
 		if ( NULL == assImage ) {
 			continue;
 		}
+
+		switch( lineChanged ) {
+			// Line is identical to last one.
+			case 0:
+				rects[i] = state->lastRect;
+				continue;
+
+			// The position of the line changed, but its contents are the
+			// same. More code duplication!!!!
+			case 1:
+				rects[i] = state->lastRect;
+				rects[i].x = assImage->dst_x;
+				rects[i].y = assImage->dst_y;
+				assImage = assImage->next;
+				while( assImage ) {
+					rects[i].x = (assImage->dst_x < rects[i].x)? assImage->dst_x: rects[i].x;
+					rects[i].y = (assImage->dst_y < rects[i].y)? assImage->dst_y: rects[i].y;
+					assImage = assImage->next;
+				}
+				state->lastRect = rects[i];
+				continue;
+		}
+
 		rects[i].x = assImage->dst_x;
 		rects[i].y = assImage->dst_y;
 		while ( assImage ) {
