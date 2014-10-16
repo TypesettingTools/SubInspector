@@ -152,6 +152,9 @@ mainFunction = ( subtitle, selectedLines, activeLine ) ->
 
 	initializeInspector( resX, resY, minimalHeader )
 
+	insertIndices = { }
+	insertEvents  = { }
+
 	for eventIndex in *selectedLines
 		with event = subtitle[eventIndex]
 			-- This does not account for \r[name] being in the line.
@@ -206,11 +209,15 @@ mainFunction = ( subtitle, selectedLines, activeLine ) ->
 
 			-- Check out the calculated bounding rects
 			for render = 0, renderCount - 1
-				newEvent = dumpRect( event, rects[render] )
-				-- log.dump newEvent
-				subtitle.insert( eventIndex + render, newEvent )
+				if rects[render].w > 0 and rects[render].h > 0
+					newEvent = dumpRect( event, rects[render] )
+					table.insert( insertIndices, eventIndex )
+					table.insert( insertEvents, newEvent)
 
-			subtitle[eventIndex + renderCount] = event
+			subtitle[eventIndex] = event
+
+	for index = #insertIndices, 1, -1
+		subtitle.insert( insertIndices[index], insertEvents[index] )
 
 
 aegisub.register_macro( script_name, script_description, mainFunction )
