@@ -17,8 +17,7 @@ typedef struct {
 
 uint32_t    assi_getVersion( void );
 const char* assi_getErrorString( void* );
-void*       assi_init( int, int, const char*, uint32_t, const char* );
-void        assi_setFontDir( void*, const char* );
+void*       assi_init( int, int, const char*, uint32_t, const char*, const char* );
 int         assi_setScript( void*, const char*, uint32_t, const char *, const uint32_t );
 int         assi_calculateBounds( void*, ASSI_Rect*, const int32_t*, const uint32_t );
 void        assi_cleanup( void* );
@@ -51,14 +50,15 @@ if not success
 inspector = nil
 initializeInspector = ( resX, resY, minimalHeader ) ->
 	if nil == inspector
-		inspector = ffi.gc( ASSInspector.assi_init( resX, resY, minimalHeader, #minimalHeader, aegisub.decode_path( libraryPath .. "/fonts.conf" ) ), ASSInspector.assi_cleanup )
+		if '?script' != aegisub.decode_path( '?script' )
+			inspector = ffi.gc( ASSInspector.assi_init( resX, resY, minimalHeader, #minimalHeader, aegisub.decode_path( libraryPath .. "/fonts.conf" ), aegisub.decode_path( '?script/fonts' ) ), ASSInspector.assi_cleanup )
+		else
+			inspector = ffi.gc( ASSInspector.assi_init( resX, resY, minimalHeader, #minimalHeader, aegisub.decode_path( libraryPath .. "/fonts.conf" ), nil ), ASSInspector.assi_cleanup )
 		if nil == inspector
 			log.windowError( "ASSInspector library init failed." )
 
 		-- Tell ASSInspector to tell fontconfig to search the fonts directory
 		-- in the script directory for fonts to load.
-		if '?script' != aegisub.decode_path( '?script' )
-			ASSInspector.assi_setFontDir( inspector, aegisub.decode_path( '?script/fonts' ) )
 
 dumpRect = ( event, rect ) ->
 	bounds = {

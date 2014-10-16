@@ -39,7 +39,7 @@ ASSI_EXPORT const char* assi_getErrorString( ASSI_State *state ) {
 	return state->error;
 }
 
-ASSI_EXPORT ASSI_State* assi_init( int width, int height, const char *header, uint32_t headerLength, const char* fontConfigConfig ) {
+ASSI_EXPORT ASSI_State* assi_init( int width, int height, const char *header, uint32_t headerLength, const char* fontConfigConfig, const char *fontDir ) {
 	ASSI_State *state = calloc( 1, sizeof(*state) );
 	if ( NULL == state ) {
 		return NULL;
@@ -60,6 +60,7 @@ ASSI_EXPORT ASSI_State* assi_init( int width, int height, const char *header, ui
 	}
 
 	ass_set_frame_size( state->assRenderer, width, height );
+	ass_set_fonts_dir( state->assLibrary, fontDir );
 	ass_set_fonts( state->assRenderer, NULL, "Sans", 1, fontConfigConfig, 1 );
 
 	char *tempHeader = calloc( headerLength, sizeof(*tempHeader) );
@@ -74,13 +75,6 @@ ASSI_EXPORT ASSI_State* assi_init( int width, int height, const char *header, ui
 	state->headerLength = headerLength;
 
 	return state;
-}
-
-// There doesn't seem to be any way to get error reporting from these
-// functions, so there's no reason to return a status code.
-ASSI_EXPORT void assi_setFontDir( ASSI_State *state, const char *directory ) {
-	ass_set_fonts_dir( state->assLibrary, directory );
-	ass_fonts_update( state->assRenderer );
 }
 
 ASSI_EXPORT int assi_setScript( ASSI_State *state, const char *styles, uint32_t stylesLength, const char *events, const uint32_t eventsLength ) {
