@@ -155,12 +155,12 @@ mainFunction = ( subtitle, selectedLines, activeLine ) ->
 	for eventIndex in *selectedLines
 		with event = subtitle[eventIndex]
 			-- This does not account for \r[name] being in the line.
-			styles = (styles[.style] or "") .. "\n[Events]\n"
-			events = .raw
+			styleText = (styles[.style] or "") .. "\n[Events]\n"
+			eventText = .raw
 
 			-- It occurs to me that perhaps having the user just pass in one
 			-- string that contains both styles and events may be easier.
-			if 0 < ASSInspector.assi_setScript( inspector, styles, #styles, events, #events )
+			if 0 < ASSInspector.assi_setScript( inspector, styleText, #styleText, eventText, #eventText )
 				log.warn( ASSInspector.assi_getErrorString( inspector ) )
 				ASSInspector.assi_cleanup( inspector )
 				aegisub.cancel( )
