@@ -203,31 +203,30 @@ void assi_cleanup( ASSI_State *state ) {
 	}
 }
 
+#define SEARCH_BOUNDS 32
+
 static void checkBounds( ASS_Image *assImage, int32_t *xMax, int32_t *yMax ) {
-	if ( assImage->w < 16 || assImage->h < 16 ) {
+	if ( assImage->w < SEARCH_BOUNDS || assImage->h < SEARCH_BOUNDS ) {
 		checkSmallBounds( assImage, xMax, yMax );
 		return;
 	}
-	// Shift back from the end of the first row by 16 bytes.
-	// Theoretically only needs to be 15 because if all 15 are blank, it
-	// means that the one before that must be the boundary of the image.
-	// But this is easier.
-	uint8_t       *byte = assImage->bitmap + assImage->w - 16,
+	// Shift back from the end of the first row by SEARCH_BOUNDS bytes.
+	uint8_t       *byte = assImage->bitmap + assImage->w - SEARCH_BOUNDS,
 	               addHeight;
 
 	uintptr_t     *chunk;
 
 	const uint8_t  chunkSize  = sizeof(*chunk),
 	              *start      = assImage->bitmap,
-	              *shortEnd   = start + (assImage->h - 16) * assImage->stride,
-	              *realEnd    = shortEnd + 15 * assImage->stride + assImage->w,
+	              *shortEnd   = start + (assImage->h - SEARCH_BOUNDS) * assImage->stride,
+	              *realEnd    = shortEnd + (SEARCH_BOUNDS - 1) * assImage->stride + assImage->w,
 	               rowPadding = assImage->stride - assImage->w;
 
 	const uint32_t chunksPerRow = assImage->w/chunkSize,
-	               chunksPerShortRow = 16/chunkSize;
+	               chunksPerShortRow = SEARCH_BOUNDS/chunkSize;
 
-	// Process the rightmost 16 bytes of the first height-16 rows. Because
-	// we are guaranteed to be processing 16 bytes here regardless of
+	// Process the rightmost SEARCH_BOUNDS bytes of the first height-SEARCH_BOUNDS rows. Because
+	// we are guaranteed to be processing SEARCH_BOUNDS bytes here regardless of
 	// alignment, don't worry about being careful about chunks here. I
 	// don't think anyone has a system that's more than 128-bit.
 	while ( byte < shortEnd ) {
@@ -259,10 +258,10 @@ static void checkBounds( ASS_Image *assImage, int32_t *xMax, int32_t *yMax ) {
 		if ( addHeight ) {
 			*yMax = (y > *yMax)? y: *yMax;
 		}
-		byte = (uint8_t *)chunk + assImage->stride - 16;
+		byte = (uint8_t *)chunk + assImage->stride - SEARCH_BOUNDS;
 	}
 
-	// Process the bottom 16 rows. Should probably be combined into a
+	// Process the bottom SEARCH_BOUNDS rows. Should probably be combined into a
 	// function with checkSmallBounds, since they're identical, except the
 	// starting pointer and constants for this are already calculated.
 	byte = (uint8_t *)shortEnd;
