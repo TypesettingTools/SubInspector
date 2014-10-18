@@ -30,11 +30,11 @@ static void msgCallback( int level, const char *fmt, va_list va, void *data ) {
 	}
 }
 
-ASSI_EXPORT uint32_t assi_getVersion( void ) {
+uint32_t assi_getVersion( void ) {
 	return ASSI_VERSION;
 }
 
-ASSI_EXPORT const char* assi_getErrorString( ASSI_State *state ) {
+const char* assi_getErrorString( ASSI_State *state ) {
 	return state->error;
 }
 
@@ -117,7 +117,7 @@ int assi_setScript( ASSI_State *state, const char *scriptBody ) {
 	return 0;
 }
 
-ASSI_EXPORT int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *times, const uint32_t renderCount ) {
+int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *times, const uint32_t renderCount ) {
 	if ( !state ) {
 		return 1;
 	}
@@ -192,7 +192,7 @@ ASSI_EXPORT int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const
 	return 0;
 }
 
-ASSI_EXPORT void assi_cleanup( ASSI_State *state ) {
+void assi_cleanup( ASSI_State *state ) {
 	if ( state ) {
 		free( state->header );
 		free( state->currentScript );
