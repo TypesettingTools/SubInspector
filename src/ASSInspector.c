@@ -121,9 +121,14 @@ ASSI_EXPORT int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const
 	if ( !state ) {
 		return 1;
 	}
+	if ( NULL == state->currentScript ) {
+		strcpy( state->error, "currentScript must not be NULL.");
+		return 1;
+	}
 
 	ASS_Track *assTrack = ass_read_memory( state->assLibrary, state->currentScript, state->scriptLength, NULL );
 	if ( NULL == assTrack ) {
+		strcpy( state->error, "Memory allocation failure." );
 		return 1;
 	}
 
