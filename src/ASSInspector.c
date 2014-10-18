@@ -38,7 +38,7 @@ ASSI_EXPORT const char* assi_getErrorString( ASSI_State *state ) {
 	return state->error;
 }
 
-ASSI_EXPORT ASSI_State* assi_init( int width, int height, const char *header, uint32_t headerLength, const char* fontConfigConfig, const char *fontDir ) {
+ASSI_State* assi_init( int width, int height, const char* fontConfigConfig, const char *fontDir ) {
 	ASSI_State *state = calloc( 1, sizeof(*state) );
 	if ( NULL == state ) {
 		return NULL;
@@ -62,21 +62,34 @@ ASSI_EXPORT ASSI_State* assi_init( int width, int height, const char *header, ui
 	ass_set_fonts_dir( state->assLibrary, fontDir );
 	ass_set_fonts( state->assRenderer, NULL, "Sans", 1, fontConfigConfig, 1 );
 
-	char *tempHeader = calloc( headerLength, sizeof(*tempHeader) );
-	if ( NULL == tempHeader ) {
-		ass_renderer_done( state->assRenderer );
-		ass_library_done( state->assLibrary );
-		free( state );
-		return NULL;
-	}
-	memcpy( tempHeader, header, headerLength );
-	state->header = tempHeader;
-	state->headerLength = headerLength;
-
 	return state;
 }
 
 ASSI_EXPORT int assi_setScript( ASSI_State *state, const char *styles, uint32_t stylesLength, const char *events, const uint32_t eventsLength ) {
+int assi_setHeader( ASSI_State *state, const char *header ) {
+	if ( !state ) {
+		return 1;
+	}
+	// Free the old header before checking the new one for null.
+	if ( state->header ) {
+		free( state->header );
+		state->header = NULL;
+		state->headerLength = 0;
+	}
+	if ( NULL == header ) {
+		return 0;
+	}
+	state->headerLength = strlen( header );
+	// Copy terminating null byte too.
+	state->header = malloc( state->headerLength + 1 );
+	if ( NULL == state->header ) {
+		strcpy( state->error, "Memory allocation failure." );
+		return 1;
+	}
+	memcpy( state->header, header, state->headerLength + 1 );
+	return 0;
+}
+
 	if ( !state ) {
 		return 1;
 	}
