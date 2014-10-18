@@ -11,8 +11,8 @@ log  = require( 'a-mo.log' )
 
 ffi.cdef( [[
 typedef struct {
-	int32_t x, y;
-	uint32_t w, h;
+	int x, y;
+	unsigned int w, h;
 } ASSI_Rect;
 
 uint32_t    assi_getVersion( void );

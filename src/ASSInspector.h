@@ -25,8 +25,8 @@
 typedef struct ASSI_State_priv ASSI_State;
 
 typedef struct {
-	int32_t x, y;
-	uint32_t w, h;
+	int x, y;
+	unsigned int w, h;
 } ASSI_Rect;
 
 ASSI_EXPORT uint32_t    assi_getVersion( void );
