@@ -17,8 +17,9 @@ typedef struct {
 
 uint32_t    assi_getVersion( void );
 const char* assi_getErrorString( void* );
-void*       assi_init( int, int, const char*, uint32_t, const char*, const char* );
-int         assi_setScript( void*, const char*, uint32_t, const char *, const uint32_t );
+void*       assi_init( int, int, const char*, const char* );
+int         assi_setHeader( void*, const char* );
+int         assi_setScript( void*, const char* );
 int         assi_calculateBounds( void*, ASSI_Rect*, const int32_t*, const uint32_t );
 void        assi_cleanup( void* );
 ]] )
@@ -53,11 +54,15 @@ initializeInspector = ( resX, resY, minimalHeader ) ->
 		if '?script' != aegisub.decode_path( '?script' )
 			-- Tell ASSInspector to tell fontconfig to search the fonts
 			-- directory in the script directory for fonts to load.
-			inspector = ffi.gc( ASSInspector.assi_init( resX, resY, minimalHeader, #minimalHeader, aegisub.decode_path( libraryPath .. "/fonts.conf" ), aegisub.decode_path( '?script/fonts' ) ), ASSInspector.assi_cleanup )
+			inspector = ffi.gc( ASSInspector.assi_init( resX, resY, aegisub.decode_path( libraryPath .. "/fonts.conf" ), aegisub.decode_path( '?script/fonts' ) ), ASSInspector.assi_cleanup )
 		else
-			inspector = ffi.gc( ASSInspector.assi_init( resX, resY, minimalHeader, #minimalHeader, aegisub.decode_path( libraryPath .. "/fonts.conf" ), nil ), ASSInspector.assi_cleanup )
+			inspector = ffi.gc( ASSInspector.assi_init( resX, resY, aegisub.decode_path( libraryPath .. "/fonts.conf" ), nil ), ASSInspector.assi_cleanup )
 		if nil == inspector
 			log.windowError( "ASSInspector library init failed." )
+
+		if 0 < ASSInspector.assi_setHeader( inspector, minimalHeader )
+			log.warn "Failed to set header."
+			log.warn( ffi.string( ASSInspector.assi_getErrorString( inspector ) ) )
 
 dumpRect = ( event, rect ) ->
 	bounds = {
@@ -66,6 +71,8 @@ dumpRect = ( event, rect ) ->
 		x2: tonumber( rect.w + rect.x )
 		y2: tonumber( rect.h + rect.y )
 	}
+
+	log.dump { x: bounds.x, y: bounds.y, w: bounds.x2-bounds.x, h: bounds.y2-bounds.y }
 
 	newEvent = util.deep_copy( event )
 	with bounds
@@ -157,19 +164,18 @@ mainFunction = ( subtitle, selectedLines, activeLine ) ->
 	for eventIndex in *selectedLines
 		with event = subtitle[eventIndex]
 			-- This does not account for \r[name] being in the line.
-			styleText = (styles[.style] or "") .. "\n[Events]\n"
-			eventText = .raw
+			scriptText = (styles[.style] or "") .. "\n[Events]\n" .. .raw
 
 			-- It occurs to me that perhaps having the user just pass in one
 			-- string that contains both styles and events may be easier.
-			if 0 < ASSInspector.assi_setScript( inspector, styleText, #styleText, eventText, #eventText )
-				log.warn( ASSInspector.assi_getErrorString( inspector ) )
+			if 0 < ASSInspector.assi_setScript( inspector, scriptText )
+				log.warn( ffi.string( ASSInspector.assi_getErrorString( inspector ) ) )
 				ASSInspector.assi_cleanup( inspector )
 				aegisub.cancel( )
 
 			-- We're going to render a line twice, once at its start and once
 			-- at its end.
-			renderCount = 2
+			renderCount = 1
 
 			renderTimes = { }
 
