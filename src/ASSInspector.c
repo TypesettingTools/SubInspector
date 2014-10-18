@@ -104,8 +104,8 @@ int assi_setScript( ASSI_State *state, const char *scriptBody ) {
 
 	size_t scriptBodyLength = strlen( scriptBody );
 	state->scriptLength = state->headerLength + scriptBodyLength;
-	char state->currentScript = malloc( state->scriptLength );
-	if ( NULL == tempScript ) {
+	state->currentScript = malloc( state->scriptLength );
+	if ( NULL == state->currentScript ) {
 		state->scriptLength = 0;
 		strcpy( state->error, "Memory allocation failure." );
 		return 1;
@@ -121,6 +121,7 @@ int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *ti
 	if ( !state ) {
 		return 1;
 	}
+
 	if ( NULL == state->currentScript ) {
 		strcpy( state->error, "currentScript must not be NULL.");
 		return 1;
