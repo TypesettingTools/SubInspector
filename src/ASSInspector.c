@@ -19,7 +19,6 @@ struct ASSI_State_priv {
 	char          error[128];
 };
 
-static void msgCallback( int, const char*, va_list, void* );
 static void checkBounds( ASS_Image*, int32_t*, int32_t* );
 static void checkSmallBounds( ASS_Image*, int32_t*, int32_t* );
 
