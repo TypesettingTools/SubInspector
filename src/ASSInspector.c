@@ -13,7 +13,7 @@ struct ASSI_State_priv {
 	ASS_Renderer *assRenderer;
 	char         *header,
 	             *currentScript;
-	uint32_t      headerLength,
+	size_t        headerLength,
 	              scriptLength;
 	ASSI_Rect     lastRect;
 	char          error[128];
