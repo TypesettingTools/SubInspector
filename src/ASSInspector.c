@@ -65,7 +65,6 @@ ASSI_State* assi_init( int width, int height, const char* fontConfigConfig, cons
 	return state;
 }
 
-ASSI_EXPORT int assi_setScript( ASSI_State *state, const char *styles, uint32_t stylesLength, const char *events, const uint32_t eventsLength ) {
 int assi_setHeader( ASSI_State *state, const char *header ) {
 	if ( !state ) {
 		return 1;
@@ -90,31 +89,30 @@ int assi_setHeader( ASSI_State *state, const char *header ) {
 	return 0;
 }
 
+int assi_setScript( ASSI_State *state, const char *scriptBody ) {
 	if ( !state ) {
 		return 1;
 	}
 	if ( state->currentScript ) {
 		free( state->currentScript );
 		state->currentScript = NULL;
+		state->scriptLength = 0;
+	}
+	if ( NULL == scriptBody ) {
+		return 0;
 	}
 
-	uint32_t tempScriptLength = state->headerLength + stylesLength + eventsLength;
-	char *tempScript = malloc( tempScriptLength * sizeof(*tempScript) );
+	size_t scriptBodyLength = strlen( scriptBody );
+	state->scriptLength = state->headerLength + scriptBodyLength;
+	char state->currentScript = malloc( state->scriptLength );
 	if ( NULL == tempScript ) {
+		state->scriptLength = 0;
 		strcpy( state->error, "Memory allocation failure." );
 		return 1;
 	}
-	// Copy the header.
-	memcpy( tempScript, state->header, state->headerLength );
-	// If styles are provided, copy them.
-	if ( NULL != styles && stylesLength > 0 ) {
-		memcpy( tempScript + state->headerLength, styles, stylesLength );
-	}
-	// Copy the events.
-	memcpy( tempScript + state->headerLength + stylesLength, events, eventsLength );
 
-	state->currentScript = tempScript;
-	state->scriptLength = tempScriptLength;
+	memcpy( state->currentScript, state->header, state->headerLength );
+	memcpy( state->currentScript + state->headerLength, scriptBody, scriptBodyLength );
 
 	return 0;
 }
