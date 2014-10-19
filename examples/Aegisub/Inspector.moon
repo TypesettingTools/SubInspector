@@ -6,8 +6,6 @@ export script_author      = "torque"
 export script_version     = 0x000003
 
 ffi  = require( 'ffi' )
-util = require( 'aegisub.util' )
-log  = require( 'a-mo.log' )
 
 ffi.cdef( [[
 typedef struct {
@@ -131,8 +129,6 @@ validateRect = ( rect ) ->
 		h: tonumber( rect.h )
 	}
 
-	log.dump bounds
-
 	if bounds.w == 0 or bounds.h == 0
 		return false
 	else
@@ -220,11 +216,10 @@ class Inspector
 	--        line is displayed.
 
 	-- Returns:
-	-- False or an array-like table of bounding boxes of the form {:x, :y,
-	-- :w, :h }. If false, then the line is not displayed on screen. If
-	-- multiple times are rendered, each index of the return table will be
-	-- false or a bounding box. If an index is false, the line is not
-	-- displayed on that frame.
+	-- An array-like table of bounding boxes, and an array-like table of
+	-- render times, the two tables are the same length. If multiple lines
+	-- are passed, the bounding box for a given time is the combined
+	-- bounding boxes of all the lines.
 
 	-- Error Handling:
 	-- If an error is encounted, getBounds returns nil and an error string,
@@ -232,6 +227,7 @@ class Inspector
 	-- between an error and a valid false return, users should make sure
 	-- they actually compare result to nil and false. Rather than just
 	-- checking that the result is not falsy.
+
 	getBounds: ( lines, times = defaultTimes( lines ) ) =>
 		unless times
 			return false
