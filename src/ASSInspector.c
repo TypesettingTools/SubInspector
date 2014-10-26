@@ -8,24 +8,25 @@
 #include <string.h>
 #include <ass/ass.h>
 
-struct ASSI_State_priv{
-	ASS_Library   *assLibrary;
-	ASS_Renderer  *assRenderer;
-	char          *header;
-	char         **events;
-	unsigned int  *eventLengths, headerLength, eventCount;
-	char error[128];
+struct ASSI_State_priv {
+	ASS_Library  *assLibrary;
+	ASS_Renderer *assRenderer;
+	char         *header,
+	             *currentScript;
+	size_t        headerLength,
+	              scriptLength;
+	ASSI_Rect     lastRect;
+	char          error[128];
 };
 
-static uint8_t findDirty( ASS_Image* );
-static uint8_t processFrame( ASS_Renderer*, ASS_Track*, int );
-static void msgCallback( int, const char*, va_list, void* );
+static void checkBounds( ASS_Image*, int32_t*, int32_t* );
+static void checkSmallBounds( ASS_Image*, int32_t*, int32_t* );
 
 static void msgCallback( int level, const char *fmt, va_list va, void *data ) {
-	if( level < 5 ){
+	if ( level < 4 ) {
 		ASSI_State *state = data;
 		int levelLength = sprintf( state->error, "%d: ", level );
-		vsnprintf( state->error + levelLength, sizeof state->error - levelLength, fmt, va );
+		vsnprintf( state->error + levelLength, sizeof(state->error) - levelLength, fmt, va );
 	}
 }
 
@@ -33,8 +34,12 @@ uint32_t assi_getVersion( void ) {
 	return ASSI_VERSION;
 }
 
-ASSI_State* assi_init( int width, int height ) {
-	ASSI_State *state = malloc( sizeof *state );
+const char* assi_getErrorString( ASSI_State *state ) {
+	return state->error;
+}
+
+ASSI_State* assi_init( int width, int height, const char* fontConfigConfig, const char *fontDir ) {
+	ASSI_State *state = calloc( 1, sizeof(*state) );
 	if ( NULL == state ) {
 		return NULL;
 	}
@@ -54,169 +59,317 @@ ASSI_State* assi_init( int width, int height ) {
 	}
 
 	ass_set_frame_size( state->assRenderer, width, height );
-	ass_set_fonts( state->assRenderer, NULL, "Sans", 1, NULL, 1 );
-
-	state->header = NULL;
-	state->events = NULL;
-	state->eventLengths = NULL;
-	state->error[0] = '\0';
+	ass_set_fonts_dir( state->assLibrary, fontDir );
+	ass_set_fonts( state->assRenderer, NULL, "Sans", 1, fontConfigConfig, 1 );
 
 	return state;
 }
 
-int assi_addHeader( ASSI_State *state, const char *header, unsigned int length ) {
-	if( NULL == state ){
+int assi_setHeader( ASSI_State *state, const char *header ) {
+	if ( !state ) {
 		return 1;
 	}
-	char *tempHeader = malloc( length );
-	if( NULL == tempHeader ){
+	// Free the old header before checking the new one for null.
+	if ( state->header ) {
+		free( state->header );
+		state->header = NULL;
+		state->headerLength = 0;
+	}
+	if ( NULL == header ) {
+		return 0;
+	}
+	state->headerLength = strlen( header );
+	// Copy terminating null byte too.
+	state->header = malloc( state->headerLength + 1 );
+	if ( NULL == state->header ) {
+		strcpy( state->error, "Memory allocation failure." );
 		return 1;
 	}
-	memcpy( tempHeader, header, length );
-	free( state->header );
-	state->header = tempHeader;
-	state->headerLength = length;
+	memcpy( state->header, header, state->headerLength + 1 );
 	return 0;
 }
 
-int assi_initEvents( ASSI_State *state, unsigned int count ) {
-	if( NULL == state ){
+int assi_setScript( ASSI_State *state, const char *scriptBody ) {
+	if ( !state ) {
 		return 1;
 	}
-	if( state->events ) {
-		for ( unsigned int index = 0; index < state->eventCount; ++index ) {
-			free( state->events[index] );
+	if ( state->currentScript ) {
+		free( state->currentScript );
+		state->currentScript = NULL;
+		state->scriptLength = 0;
+	}
+	if ( NULL == scriptBody ) {
+		return 0;
+	}
+
+	size_t scriptBodyLength = strlen( scriptBody );
+	state->scriptLength = state->headerLength + scriptBodyLength;
+	state->currentScript = malloc( state->scriptLength );
+	if ( NULL == state->currentScript ) {
+		state->scriptLength = 0;
+		strcpy( state->error, "Memory allocation failure." );
+		return 1;
+	}
+
+	memcpy( state->currentScript, state->header, state->headerLength );
+	memcpy( state->currentScript + state->headerLength, scriptBody, scriptBodyLength );
+
+	return 0;
+}
+
+int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *times, const uint32_t renderCount ) {
+	if ( !state ) {
+		return 1;
+	}
+
+	if ( NULL == state->currentScript ) {
+		strcpy( state->error, "currentScript must not be NULL.");
+		return 1;
+	}
+
+	ASS_Track *assTrack = ass_read_memory( state->assLibrary, state->currentScript, state->scriptLength, NULL );
+	if ( NULL == assTrack ) {
+		strcpy( state->error, "Memory allocation failure." );
+		return 1;
+	}
+
+	for ( int i = 0; i < renderCount; ++i ) {
+		// set to 1 if positions changed, or set to 2 if content changed.
+		int lineChanged = 0;
+
+		ASS_Image *assImage = ass_render_frame( state->assRenderer, assTrack, times[i], &lineChanged );
+		if ( NULL == assImage ) {
+			continue;
 		}
-		free( state->events );
-	}
-	state->events = malloc( count * sizeof *state->events );
-	if( NULL == state->events ) {
-		return 1;
-	}
-	memset( state->events, 0, count * sizeof *state->events );
-	free( state->eventLengths );
-	state->eventLengths = malloc( count * sizeof *state->eventLengths );
-	if( NULL == state->eventLengths ) {
-		free( state->events );
-		state->events = NULL;
-		return 1;
-	}
-	state->eventCount = count;
-	return 0;
-}
 
-int assi_addEvent( ASSI_State *state, const char *event, unsigned int length, unsigned int index ) {
-	if( NULL == state || NULL == state->events ){
-		return 1;
+		switch( lineChanged ) {
+			// Line is identical to last one.
+			case 0:
+				rects[i] = state->lastRect;
+				continue;
+
+			// The position of the line changed, but its contents are the
+			// same. More code duplication!!!!
+			case 1:
+				rects[i] = state->lastRect;
+				rects[i].x = assImage->dst_x;
+				rects[i].y = assImage->dst_y;
+				assImage = assImage->next;
+				while( assImage ) {
+					rects[i].x = (assImage->dst_x < rects[i].x)? assImage->dst_x: rects[i].x;
+					rects[i].y = (assImage->dst_y < rects[i].y)? assImage->dst_y: rects[i].y;
+					assImage = assImage->next;
+				}
+				state->lastRect = rects[i];
+				continue;
+		}
+
+		// Set initial conditions.
+		rects[i].x = assImage->dst_x;
+		rects[i].y = assImage->dst_y;
+
+		int32_t xMax = rects[i].x,
+		        yMax = rects[i].y;
+
+		if ( 0xFF != (assImage->color & 0xFF) ) {
+			checkBounds( assImage, &xMax, &yMax );
+		}
+		assImage = assImage->next;
+
+		while ( assImage ) {
+			if ( 0xFF != (assImage->color & 0xFF) ) {
+				rects[i].x = (assImage->dst_x < rects[i].x)? assImage->dst_x: rects[i].x;
+				rects[i].y = (assImage->dst_y < rects[i].y)? assImage->dst_y: rects[i].y;
+				checkBounds( assImage, &xMax, &yMax );
+			}
+			assImage = assImage->next;
+		}
+		rects[i].w = xMax - rects[i].x;
+		rects[i].h = yMax - rects[i].y;
+		state->lastRect = rects[i];
 	}
-	char *tempEvent = malloc( length );
-	if( NULL == tempEvent ) {
-		return 1;
-	}
-	memcpy( tempEvent, event, length );
-	free( state->events[index] );
-	state->events[index] = tempEvent;
-	state->eventLengths[index] = length;
+
+	ass_free_track( assTrack );
 	return 0;
 }
 
 void assi_cleanup( ASSI_State *state ) {
-	if( state ){
+	if ( state ) {
 		free( state->header );
-		if( state->events) {
-			for ( unsigned int index = 0; index < state->eventCount; ++index ) {
-				free( state->events[index] );
-			}
-			free( state->events );
-		}
-		free( state->eventLengths );
+		free( state->currentScript );
 		ass_renderer_done( state->assRenderer );
 		ass_library_done( state->assLibrary );
 		free( state );
 	}
 }
 
-// Takes the index (0-based) of the event to render and an array of times
-// (corresponding to the frames of the event). Modifies the array
-// `result` that is passed in. Returns an error if libass fails to read
-// the event.
-int assi_checkLine( ASSI_State *state, const int eventIndex, const int *times, const unsigned int timesLength, uint8_t *result ) {
-	if( NULL == state || NULL == state->header || NULL == state->events || NULL == state->events[eventIndex] ){
-		return 1;
-	}
-	// Merge the header and the desired event. None of this needs to be
-	// null terminated because we have the length of everything.
-	int scriptLength = state->headerLength + state->eventLengths[eventIndex];
-	char *script = malloc( scriptLength );
-	if( NULL == script ) {
-		return 1;
-	}
-	memcpy( script, state->header, state->headerLength );
-	memcpy( script + state->headerLength, state->events[eventIndex], state->eventLengths[eventIndex] );
+#define SEARCH_BOUNDS 32
 
-	ASS_Track *assTrack = ass_read_memory( state->assLibrary, script, scriptLength, NULL );
-	if ( NULL == assTrack ) {
-		free( script );
-		return 1;
+static void checkBounds( ASS_Image *assImage, int32_t *xMax, int32_t *yMax ) {
+	if ( assImage->w < SEARCH_BOUNDS || assImage->h < SEARCH_BOUNDS ) {
+		checkSmallBounds( assImage, xMax, yMax );
+		return;
+	}
+	// Shift back from the end of the first row by SEARCH_BOUNDS bytes.
+	uint8_t       *byte = assImage->bitmap + assImage->w - SEARCH_BOUNDS,
+	               addHeight;
+
+	uintptr_t     *chunk;
+
+	const uint8_t  chunkSize  = sizeof(*chunk),
+	              *start      = assImage->bitmap,
+	              *shortEnd   = start + (assImage->h - SEARCH_BOUNDS) * assImage->stride,
+	              *realEnd    = shortEnd + (SEARCH_BOUNDS - 1) * assImage->stride + assImage->w,
+	               rowPadding = assImage->stride - assImage->w;
+
+	const uint32_t chunksPerRow = assImage->w/chunkSize,
+	               chunksPerShortRow = SEARCH_BOUNDS/chunkSize;
+
+	// Process the rightmost SEARCH_BOUNDS bytes of the first height-SEARCH_BOUNDS rows. Because
+	// we are guaranteed to be processing SEARCH_BOUNDS bytes here regardless of
+	// alignment, don't worry about being careful about chunks here. I
+	// don't think anyone has a system that's more than 128-bit.
+	while ( byte < shortEnd ) {
+		chunk = (uintptr_t *)byte;
+		addHeight = 0;
+
+		uintptr_t *endChunk = chunk + chunksPerShortRow;
+
+		uint32_t position = (byte - start),
+		         x = position%assImage->stride + assImage->dst_x + 1,
+		         y = position/assImage->stride + assImage->dst_y + 1;
+
+		while (chunk < endChunk) {
+			if ( *chunk ) {
+				// printf( "Chunk: %p; Value: %016lX, End: %p\n", chunk, *chunk, chunk + 1 );
+				for ( byte = (uint8_t *)chunk; byte < (uint8_t *)(chunk + 1); byte++ ) {
+					if ( *byte ) {
+						// printf( "Byte: %p; Value: %u (%3u, %3u)\n", byte, *byte, x, y );
+						*xMax = (x > *xMax)? x: *xMax;
+						addHeight = 1;
+					}
+					x++;
+				}
+			} else {
+				x += chunkSize;
+			}
+			chunk++;
+		}
+		if ( addHeight ) {
+			*yMax = (y > *yMax)? y: *yMax;
+		}
+		byte = (uint8_t *)chunk + assImage->stride - SEARCH_BOUNDS;
 	}
 
-	for ( int timeIdx = 0; timeIdx < timesLength; ++timeIdx ) {
-		result[timesLength] |= result[timeIdx] = processFrame( state->assRenderer, assTrack, times[timeIdx] );
+	// Process the bottom SEARCH_BOUNDS rows. Should probably be combined into a
+	// function with checkSmallBounds, since they're identical, except the
+	// starting pointer and constants for this are already calculated.
+	byte = (uint8_t *)shortEnd;
+
+	while ( byte < realEnd ) {
+		chunk = (uintptr_t *)byte;
+		addHeight = 0;
+
+		uint8_t   *endByte   = byte + assImage->w;
+
+		uintptr_t *endChunk = chunk + chunksPerRow;
+
+		uint32_t   position = (byte - start),
+		           x = position%assImage->stride + assImage->dst_x + 1,
+		           y = position/assImage->stride + assImage->dst_y + 1;
+
+		while ( chunk < endChunk ) {
+			if ( *chunk ) {
+				// printf( "Chunk: %p; Value: %016lX, End: %p\n", chunk, *chunk, chunk + 1 );
+				for( byte = (uint8_t *)chunk; byte < (uint8_t *)(chunk + 1); byte++ ) {
+					if ( *byte ) {
+						// printf( "Byte: %p; Value: %u (%3u, %3u)\n", byte, *byte, x, y );
+						*xMax = (x > *xMax)? x: *xMax;
+						addHeight = 1;
+					}
+					x++;
+				}
+			} else {
+				x += chunkSize;
+			}
+			chunk++;
+		}
+
+		byte = (uint8_t *)chunk;
+		while ( byte < endByte ) {
+			if ( *byte ) {
+				// printf( "Byte: %p; Value: %u (%3u, %3u)\n", byte, *byte, x, y );
+				*xMax = (x > *xMax)? x: *xMax;
+				addHeight = 1;
+			}
+			byte++;
+			// Can be lazy about incrementing x here.
+			x++;
+		}
+		if ( addHeight ) {
+			*yMax = (y > *yMax)? y: *yMax;
+		}
+		byte += rowPadding;
 	}
-
-	ass_free_track( assTrack );
-	free( script );
-
-	return 0;
 }
 
-static uint8_t findDirty( ASS_Image *img ) {
-	// If alpha is not 255, the image is not fully transparent and we need
-	// to check the bitmap blending mask to verify if it is dirty or not.
-	if( 0xFF != (img->color & 0xFF) ) {
-		uint8_t *bitmap = img->bitmap,
-			*endOfRow;
+static void checkSmallBounds( ASS_Image *assImage, int32_t *xMax, int32_t *yMax ) {
+	uint8_t       *byte = assImage->bitmap,
+	               addHeight;
 
-		const uint8_t *endOfBitmap = bitmap + img->h * img->stride,
-			       widthRemainder = img->w % sizeof( uintptr_t );
+	uintptr_t     *chunk;
 
-		const uint16_t padding = img->stride - img->w,
-			       widthX = img->w / sizeof( uintptr_t );
+	const uint8_t  chunkSize   = sizeof(*chunk),
+	              *bitmapStart = assImage->bitmap,
+	              *bitmapEnd   = bitmapStart + (assImage->h - 1) * assImage->stride + assImage->w,
+	               rowPadding  = assImage->stride - assImage->w;
 
-		uintptr_t *bitmap_X,
-			 *endOfRow_X;
+	const uint32_t chunksPerRow      = assImage->w/chunkSize;
 
-		while ( bitmap < endOfBitmap ) {
-			bitmap_X   = (uintptr_t *)bitmap;
-			endOfRow_X = bitmap_X + widthX;
-			while ( bitmap_X < endOfRow_X ) {
-				if ( *bitmap_X++ ) {
-					return 1;
+	// Let's write the same loop 3 times!
+	while ( byte < bitmapEnd ) {
+		chunk = (uintptr_t *)byte;
+		addHeight = 0;
+
+		uint8_t   *endByte   = byte + assImage->w;
+
+		uintptr_t *endChunk = chunk + chunksPerRow;
+
+		uint32_t   position = (byte - bitmapStart),
+		           x = position%assImage->stride + assImage->dst_x + 1,
+		           y = position/assImage->stride + assImage->dst_y + 1;
+
+		while ( chunk < endChunk ) {
+			if ( *chunk ) {
+				// printf( "Chunk: %p; Value: %016lX, End: %p\n", chunk, *chunk, chunk + 1 );
+				for( byte = (uint8_t *)chunk; byte < (uint8_t *)(chunk + 1); byte++ ) {
+					if ( *byte ) {
+						// printf( "Byte: %p; Value: %u (%3u, %3u)\n", byte, *byte, x, y );
+						*xMax = (x > *xMax)? x: *xMax;
+						addHeight = 1;
+					}
+					x++;
 				}
+			} else {
+				x += chunkSize;
 			}
-			bitmap = (uint8_t *)bitmap_X;
-			endOfRow = bitmap + widthRemainder;
-			while ( bitmap < endOfRow ) {
-				if ( *bitmap++ ) {
-					return 1;
-				}
+			chunk++;
+		}
+
+		byte = (uint8_t *)chunk;
+		while ( byte < endByte ) {
+			if ( *byte ) {
+				// printf( "Byte: %p; Value: %u (%3u, %3u)\n", byte, *byte, x, y );
+				*xMax = (x > *xMax)? x: *xMax;
+				addHeight = 1;
 			}
-			bitmap += padding;
+			byte++;
+			// Can be lazy about incrementing x here.
+			x++;
 		}
-	}
-	return 0;
-}
-
-static uint8_t processFrame( ASS_Renderer *assRenderer, ASS_Track *assTrack, int frameTime ) {
-	ASS_Image *assImage = ass_render_frame( assRenderer, assTrack, frameTime, NULL );
-
-	// ASS_Image is apparently a linked list.
-	while ( assImage ) {
-		if ( findDirty( assImage ) ) {
-			return 1;
+		if ( addHeight ) {
+			*yMax = (y > *yMax)? y: *yMax;
 		}
-		assImage = assImage->next;
+		byte += rowPadding;
 	}
-
-	return 0;
 }
