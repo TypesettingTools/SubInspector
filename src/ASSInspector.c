@@ -19,8 +19,11 @@ struct ASSI_State_priv {
 	char          error[128];
 };
 
-static void checkBounds( ASS_Image*, int32_t*, int32_t* );
-static void checkSmallBounds( ASS_Image*, int32_t*, int32_t* );
+typedef struct {
+	int x1, y1, x2, y2;
+} ASSI_InternalRect;
+
+static void checkBounds( ASS_Image*, ASSI_InternalRect* );
 
 static void msgCallback( int level, const char *fmt, va_list va, void *data ) {
 	if ( level < 4 ) {
@@ -148,44 +151,36 @@ int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *ti
 				rects[i] = state->lastRect;
 				continue;
 
-			// The position of the line changed, but its contents are the
-			// same. More code duplication!!!!
-			case 1:
-				rects[i] = state->lastRect;
-				rects[i].x = assImage->dst_x;
-				rects[i].y = assImage->dst_y;
-				assImage = assImage->next;
-				while( assImage ) {
-					rects[i].x = (assImage->dst_x < rects[i].x)? assImage->dst_x: rects[i].x;
-					rects[i].y = (assImage->dst_y < rects[i].y)? assImage->dst_y: rects[i].y;
-					assImage = assImage->next;
-				}
-				state->lastRect = rects[i];
-				continue;
+			// dst_x and dst_y aren't actually trustworthy, so this can get
+			// chucked right out the window. It'd still be possible to
+			// optimize the moved case by storing the offset between dst_[xy]
+			// and the actual bounding rect.
 		}
 
 		// Set initial conditions.
-		rects[i].x = assImage->dst_x;
-		rects[i].y = assImage->dst_y;
 
-		int32_t xMax = rects[i].x,
-		        yMax = rects[i].y;
+		ASSI_InternalRect boundsRect = {
+			assImage->dst_x + assImage->w,
+			assImage->dst_y + assImage->h,
+			0,
+			0
+		};
 
 		if ( 0xFF != (assImage->color & 0xFF) ) {
-			checkBounds( assImage, &xMax, &yMax );
+			checkBounds( assImage, &boundsRect );
 		}
 		assImage = assImage->next;
 
 		while ( assImage ) {
 			if ( 0xFF != (assImage->color & 0xFF) ) {
-				rects[i].x = (assImage->dst_x < rects[i].x)? assImage->dst_x: rects[i].x;
-				rects[i].y = (assImage->dst_y < rects[i].y)? assImage->dst_y: rects[i].y;
-				checkBounds( assImage, &xMax, &yMax );
+				checkBounds( assImage, &boundsRect );
 			}
 			assImage = assImage->next;
 		}
-		rects[i].w = xMax - rects[i].x;
-		rects[i].h = yMax - rects[i].y;
+		rects[i].x = boundsRect.x1;
+		rects[i].y = boundsRect.y1;
+		rects[i].w = boundsRect.x2 - boundsRect.x1;
+		rects[i].h = boundsRect.y2 - boundsRect.y1;
 		state->lastRect = rects[i];
 	}
 
@@ -203,117 +198,7 @@ void assi_cleanup( ASSI_State *state ) {
 	}
 }
 
-#define SEARCH_BOUNDS 32
-
-static void checkBounds( ASS_Image *assImage, int32_t *xMax, int32_t *yMax ) {
-	if ( assImage->w < SEARCH_BOUNDS || assImage->h < SEARCH_BOUNDS ) {
-		checkSmallBounds( assImage, xMax, yMax );
-		return;
-	}
-	// Shift back from the end of the first row by SEARCH_BOUNDS bytes.
-	uint8_t       *byte = assImage->bitmap + assImage->w - SEARCH_BOUNDS,
-	               addHeight;
-
-	uintptr_t     *chunk;
-
-	const uint8_t  chunkSize  = sizeof(*chunk),
-	              *start      = assImage->bitmap,
-	              *shortEnd   = start + (assImage->h - SEARCH_BOUNDS) * assImage->stride,
-	              *realEnd    = shortEnd + (SEARCH_BOUNDS - 1) * assImage->stride + assImage->w,
-	               rowPadding = assImage->stride - assImage->w;
-
-	const uint32_t chunksPerRow = assImage->w/chunkSize,
-	               chunksPerShortRow = SEARCH_BOUNDS/chunkSize;
-
-	// Process the rightmost SEARCH_BOUNDS bytes of the first height-SEARCH_BOUNDS rows. Because
-	// we are guaranteed to be processing SEARCH_BOUNDS bytes here regardless of
-	// alignment, don't worry about being careful about chunks here. I
-	// don't think anyone has a system that's more than 128-bit.
-	while ( byte < shortEnd ) {
-		chunk = (uintptr_t *)byte;
-		addHeight = 0;
-
-		uintptr_t *endChunk = chunk + chunksPerShortRow;
-
-		uint32_t position = (byte - start),
-		         x = position%assImage->stride + assImage->dst_x + 1,
-		         y = position/assImage->stride + assImage->dst_y + 1;
-
-		while (chunk < endChunk) {
-			if ( *chunk ) {
-				// printf( "Chunk: %p; Value: %016lX, End: %p\n", chunk, *chunk, chunk + 1 );
-				for ( byte = (uint8_t *)chunk; byte < (uint8_t *)(chunk + 1); byte++ ) {
-					if ( *byte ) {
-						// printf( "Byte: %p; Value: %u (%3u, %3u)\n", byte, *byte, x, y );
-						*xMax = (x > *xMax)? x: *xMax;
-						addHeight = 1;
-					}
-					x++;
-				}
-			} else {
-				x += chunkSize;
-			}
-			chunk++;
-		}
-		if ( addHeight ) {
-			*yMax = (y > *yMax)? y: *yMax;
-		}
-		byte = (uint8_t *)chunk + assImage->stride - SEARCH_BOUNDS;
-	}
-
-	// Process the bottom SEARCH_BOUNDS rows. Should probably be combined into a
-	// function with checkSmallBounds, since they're identical, except the
-	// starting pointer and constants for this are already calculated.
-	byte = (uint8_t *)shortEnd;
-
-	while ( byte < realEnd ) {
-		chunk = (uintptr_t *)byte;
-		addHeight = 0;
-
-		uint8_t   *endByte   = byte + assImage->w;
-
-		uintptr_t *endChunk = chunk + chunksPerRow;
-
-		uint32_t   position = (byte - start),
-		           x = position%assImage->stride + assImage->dst_x + 1,
-		           y = position/assImage->stride + assImage->dst_y + 1;
-
-		while ( chunk < endChunk ) {
-			if ( *chunk ) {
-				// printf( "Chunk: %p; Value: %016lX, End: %p\n", chunk, *chunk, chunk + 1 );
-				for( byte = (uint8_t *)chunk; byte < (uint8_t *)(chunk + 1); byte++ ) {
-					if ( *byte ) {
-						// printf( "Byte: %p; Value: %u (%3u, %3u)\n", byte, *byte, x, y );
-						*xMax = (x > *xMax)? x: *xMax;
-						addHeight = 1;
-					}
-					x++;
-				}
-			} else {
-				x += chunkSize;
-			}
-			chunk++;
-		}
-
-		byte = (uint8_t *)chunk;
-		while ( byte < endByte ) {
-			if ( *byte ) {
-				// printf( "Byte: %p; Value: %u (%3u, %3u)\n", byte, *byte, x, y );
-				*xMax = (x > *xMax)? x: *xMax;
-				addHeight = 1;
-			}
-			byte++;
-			// Can be lazy about incrementing x here.
-			x++;
-		}
-		if ( addHeight ) {
-			*yMax = (y > *yMax)? y: *yMax;
-		}
-		byte += rowPadding;
-	}
-}
-
-static void checkSmallBounds( ASS_Image *assImage, int32_t *xMax, int32_t *yMax ) {
+static void checkBounds( ASS_Image *assImage, ASSI_InternalRect *boundsRect ) {
 	uint8_t       *byte = assImage->bitmap,
 	               addHeight;
 
@@ -326,7 +211,6 @@ static void checkSmallBounds( ASS_Image *assImage, int32_t *xMax, int32_t *yMax 
 
 	const uint32_t chunksPerRow      = assImage->w/chunkSize;
 
-	// Let's write the same loop 3 times!
 	while ( byte < bitmapEnd ) {
 		chunk = (uintptr_t *)byte;
 		addHeight = 0;
@@ -345,11 +229,16 @@ static void checkSmallBounds( ASS_Image *assImage, int32_t *xMax, int32_t *yMax 
 				for( byte = (uint8_t *)chunk; byte < (uint8_t *)(chunk + 1); byte++ ) {
 					if ( *byte ) {
 						// printf( "Byte: %p; Value: %u (%3u, %3u)\n", byte, *byte, x, y );
-						*xMax = (x > *xMax)? x: *xMax;
-						addHeight = 1;
+						if ( x < boundsRect->x1 ) {
+							boundsRect->x1 = x;
+						}
+						if ( x > boundsRect->x2 ) {
+							boundsRect->x2 = x;
+						}
 					}
 					x++;
 				}
+				addHeight = 1;
 			} else {
 				x += chunkSize;
 			}
@@ -360,7 +249,12 @@ static void checkSmallBounds( ASS_Image *assImage, int32_t *xMax, int32_t *yMax 
 		while ( byte < endByte ) {
 			if ( *byte ) {
 				// printf( "Byte: %p; Value: %u (%3u, %3u)\n", byte, *byte, x, y );
-				*xMax = (x > *xMax)? x: *xMax;
+				if ( x < boundsRect->x1 ) {
+					boundsRect->x1 = x;
+				}
+				if ( x > boundsRect->x2 ) {
+					boundsRect->x2 = x;
+				}
 				addHeight = 1;
 			}
 			byte++;
@@ -368,7 +262,12 @@ static void checkSmallBounds( ASS_Image *assImage, int32_t *xMax, int32_t *yMax 
 			x++;
 		}
 		if ( addHeight ) {
-			*yMax = (y > *yMax)? y: *yMax;
+			if ( y < boundsRect->y1 ) {
+				boundsRect->y1 = y;
+			}
+			if ( y > boundsRect->y2 ) {
+				boundsRect->y2 = y;
+			}
 		}
 		byte += rowPadding;
 	}
