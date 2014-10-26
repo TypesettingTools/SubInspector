@@ -3,7 +3,7 @@
 export script_name        = "ASSInspector Example"
 export script_description = "Calculates bounding rectangles on the start and end times of selected events."
 export script_author      = "torque"
-export script_version     = 0x000003
+export script_version     = 0x000100
 
 ffi  = require( 'ffi' )
 
