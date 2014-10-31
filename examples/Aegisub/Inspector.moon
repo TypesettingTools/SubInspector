@@ -1,9 +1,6 @@
 -- This library is unlicensed under CC0
 
-export script_name        = "ASSInspector Example"
-export script_description = "Calculates bounding rectangles on the start and end times of selected events."
-export script_author      = "torque"
-export script_version     = 0x000101
+libraryVersion = 0x000101
 
 ffi  = require( 'ffi' )
 
@@ -105,9 +102,9 @@ collectHeader = ( subtitles ) =>
 initializeInspector = ( fontDirectory = state.fontDir ) =>
 	if nil == state.inspector
 		libVersion = ASSInspector.assi_getVersion!
-		if libVersion < script_version
+		if libVersion < libraryVersion
 			return nil, "ASSInspector C library is out of date."
-		elseif libVersion > script_version
+		elseif libVersion > libraryVersion
 			return nil, "ASSInspector moonscript library is out of date."
 
 		state.inspector = ffi.gc( ASSInspector.assi_init( @resX, @resY, aegisub.decode_path( libraryPath .. "/fonts.conf" ), fontDirectory ), ASSInspector.assi_cleanup )
