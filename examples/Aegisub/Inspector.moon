@@ -226,15 +226,15 @@ class Inspector
 
 	-- Returns:
 	-- An array-like table of bounding boxes, and an array-like table of
-	-- render times, the two tables are the same length. If multiple lines
+	-- render times. The two tables are the same length. If multiple lines
 	-- are passed, the bounding box for a given time is the combined
 	-- bounding boxes of all the lines.
 
 	-- Error Handling:
-	-- If an error is encounted, getBounds returns nil and an error string,
+	-- If an error is encountered, getBounds returns nil and an error string,
 	-- which is typical for lua error reporting. In order to distinguish
 	-- between an error and a valid false return, users should make sure
-	-- they actually compare result to nil and false. Rather than just
+	-- they actually compare result to nil and false, rather than just
 	-- checking that the result is not falsy.
 
 	getBounds: ( lines, times = defaultTimes( lines ) ) =>
