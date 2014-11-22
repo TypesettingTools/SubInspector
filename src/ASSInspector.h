@@ -30,9 +30,9 @@ typedef struct {
 } ASSI_Rect;
 
 ASSI_EXPORT uint32_t    assi_getVersion( void );
-ASSI_EXPORT const char* assi_getErrorString( ASSI_State* );
-ASSI_EXPORT ASSI_State* assi_init( int, int, const char*, const char* );
-ASSI_EXPORT int         assi_setHeader( ASSI_State*, const char* );
-ASSI_EXPORT int         assi_setScript( ASSI_State*, const char* );
-ASSI_EXPORT int         assi_calculateBounds( ASSI_State*, ASSI_Rect*, const int32_t*, const uint32_t );
-ASSI_EXPORT void        assi_cleanup( ASSI_State* );
+ASSI_EXPORT const char* assi_getErrorString( ASSI_State *state );
+ASSI_EXPORT ASSI_State* assi_init( int width, int height, const char* fontConfigConfig, const char *fontDir );
+ASSI_EXPORT int         assi_setHeader( ASSI_State *state, const char *header );
+ASSI_EXPORT int         assi_setScript( ASSI_State *state, const char *body );
+ASSI_EXPORT int         assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *times, const uint32_t renderCount );
+ASSI_EXPORT void        assi_cleanup( ASSI_State *state );
