@@ -141,16 +141,12 @@ defaultTimes = ( lines ) ->
 
 	for line in *lines
 		with line
-			if (true == .assi_exhaustive) and hasFrames
-				for frame = ffms( .start_time ), ffms( .end_time ) - 1
+			if hasFrames
+				for frame = ffms( .start_time ), true == .assi_exhaustive and ffms( .end_time ) - 1 or ffms( .start_time )
 					frameTime = math.floor( 0.5*( msff( frame ) + msff( frame + 1 ) ) )
 					unless seenTimes[frameTime]
 						table.insert( times, frameTime )
 						seenTimes[frameTime] = true
-			else
-				unless seenTimes[.start_time]
-					table.insert( times, frameTime )
-					seenTimes[.start_time] = true
 
 	-- This will only happen if all lines are displayed for 0 frames.
 	unless 0 < #times
