@@ -1,8 +1,13 @@
 -- This library is unlicensed under CC0
 
-libraryVersion = 0x000101
+version = 0x000101
 
-ffi  = require( 'ffi' )
+ffi = require( 'ffi' )
+bit = require( 'bit' )
+
+version_major = bit.rshift( version, 16 )
+version_minor = bit.band( bit.rshift( version, 8 ), 0xFF )
+version_patch = bit.band( version, 0xFF )
 
 ffi.cdef( [[
 typedef struct {
@@ -29,6 +34,19 @@ if not success
 	if not success
 		error( "Could not load required libASSInspector library." )
 
+-- Returns true if the versions are compatible and nil, "message" if
+-- they aren't.
+looseVersionCompare = ( ASSIVersion ) ->
+	ASSIVersion_major = bit.rshift( ASSIVersion, 16 )
+	ASSIVersion_minor = bit.band( bit.rshift( ASSIVersion, 8 ), 0xFF )
+	ASSIVersion_patch = bit.band( ASSIVersion, 0xFF )
+
+	if ASSIVersion_major > version_major
+		return nil, "Inspector.moon library is too old."
+	elseif ASSIVersion_major < version_major or ASSIVersion_minor < version_minor
+		return nil, "libASSInspector library is too old."
+
+	return true
 
 -- Inspector is not actually a property of the class but a property of
 -- the script. Since we don't need to worry about concurrency or
@@ -101,11 +119,9 @@ collectHeader = ( subtitles ) =>
 
 initializeInspector = ( fontDirectory = state.fontDir ) =>
 	if nil == state.inspector
-		libVersion = ASSInspector.assi_getVersion!
-		if libVersion < libraryVersion
-			return nil, "ASSInspector C library is out of date."
-		elseif libVersion > libraryVersion
-			return nil, "ASSInspector moonscript library is out of date."
+		success, message = looseVersionCompare( ASSInspector.assi_getVersion! )
+		unless success
+			return nil, message
 
 		state.inspector = ffi.gc( ASSInspector.assi_init( @resX, @resY, aegisub.decode_path( libraryPath .. "/fonts.conf" ), fontDirectory ), ASSInspector.assi_cleanup )
 
