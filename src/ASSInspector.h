@@ -5,6 +5,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <string.h> // size_t
 
 #ifdef _WIN32
 	#ifdef ASS_INSPECTOR_STATIC
@@ -32,7 +33,7 @@ typedef struct {
 ASSI_EXPORT uint32_t    assi_getVersion( void );
 ASSI_EXPORT const char* assi_getErrorString( ASSI_State *state );
 ASSI_EXPORT ASSI_State* assi_init( int width, int height, const char* fontConfigConfig, const char *fontDir );
-ASSI_EXPORT int         assi_setHeader( ASSI_State *state, const char *header );
-ASSI_EXPORT int         assi_setScript( ASSI_State *state, const char *body );
+ASSI_EXPORT int         assi_setHeader( ASSI_State *state, const char *header, size_t length );
+ASSI_EXPORT int         assi_setScript( ASSI_State *state, const char *body, size_t length );
 ASSI_EXPORT int         assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *times, const uint32_t renderCount );
 ASSI_EXPORT void        assi_cleanup( ASSI_State *state );

@@ -68,7 +68,7 @@ ASSI_State* assi_init( int width, int height, const char* fontConfigConfig, cons
 	return state;
 }
 
-int assi_setHeader( ASSI_State *state, const char *header ) {
+int assi_setHeader( ASSI_State *state, const char *header, size_t headerLength ) {
 	if ( !state ) {
 		return 1;
 	}
@@ -81,18 +81,22 @@ int assi_setHeader( ASSI_State *state, const char *header ) {
 	if ( NULL == header ) {
 		return 0;
 	}
-	state->headerLength = strlen( header );
+	if ( headerLength ) {
+		state->headerLength = headerLength;
+	} else {
+		state->headerLength = strlen( header );
+	}
 	// Copy terminating null byte too.
-	state->header = malloc( state->headerLength + 1 );
+	state->header = malloc( state->headerLength );
 	if ( NULL == state->header ) {
 		strcpy( state->error, "Memory allocation failure." );
 		return 1;
 	}
-	memcpy( state->header, header, state->headerLength + 1 );
+	memcpy( state->header, header, state->headerLength );
 	return 0;
 }
 
-int assi_setScript( ASSI_State *state, const char *scriptBody ) {
+int assi_setScript( ASSI_State *state, const char *scriptBody, size_t bodyLength ) {
 	if ( !state ) {
 		return 1;
 	}
@@ -105,7 +109,13 @@ int assi_setScript( ASSI_State *state, const char *scriptBody ) {
 		return 0;
 	}
 
-	size_t scriptBodyLength = strlen( scriptBody );
+	size_t scriptBodyLength = 0;
+	if ( bodyLength ) {
+		scriptBodyLength = bodyLength;
+	} else {
+		scriptBodyLength = strlen( scriptBody );
+	}
+
 	state->scriptLength = state->headerLength + scriptBodyLength;
 	state->currentScript = malloc( state->scriptLength );
 	if ( NULL == state->currentScript ) {
