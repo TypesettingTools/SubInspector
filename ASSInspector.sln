@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ASSInspector", "msvs\ASSInspector\ASSInspector.vcxproj", "{1115530E-EBB6-486F-9261-17E70FE204CD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ASSI_Example", "msvs\ASSI_Example\ASSI_Example.vcxproj", "{800578E8-0B52-4272-B758-0DD14398AD46}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1115530E-EBB6-486F-9261-17E70FE204CD} = {1115530E-EBB6-486F-9261-17E70FE204CD}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1115530E-EBB6-486F-9261-17E70FE204CD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1115530E-EBB6-486F-9261-17E70FE204CD}.Debug|Win32.Build.0 = Debug|Win32
+		{1115530E-EBB6-486F-9261-17E70FE204CD}.Release|Win32.ActiveCfg = Release|Win32
+		{1115530E-EBB6-486F-9261-17E70FE204CD}.Release|Win32.Build.0 = Release|Win32
+		{800578E8-0B52-4272-B758-0DD14398AD46}.Debug|Win32.ActiveCfg = Debug|Win32
+		{800578E8-0B52-4272-B758-0DD14398AD46}.Debug|Win32.Build.0 = Debug|Win32
+		{800578E8-0B52-4272-B758-0DD14398AD46}.Release|Win32.ActiveCfg = Release|Win32
+		{800578E8-0B52-4272-B758-0DD14398AD46}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
