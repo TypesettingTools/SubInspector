@@ -61,18 +61,23 @@ ASSI_State* assi_init( int width, int height, const char *fontConfigConfig, cons
 		return NULL;
 	}
 
-	ass_set_frame_size( state->assRenderer, width, height );
-	ass_set_fonts_dir( state->assLibrary, fontDir );
-	ass_set_fonts( state->assRenderer, NULL, "Sans", 1, fontConfigConfig, 1 );
+	assi_changeResolution( state, width, height );
+	assi_reloadFonts( state, fontConfigConfig, fontDir );
 
 	return state;
 }
 
 void assi_changeResolution( ASSI_State *state, int width, int height ) {
+	if ( NULL == state ) {
+		return;
+	}
 	ass_set_frame_size( state->assRenderer, width, height );
 }
 
 void assi_reloadFonts( ASSI_State *state, const char *fontConfigConfig, const char *fontDir ) {
+	if ( NULL == state ) {
+		return;
+	}
 	ass_set_fonts_dir( state->assLibrary, fontDir );
 	ass_set_fonts( state->assRenderer, NULL, "Sans", 1, fontConfigConfig, 1 );
 }
