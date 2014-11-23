@@ -41,7 +41,7 @@ const char* assi_getErrorString( ASSI_State *state ) {
 	return state->error;
 }
 
-ASSI_State* assi_init( int width, int height, const char* fontConfigConfig, const char *fontDir ) {
+ASSI_State* assi_init( int width, int height, const char *fontConfigConfig, const char *fontDir ) {
 	ASSI_State *state = calloc( 1, sizeof(*state) );
 	if ( NULL == state ) {
 		return NULL;
@@ -66,6 +66,15 @@ ASSI_State* assi_init( int width, int height, const char* fontConfigConfig, cons
 	ass_set_fonts( state->assRenderer, NULL, "Sans", 1, fontConfigConfig, 1 );
 
 	return state;
+}
+
+void assi_changeResolution( ASSI_State *state, int width, int height ) {
+	ass_set_frame_size( state->assRenderer, width, height );
+}
+
+void assi_reloadFonts( ASSI_State *state, const char *fontConfigConfig, const char *fontDir ) {
+	ass_set_fonts_dir( state->assLibrary, fontDir );
+	ass_set_fonts( state->assRenderer, NULL, "Sans", 1, fontConfigConfig, 1 );
 }
 
 int assi_setHeader( ASSI_State *state, const char *header, size_t headerLength ) {

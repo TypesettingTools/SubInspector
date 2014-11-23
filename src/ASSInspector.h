@@ -33,6 +33,8 @@ typedef struct {
 ASSI_EXPORT uint32_t    assi_getVersion( void );
 ASSI_EXPORT const char* assi_getErrorString( ASSI_State *state );
 ASSI_EXPORT ASSI_State* assi_init( int width, int height, const char* fontConfigConfig, const char *fontDir );
+ASSI_EXPORT void        assi_changeResolution( ASSI_State *state, int width, int height );
+ASSI_EXPORT void        assi_reloadFonts( ASSI_State *state, const char *fontConfigConfig, const char *fontDir );
 ASSI_EXPORT int         assi_setHeader( ASSI_State *state, const char *header, size_t length );
 ASSI_EXPORT int         assi_setScript( ASSI_State *state, const char *body, size_t length );
 ASSI_EXPORT int         assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *times, const uint32_t renderCount );
