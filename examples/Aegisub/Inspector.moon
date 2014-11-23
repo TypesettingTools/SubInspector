@@ -201,8 +201,6 @@ class Inspector
 		-- ASSInspector is stored at the script scope, which means it
 		-- persists until either Aegisub quits, automation scripts are
 		-- reloaded, or forceLibraryReload is called.
-		aegisub.progress.title = "Updating fontconfig cache."
-		aegisub.progress.task  = "This may take a long time and cannot be cancelled."
 		success, message = initializeInspector( fontconfigConfig, fontDirectory )
 		if nil == success
 			return success, message
@@ -225,8 +223,6 @@ class Inspector
 			return nil, "Failed to set header.\n" .. ffi.string( ASSInspector.assi_getErrorString( state.inspector ) )
 
 	reloadFonts: ( fontconfigConfig = state.fontconfigConfig, fontDirectory = state.fontDir ) =>
-		aegisub.progress.title = "Updating fontconfig cache."
-		aegisub.progress.task  = "This may take a long time and cannot be cancelled."
 		ASSInspector.assi_reloadFonts( state.inspector, fontconfigConfig, fontDirectory )
 
 	forceLibraryReload: ( subtitles, fontconfigConfig, fontDirectory ) =>
