@@ -169,9 +169,10 @@ defaultTimes = ( lines ) ->
 						seenTimes[frameTime] = true
 	else
 		for line in *lines
-			unless seenTimes[.start_time]
-				table.insert( times, .start_time )
-				seenTimes[.start_time] = true
+			with line
+				unless seenTimes[.start_time]
+					table.insert( times, .start_time )
+					seenTimes[.start_time] = true
 
 	-- This will only happen if all lines are displayed for 0 frames.
 	unless 0 < #times
