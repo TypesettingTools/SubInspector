@@ -75,8 +75,8 @@ int main( int argc, char **argv ) {
 	ScriptWrapper wrapper;
 
 	// This is pretty terrible.
-	std::getline( inAss, line );
-	while ( inAss.good( ) ) {
+	while ( true ) {
+		std::getline( inAss, line );
 		if ( '[' == line[0] ) {
 			break;
 		}
@@ -105,13 +105,15 @@ int main( int argc, char **argv ) {
 				}
 				break;
 		}
-		std::getline( inAss, line );
+		if ( !inAss.good( ) ) {
+			break;
+		}
 	}
 
 	wrapper.appendHeader( "[V4+ Styles]" );
 
-	std::getline( inAss, line );
-	while ( inAss.good( ) ) {
+	while ( true ) {
+		std::getline( inAss, line );
 		switch ( line[0] ) {
 			case 'S':
 				if ( 0 == line.compare( 0, 6, "Style:" ) ) {
@@ -127,7 +129,9 @@ int main( int argc, char **argv ) {
 				}
 				break;
 		}
-		std::getline( inAss, line );
+		if ( !inAss.good( ) ) {
+			break;
+		}
 	}
 
 	inAss.close( );
