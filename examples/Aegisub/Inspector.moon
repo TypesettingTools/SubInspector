@@ -18,8 +18,10 @@ typedef struct {
 uint32_t    assi_getVersion( void );
 const char* assi_getErrorString( void* );
 void*       assi_init( int, int, const char*, const char* );
-int         assi_setHeader( void*, const char* );
-int         assi_setScript( void*, const char* );
+void        assi_changeResolution( void*, int, int );
+void        assi_reloadFonts( void*, const char*, const char* );
+int         assi_setHeader( void*, const char*, size_t );
+int         assi_setScript( void*, const char*, size_t );
 int         assi_calculateBounds( void*, ASSI_Rect*, const int32_t*, const uint32_t );
 void        assi_cleanup( void* );
 ]] )
@@ -54,10 +56,11 @@ looseVersionCompare = ( ASSIVersion ) ->
 -- keep that reference alive until Aegisub is closed or scripts are all
 -- reloaded.
 state = {
-	inspector: nil
-	fontDir:   nil
-	resX:      nil
-	resY:      nil
+	inspector:        nil
+	fontconfigConfig: nil
+	fontDir:          nil
+	resX:             nil
+	resY:             nil
 }
 
 collectHeader = ( subtitles ) =>
@@ -117,20 +120,21 @@ collectHeader = ( subtitles ) =>
 	@header = table.concat( scriptHeader, '\n' )
 	@styles = styles
 
-initializeInspector = ( fontDirectory = state.fontDir ) =>
+initializeInspector = ( fontconfigConfig = state.fontconfigConfig, fontDirectory = state.fontDir ) ->
 	if nil == state.inspector
 		success, message = looseVersionCompare( ASSInspector.assi_getVersion! )
 		unless success
 			return nil, message
 
-		state.inspector = ffi.gc( ASSInspector.assi_init( @resX, @resY, aegisub.decode_path( libraryPath .. "/fonts.conf" ), fontDirectory ), ASSInspector.assi_cleanup )
+		state.inspector = ffi.gc( ASSInspector.assi_init( 1, 1, fontconfigConfig, fontDirectory ), ASSInspector.assi_cleanup )
 
 		if nil == state.inspector
 			return nil, "ASSInspector library initialization failed."
 
-		state.resX = @resX
-		state.resY = @resY
+		state.resX = 1
+		state.resY = 1
 		state.fontDir = fontDirectory
+		state.fontconfigConfig = fontconfigConfig
 
 	return true
 
@@ -183,30 +187,49 @@ addStyles = ( line, scriptText, seenStyles ) =>
 
 class Inspector
 
-	new: ( subtitles, fontDirectory = aegisub.decode_path( '?script/fonts' ) ) =>
-		if '?script/fonts' == fontDirectory
-			fontDirectory = nil
+	new: ( subtitles, fontconfigConfig = aegisub.decode_path( libraryPath .. "/fonts.conf" ), fontDirectory = aegisub.decode_path( '?script/fonts' ) ) =>
+		if nil == subtitles
+			return nil, "You must provide the subtitles object."
 
-		collectHeader( @, subtitles )
-		success, message = initializeInspector( @, fontDirectory )
+		-- Does nothing if inspector is already initialized. The initialized
+		-- ASSInspector is stored at the script scope, which means it
+		-- persists until either Aegisub quits, automation scripts are
+		-- reloaded, or forceLibraryReload is called.
+		success, message = initializeInspector( fontconfigConfig, fontDirectory )
 		if nil == success
 			return success, message
 
-		@updateHeader!
+		@updateHeader( subtitles )
 
 	updateHeader: ( subtitles ) =>
-		if nil != subtitles
-			collectHeader( @, subtitles )
+		if nil == subtitles
+			return nil, "You must provide the subtitles object."
+
+		collectHeader( @, subtitles )
 
 		if @resX != state.resX or @resY != state.resY
-			@forceLibraryReload!
+			state.resX, state.resY = @resX, @resY
+			ASSInspector.assi_changeResolution( state.inspector, @resX, @resY )
 
-		if 0 < ASSInspector.assi_setHeader( state.inspector, @header )
+		@reloadFonts!
+
+		if 0 < ASSInspector.assi_setHeader( state.inspector, @header, #@header )
 			return nil, "Failed to set header.\n" .. ffi.string( ASSInspector.assi_getErrorString( state.inspector ) )
 
-	forceLibraryReload: ( fontDirectory ) =>
+	reloadFonts: ( fontconfigConfig = state.fontconfigConfig, fontDirectory = state.fontDir ) =>
+		ASSInspector.assi_reloadFonts( state.inspector, fontconfigConfig, fontDirectory )
+
+	forceLibraryReload: ( subtitles, fontconfigConfig, fontDirectory ) =>
+		if nil == subtitles
+			return nil, "You must provide the subtitles object."
+
 		state.inspector = nil
-		initializeInspector( @, fontDirectory )
+		-- let initializeInspector handle the default arguments.
+		success, message = initializeInspector( fontconfigConfig, fontDirectory )
+		if nil == success
+			return success, message
+
+		@updateHeader( subtitles )
 
 	-- Arguments:
 	-- subtitles: the subtitles object that Aegisub passes to the macro.
@@ -228,7 +251,7 @@ class Inspector
 	-- An array-like table of bounding boxes, and an array-like table of
 	-- render times. The two tables are the same length. If multiple lines
 	-- are passed, the bounding box for a given time is the combined
-	-- bounding boxes of all the lines.
+	-- bounding boxes of all the lines rendered at that time.
 
 	-- Error Handling:
 	-- If an error is encountered, getBounds returns nil and an error string,
@@ -239,7 +262,7 @@ class Inspector
 
 	getBounds: ( lines, times = defaultTimes( lines ) ) =>
 		unless times
-			return false
+			return nil, "The render times table was empty."
 
 		scriptText = { }
 		seenStyles = { }
@@ -255,7 +278,8 @@ class Inspector
 		for line in *lines
 			table.insert( scriptText, line.raw )
 
-		if 0 < ASSInspector.assi_setScript( state.inspector, table.concat( scriptText, '\n' ) )
+		scriptString = table.concat( scriptText, '\n' )
+		if 0 < ASSInspector.assi_setScript( state.inspector, scriptString, #scriptString )
 			return nil, "Could not set script" .. ffi.string( ASSInspector.assi_getErrorString( state.inspector ) )
 
 		renderCount = #times
