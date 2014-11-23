@@ -1,6 +1,6 @@
 -- This library is unlicensed under CC0
 
-version = 0x000101
+version = 0x000200
 
 ffi = require( 'ffi' )
 bit = require( 'bit' )
