@@ -275,6 +275,14 @@ class Inspector
 		unless times
 			return nil, "The render times table was empty."
 
+		for i = 1,#lines
+			line = lines[i]
+			if nil == line.raw
+				if line.createRaw
+					line\createRaw!
+				else
+					return nil, "line.raw is missing from line #{i}."
+
 		scriptText = { }
 		seenStyles = { }
 		if @styles.Default
