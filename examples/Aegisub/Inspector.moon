@@ -6,6 +6,10 @@ InspectorVersion  = 0x000201
 ffi = require( 'ffi' )
 bit = require( 'bit' )
 
+InspectorVersion_major = bit.rshift( ASSIVersionCompat, 16 )
+InspectorVersion_minor = bit.band( bit.rshift( ASSIVersionCompat, 8 ), 0xFF )
+InspectorVersion_patch = bit.band( ASSIVersionCompat, 0xFF )
+
 ASSIVersionCompat_major = bit.rshift( ASSIVersionCompat, 16 )
 ASSIVersionCompat_minor = bit.band( bit.rshift( ASSIVersionCompat, 8 ), 0xFF )
 ASSIVersionCompat_patch = bit.band( ASSIVersionCompat, 0xFF )
@@ -45,9 +49,9 @@ looseVersionCompare = ( ASSIVersion ) ->
 	ASSIVersion_patch = bit.band( ASSIVersion, 0xFF )
 
 	if ASSIVersion_major > ASSIVersionCompat_major
-		return nil, "Inspector.moon library is too old."
+		return nil, ("Inspector.moon library is too old. Must be v%d.x.x")\format ASSIVersionCompat_major
 	elseif ASSIVersion_major < ASSIVersionCompat_major or ASSIVersion_minor < ASSIVersionCompat_minor
-		return nil, "libASSInspector library is too old."
+		return nil, ("libASSInspector library is too old. Must be v%d.%d.x compatible.")\format ASSIVersionCompat_major, ASSIVersionCompat_minor
 
 	return true
 
@@ -194,9 +198,9 @@ addStyles = ( line, scriptText, seenStyles ) =>
 
 class Inspector
 	@version = InspectorVersion
-	@version_major = bit.rshift( ASSIVersionCompat, 16 )
-	@version_minor = bit.band( bit.rshift( ASSIVersionCompat, 8 ), 0xFF )
-	@version_patch = bit.band( ASSIVersionCompat, 0xFF )
+	@version_major = InspectorVersion_major
+	@version_minor = InspectorVersion_minor
+	@version_patch = InspectorVersion_patch
 
 	new: ( subtitles, fontconfigConfig = aegisub.decode_path( libraryPath .. "/fonts.conf" ), fontDirectory = aegisub.decode_path( '?script/fonts' ) ) =>
 		assert subtitles, "You must provide the subtitles object."
