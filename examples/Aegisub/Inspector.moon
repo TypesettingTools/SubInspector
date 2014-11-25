@@ -1,13 +1,14 @@
 -- This library is unlicensed under CC0
 
-version = 0x000200
+ASSIVersionCompat = 0x000200
+InspectorVersion  = 0x000201
 
 ffi = require( 'ffi' )
 bit = require( 'bit' )
 
-version_major = bit.rshift( version, 16 )
-version_minor = bit.band( bit.rshift( version, 8 ), 0xFF )
-version_patch = bit.band( version, 0xFF )
+ASSIVersionCompat_major = bit.rshift( ASSIVersionCompat, 16 )
+ASSIVersionCompat_minor = bit.band( bit.rshift( ASSIVersionCompat, 8 ), 0xFF )
+ASSIVersionCompat_patch = bit.band( ASSIVersionCompat, 0xFF )
 
 ffi.cdef( [[
 typedef struct {
@@ -43,9 +44,9 @@ looseVersionCompare = ( ASSIVersion ) ->
 	ASSIVersion_minor = bit.band( bit.rshift( ASSIVersion, 8 ), 0xFF )
 	ASSIVersion_patch = bit.band( ASSIVersion, 0xFF )
 
-	if ASSIVersion_major > version_major
+	if ASSIVersion_major > ASSIVersionCompat_major
 		return nil, "Inspector.moon library is too old."
-	elseif ASSIVersion_major < version_major or ASSIVersion_minor < version_minor
+	elseif ASSIVersion_major < ASSIVersionCompat_major or ASSIVersion_minor < ASSIVersionCompat_minor
 		return nil, "libASSInspector library is too old."
 
 	return true
@@ -192,6 +193,10 @@ addStyles = ( line, scriptText, seenStyles ) =>
 				seenStyles[styleName] = true
 
 class Inspector
+	@version = InspectorVersion
+	@version_major = bit.rshift( ASSIVersionCompat, 16 )
+	@version_minor = bit.band( bit.rshift( ASSIVersionCompat, 8 ), 0xFF )
+	@version_patch = bit.band( ASSIVersionCompat, 0xFF )
 
 	new: ( subtitles, fontconfigConfig = aegisub.decode_path( libraryPath .. "/fonts.conf" ), fontDirectory = aegisub.decode_path( '?script/fonts' ) ) =>
 		if nil == subtitles
