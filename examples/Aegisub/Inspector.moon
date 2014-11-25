@@ -226,6 +226,8 @@ class Inspector
 		if 0 < ASSInspector.assi_setHeader( state.inspector, @header, #@header )
 			return nil, "Failed to set header.\n" .. ffi.string( ASSInspector.assi_getErrorString( state.inspector ) )
 
+		return true
+
 	reloadFonts: ( fontconfigConfig = state.fontconfigConfig, fontDirectory = state.fontDir ) =>
 		ASSInspector.assi_reloadFonts( state.inspector, fontconfigConfig, fontDirectory )
 
