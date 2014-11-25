@@ -254,7 +254,7 @@ static void checkBounds( ASS_Image *assImage, ASSI_InternalRect *boundsRect ) {
 					if ( *byte ) {
 						// printf( "Byte: %p; Value: %u (%3u, %3u)\n", byte, *byte, x, y );
 						if ( x < boundsRect->x1 ) {
-							boundsRect->x1 = x;
+							boundsRect->x1 = x - 1;
 						}
 						if ( x > boundsRect->x2 ) {
 							boundsRect->x2 = x;
@@ -274,7 +274,7 @@ static void checkBounds( ASS_Image *assImage, ASSI_InternalRect *boundsRect ) {
 			if ( *byte ) {
 				// printf( "Byte: %p; Value: %u (%3u, %3u)\n", byte, *byte, x, y );
 				if ( x < boundsRect->x1 ) {
-					boundsRect->x1 = x;
+					boundsRect->x1 = x - 1;
 				}
 				if ( x > boundsRect->x2 ) {
 					boundsRect->x2 = x;
@@ -287,7 +287,7 @@ static void checkBounds( ASS_Image *assImage, ASSI_InternalRect *boundsRect ) {
 		}
 		if ( addHeight ) {
 			if ( y < boundsRect->y1 ) {
-				boundsRect->y1 = y;
+				boundsRect->y1 = y - 1;
 			}
 			if ( y > boundsRect->y2 ) {
 				boundsRect->y2 = y;
