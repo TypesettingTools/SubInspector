@@ -8,7 +8,7 @@ It targets the Advanced SubStation Alpha subtitle format (ASS) and uses
 
 ### Install
 
-To install ASSInspector, download [the latest release][releases] Bundles
+To install ASSInspector, download [the latest release][releases]. Bundles
 are provided for Aegisub that include the ASSInspector library.
 
 ### Build
