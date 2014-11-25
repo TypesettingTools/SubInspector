@@ -199,18 +199,17 @@ class Inspector
 	@version_patch = bit.band( ASSIVersionCompat, 0xFF )
 
 	new: ( subtitles, fontconfigConfig = aegisub.decode_path( libraryPath .. "/fonts.conf" ), fontDirectory = aegisub.decode_path( '?script/fonts' ) ) =>
-		if nil == subtitles
-			return nil, "You must provide the subtitles object."
+		assert subtitles, "You must provide the subtitles object."
 
 		-- Does nothing if inspector is already initialized. The initialized
 		-- ASSInspector is stored at the script scope, which means it
 		-- persists until either Aegisub quits, automation scripts are
 		-- reloaded, or forceLibraryReload is called.
 		success, message = initializeInspector( fontconfigConfig, fontDirectory )
-		if nil == success
-			return success, message
+		assert success, message
 
-		@updateHeader( subtitles )
+		success, message = @updateHeader( subtitles )
+		assert success, message
 
 	updateHeader: ( subtitles ) =>
 		if nil == subtitles
