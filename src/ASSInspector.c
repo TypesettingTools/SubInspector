@@ -201,6 +201,10 @@ int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *ti
 			}
 			assImage = assImage->next;
 		}
+
+		boundsRect.x2 = (boundsRect.x2 < boundsRect.x1)? boundsRect.x1: boundsRect.x2;
+		boundsRect.y2 = (boundsRect.y2 < boundsRect.y1)? boundsRect.y1: boundsRect.y2;
+
 		rects[i].x = boundsRect.x1;
 		rects[i].y = boundsRect.y1;
 		rects[i].w = boundsRect.x2 - boundsRect.x1;
