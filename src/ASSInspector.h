@@ -21,7 +21,7 @@
 	#define ASSI_EXPORT
 #endif // _WIN32
 
-#define ASSI_VERSION 0x000202
+#define ASSI_VERSION 0x000300
 
 typedef struct ASSI_State_priv ASSI_State;
 
