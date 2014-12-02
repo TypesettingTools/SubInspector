@@ -8,6 +8,35 @@
 #include <string.h>
 #include <ass/ass.h>
 
+// FreeType links against zlib by default if it is available. We bundle
+// our own drop-in solution just in case people don't have zlib or don't
+// want to link against it. zlib's crc32 is faster than this one because
+// it is significantly more riced, but it shouldn't matter for the small
+// amount of data being hashed.
+#ifdef NO_ZLIB
+	#include "crc32table.h"
+	// COPYRIGHT (C) 1986 Gary S. Brown.  You may use this program, or
+	// code or tables extracted from it, as desired without restriction.
+	// Modified from: http://www.opensource.apple.com/source/xnu/xnu-1456.1.26/bsd/libkern/crc32.c
+	static uint32_t crc32( uint32_t crc, const void *buf, size_t size ) {
+		const uint8_t *p;
+
+		p = buf;
+		crc = crc ^ ~0U;
+
+		// zlib checksum unrolls this loop into 8-byte chunks, but that
+		// doesn't seem to make a major performance difference for reasonably
+		// sized buffers.
+		while ( size-- ) {
+			crc = crc32_tab[(crc ^ *p++) & 0xFF] ^ (crc >> 8);
+		}
+
+		return crc ^ ~0U;
+	}
+#else
+	#include <zlib.h>
+#endif // NO_ZLIB
+
 struct ASSI_State_priv {
 	ASS_Library  *assLibrary;
 	ASS_Renderer *assRenderer;
@@ -193,12 +222,16 @@ int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *ti
 		if ( 0xFF != (assImage->color & 0xFF) ) {
 			checkBounds( assImage, &boundsRect );
 		}
+		rects[i].hash = crc32( rects[i].hash, (void*)&assImage->color, sizeof(assImage->color) );
+		rects[i].hash = crc32( rects[i].hash, (void*) assImage->bitmap, assImage->stride*(assImage->h - 1) + assImage->w );
 		assImage = assImage->next;
 
 		while ( assImage ) {
 			if ( 0xFF != (assImage->color & 0xFF) ) {
 				checkBounds( assImage, &boundsRect );
 			}
+			rects[i].hash = crc32( rects[i].hash, (void*)&assImage->color, sizeof(assImage->color) );
+			rects[i].hash = crc32( rects[i].hash, (void*) assImage->bitmap, assImage->stride*(assImage->h - 1) + assImage->w );
 			assImage = assImage->next;
 		}
 
@@ -209,6 +242,8 @@ int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *ti
 		rects[i].y = boundsRect.y1;
 		rects[i].w = boundsRect.x2 - boundsRect.x1;
 		rects[i].h = boundsRect.y2 - boundsRect.y1;
+
+		rects[i].hash = crc32( rects[i].hash, (void*)&rects[i], 4*sizeof(rects[i].x) );
 		state->lastRect = rects[i];
 	}
 
