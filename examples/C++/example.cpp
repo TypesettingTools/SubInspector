@@ -1,6 +1,8 @@
 #include <cstdio> // sscanf
+#include <cstdint>
 #include <iostream>
 #include <fstream>
+#include <map>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -143,15 +145,31 @@ int main( int argc, char **argv ) {
 	std::string header = wrapper.getHeader( );
 	assi_setHeader( state, header.c_str( ), header.length( ) );
 
+	std::map<uint32_t,int> hashes;
+	std::map<uint32_t,int>::iterator match;
+
+	int deleted = 0, kept = 0;
+	int processed = 0;
+
 	for ( const auto &pair : wrapper.getLines( ) ) {
 		assi_setScript( state, pair.line.c_str( ), pair.line.length( ) );
-		ASSI_Rect rect{ 0, 0, 0, 0 };
+		ASSI_Rect rect{ 0, 0, 0, 0, 0 };
 		assi_calculateBounds( state, &rect, &pair.time, 1 );
-		if ( rect.w > 0 && rect.h > 0 ) {
-			std::cout << pair.time << " -> " << pair.line;
-			std::cout << "x: " << rect.x << " y: " << rect.y << " w: " << rect.w << " h: " << rect.h << std::endl;
+		++processed;
+		match = hashes.find( rect.hash );
+		if ( hashes.end( ) != match ) {
+			std::cout << "Line " << processed << ": duplicate hash found (line " << match->second << ")" << std::endl;
+		} else {
+			hashes[rect.hash] = processed;
+		}
+		if ( rect.w == 0 || rect.h == 0 ) {
+			++deleted;
+		} else {
+			++kept;
 		}
 	}
+
+	std::cout << "Deleted " << deleted << " lines out of " << processed << std::endl;
 
 	assi_cleanup( state );
 	return 0;
