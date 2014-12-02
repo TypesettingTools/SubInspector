@@ -61,6 +61,7 @@ int main( int argc, char **argv ) {
 	std::fstream inAss( argv[1], std::ifstream::in );
 	if ( inAss.fail( ) ) {
 		std::cout << "Failed to open " << argv[1] << std::endl;
+		return 1;
 	}
 
 	std::string line;
