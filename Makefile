@@ -12,13 +12,13 @@ WARNINGS := -Wall -Wunreachable-code -Wfloat-equal -Wredundant-decls -Winit-self
 OPTIMIZATION := -O3
 ADDITIONAL := -std=c99
 LIBS := -lass
-CFLAGS := $(WARNINGS) $(OPTIMIZATIONS) $(DEFINES) $(ADDITIONAL)
+CFLAGS := $(WARNINGS) $(OPTIMIZATION) $(DEFINES) $(ADDITIONAL)
 LFLAGS := $(LIBS)
 LIB_NAME := libASSInspector
 
 # Modifications
 ifeq ($(DEBUG),1)
-	CFLAGS += -DDEBUG -g
+	CFLAGS += -DDEBUG -g -O0
 else
 	LFLAGS += -s
 endif
