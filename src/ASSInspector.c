@@ -219,21 +219,20 @@ int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *ti
 			0
 		};
 
-		if ( 0xFF != (assImage->color & 0xFF) ) {
-			checkBounds( assImage, &boundsRect );
-		}
-		rects[i].hash = crc32( rects[i].hash, (void*)&assImage->color, sizeof(assImage->color) );
-		rects[i].hash = crc32( rects[i].hash, (void*) assImage->bitmap, assImage->stride*(assImage->h - 1) + assImage->w );
-		assImage = assImage->next;
-
-		while ( assImage ) {
+		do {
 			if ( 0xFF != (assImage->color & 0xFF) ) {
 				checkBounds( assImage, &boundsRect );
 			}
 			rects[i].hash = crc32( rects[i].hash, (void*)&assImage->color, sizeof(assImage->color) );
-			rects[i].hash = crc32( rects[i].hash, (void*) assImage->bitmap, assImage->stride*(assImage->h - 1) + assImage->w );
+
+			uint8_t *row = assImage->bitmap;
+			while ( (row - assImage->bitmap) < (assImage->h - 1) * assImage->stride + assImage->w ) {
+				rects[i].hash = crc32( rects[i].hash, (void*)row, assImage->w );
+				row += assImage->stride;
+			}
+
 			assImage = assImage->next;
-		}
+		} while ( assImage );
 
 		boundsRect.x2 = (boundsRect.x2 < boundsRect.x1)? boundsRect.x1: boundsRect.x2;
 		boundsRect.y2 = (boundsRect.y2 < boundsRect.y1)? boundsRect.y1: boundsRect.y2;
@@ -243,7 +242,7 @@ int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *ti
 		rects[i].w = boundsRect.x2 - boundsRect.x1;
 		rects[i].h = boundsRect.y2 - boundsRect.y1;
 
-		rects[i].hash = crc32( rects[i].hash, (void*)&rects[i], 4*sizeof(rects[i].x) );
+		rects[i].hash = crc32( rects[i].hash, (void*)&rects[i], sizeof(rects[i]) );
 		state->lastRect = rects[i];
 	}
 
