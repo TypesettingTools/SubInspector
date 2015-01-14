@@ -9,3 +9,7 @@
 # Packaging results
 ASSInspector
 *.zip
+
+# Visual Studio junk
+*.filters
+*.vcxproj.user

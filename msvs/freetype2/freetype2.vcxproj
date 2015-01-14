@@ -18,35 +18,32 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\examples\C++\example.cpp" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{800578E8-0B52-4272-B758-0DD14398AD46}</ProjectGuid>
-    <RootNamespace>ASSI_Example</RootNamespace>
+    <ProjectGuid>{F2768EE4-AC35-4107-8EDB-67A88C15734D}</ProjectGuid>
+    <RootNamespace>freetype2</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -85,11 +82,11 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_WINDOWS;_USRDLL;ASSINSPECTOR_EXPORTS;_WIN32;BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_LIB;_CRT_SECURE_NO_WARNINGS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\deps\freetype2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(OutDir)libASSInspector.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -97,11 +94,11 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_WINDOWS;_USRDLL;ASSINSPECTOR_EXPORTS;_WIN32;BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_LIB;_CRT_SECURE_NO_WARNINGS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\deps\freetype2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(OutDir)libASSInspector.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -111,13 +108,13 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_WINDOWS;_USRDLL;ASSINSPECTOR_EXPORTS;BUILD_DLL;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_LIB;_CRT_SECURE_NO_WARNINGS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\deps\freetype2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(OutDir)libASSInspector.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -127,15 +124,55 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_WINDOWS;_USRDLL;ASSINSPECTOR_EXPORTS;BUILD_DLL;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_LIB;_CRT_SECURE_NO_WARNINGS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\deps\freetype2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(OutDir)libASSInspector.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="$(ProjectDir)\ftsystem.cpp" />
+    <ClCompile Include="..\..\deps\freetype2\src\autofit\autofit.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\base\ftbase.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\base\ftbbox.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\base\ftbitmap.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\base\ftfstype.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\base\ftgasp.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\base\ftglyph.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\base\ftgxval.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\base\ftinit.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\base\ftlcdfil.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\base\ftmm.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\base\ftotval.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\base\ftpatent.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\base\ftpfr.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\base\ftstroke.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\base\ftsynth.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\base\fttype1.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\base\ftwinfnt.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\base\ftxf86.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\bdf\bdf.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\cache\ftcache.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\cff\cff.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\cid\type1cid.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\gzip\ftgzip.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\lzw\ftlzw.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\pcf\pcf.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\pfr\pfr.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\psaux\psaux.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\pshinter\pshinter.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\psnames\psmodule.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\raster\raster.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\sfnt\sfnt.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\smooth\smooth.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\truetype\truetype.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\type1\type1.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\type42\type42.c" />
+    <ClCompile Include="..\..\deps\freetype2\src\winfonts\winfnt.c" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
