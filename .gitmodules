@@ -13,3 +13,6 @@
 [submodule "deps/fontconfig-win"]
 	path = deps/fontconfig-win
 	url = https://github.com/tgoyne/fontconfig.git
+[submodule "deps/fontconfig"]
+	path = deps/fontconfig
+	url = git://anongit.freedesktop.org/fontconfig
