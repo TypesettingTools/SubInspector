@@ -24,6 +24,9 @@ Requires Microsoft Visual Studio 2013 Update 4 or newer.
 1. The library is placed in `Release\<Architecture>\libASSInspector.dll`
 
 #### Unix-like Operating Systems
+
+Requires cmake 2.8 or newer.
+
 1. Install your system's libass development package
 1. `mkdir build && cd build` from the root of the source.
 1. `cmake ..` in the build directory you just created.
