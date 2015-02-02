@@ -21,7 +21,7 @@
 	#define ASSI_EXPORT
 #endif // _WIN32
 
-#define ASSI_VERSION 0x000301
+#define ASSI_VERSION 0x000400
 
 typedef struct ASSI_State_priv ASSI_State;
 
@@ -29,6 +29,7 @@ typedef struct {
 	int x, y;
 	unsigned int w, h;
 	uint32_t hash;
+	uint8_t solid;
 } ASSI_Rect;
 
 ASSI_EXPORT uint32_t    assi_getVersion( void );

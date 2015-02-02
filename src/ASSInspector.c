@@ -52,7 +52,7 @@ typedef struct {
 	int x1, y1, x2, y2;
 } ASSI_InternalRect;
 
-static void checkBounds( ASS_Image*, ASSI_InternalRect* );
+static uint8_t checkBounds( ASS_Image*, ASSI_InternalRect* );
 
 static void msgCallback( int level, const char *fmt, va_list va, void *data ) {
 	if ( level < 4 ) {
@@ -219,9 +219,11 @@ int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *ti
 			0
 		};
 
+		uint8_t solid = 0;
+
 		do {
 			if ( 0xFF != (assImage->color & 0xFF) ) {
-				checkBounds( assImage, &boundsRect );
+				solid = solid | checkBounds( assImage, &boundsRect );
 			}
 			rects[i].hash = crc32( rects[i].hash, (void*)&assImage->color, sizeof(assImage->color) );
 
@@ -241,8 +243,9 @@ int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *ti
 		rects[i].y = boundsRect.y1;
 		rects[i].w = boundsRect.x2 - boundsRect.x1;
 		rects[i].h = boundsRect.y2 - boundsRect.y1;
-
+		rects[i].solid = solid;
 		rects[i].hash = crc32( rects[i].hash, (void*)&rects[i], sizeof(rects[i]) );
+
 		state->lastRect = rects[i];
 	}
 
@@ -260,9 +263,10 @@ void assi_cleanup( ASSI_State *state ) {
 	}
 }
 
-static void checkBounds( ASS_Image *assImage, ASSI_InternalRect *boundsRect ) {
+static uint8_t checkBounds( ASS_Image *assImage, ASSI_InternalRect *boundsRect ) {
 	uint8_t       *byte = assImage->bitmap,
-	               addHeight;
+	               addHeight,
+	               solid = 0;
 
 	uintptr_t     *chunk;
 
@@ -290,6 +294,9 @@ static void checkBounds( ASS_Image *assImage, ASSI_InternalRect *boundsRect ) {
 				// printf( "Chunk: %p; Value: %016lX, End: %p\n", chunk, *chunk, chunk + 1 );
 				for( byte = (uint8_t *)chunk; byte < (uint8_t *)(chunk + 1); byte++ ) {
 					if ( *byte ) {
+						if ( *byte == 255 ) {
+							solid = 1;
+						}
 						// printf( "Byte: %p; Value: %u (%3u, %3u)\n", byte, *byte, x, y );
 						if ( x <= boundsRect->x1 ) {
 							boundsRect->x1 = x - 1;
@@ -310,6 +317,9 @@ static void checkBounds( ASS_Image *assImage, ASSI_InternalRect *boundsRect ) {
 		byte = (uint8_t *)chunk;
 		while ( byte < endByte ) {
 			if ( *byte ) {
+				if ( *byte == 255 ) {
+					solid = 1;
+				}
 				// printf( "Byte: %p; Value: %u (%3u, %3u)\n", byte, *byte, x, y );
 				if ( x <= boundsRect->x1 ) {
 					boundsRect->x1 = x - 1;
@@ -333,4 +343,5 @@ static void checkBounds( ASS_Image *assImage, ASSI_InternalRect *boundsRect ) {
 		}
 		byte += rowPadding;
 	}
+	return solid;
 }

@@ -1,7 +1,7 @@
 -- This library is unlicensed under CC0
 
-ASSIVersionCompat = 0x000300
-InspectorVersion  = 0x000300
+ASSIVersionCompat = 0x000400
+InspectorVersion  = 0x000400
 
 ffi = require( 'ffi' )
 bit = require( 'bit' )
@@ -19,6 +19,7 @@ typedef struct {
 	int x, y;
 	unsigned int w, h;
 	uint32_t hash;
+	uint8_t solid;
 } ASSI_Rect;
 
 uint32_t    assi_getVersion( void );
@@ -151,6 +152,7 @@ validateRect = ( rect ) ->
 		w: tonumber( rect.w )
 		h: tonumber( rect.h )
 		hash: tonumber( rect.hash )
+		solid: (rect.solid == 1)
 	}
 
 	if bounds.w == 0 or bounds.h == 0
