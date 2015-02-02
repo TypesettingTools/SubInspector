@@ -1,0 +1,28 @@
+From 84c8ea684d13cd71128de95a0939460e0d7d8827 Mon Sep 17 00:00:00 2001
+From: torque <torque@1>
+Date: Fri, 30 Jan 2015 22:20:54 -0800
+Subject: [PATCH] Don't use approximation in rasterizer.
+
+Removes a small amount of error for a (negligible?) loss of performance.
+---
+ libass/ass_rasterizer.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/libass/ass_rasterizer.c b/libass/ass_rasterizer.c
+index ee19ad4..d520077 100644
+--- a/libass/ass_rasterizer.c
++++ b/libass/ass_rasterizer.c
+@@ -161,9 +161,7 @@ static inline int add_line(ASS_Rasterizer *rst, OutlinePoint pt0, OutlinePoint p
+     line->a *= 1 << shift;
+     line->b *= 1 << shift;
+     line->c *= 1 << shift;
+-    line->scale = (uint64_t)0x53333333 * (uint32_t)(max_ab * (uint64_t)max_ab >> 32) >> 32;
+-    line->scale += 0x8810624D - (0xBBC6A7EF * (uint64_t)max_ab >> 32);
+-    //line->scale = ((uint64_t)1 << 61) / max_ab;
++    line->scale = ((uint64_t)1 << 61) / max_ab;
+     return 1;
+ }
+ 
+-- 
+2.2.1
+
