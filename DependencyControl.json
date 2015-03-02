@@ -1,0 +1,71 @@
+{
+  "dependencyControlFeedFormatVersion": "0.1.0",
+  "name": "ASSInspector",
+  "description": "Official ASSInspector repository",
+  "baseUrl": "https://github.com/TypesettingCartel/ASSInspector",
+  "url": "@{baseUrl}",
+  "maintainer": "torque",
+  "modules": {
+    "ASSInspector.Inspector": {
+      "url": "@{baseUrl}",
+      "author": "torque",
+      "name": "ASSInspector",
+      "description": "Provides low level inspection and analysis of subtitles post-rasterization.",
+      "channels": {
+        "release": {
+          "version": "0.4.0",
+          "released": "2015-02-02",
+          "default": true,
+          "platforms": ["Windows-x86", "Windows-x64", "OSX-x64"],
+          "fileBaseUrl": "https://github.com/TypesettingCartel/ASSInspector/releases/download/v@{version}/@{name}",
+          "files": [
+            {
+              "name": ".moon",
+              "url": "https://raw.githubusercontent.com/TypesettingCartel/ASSInspector/v@{version}/examples/Aegisub@{fileName}",
+              "sha1": ""
+            },
+            {
+              "name": "/fonts.conf",
+              "url": "https://raw.githubusercontent.com/TypesettingCartel/ASSInspector/v@{version}/examples@{fileName}",
+              "sha1": "0505BEE4BF3C0A01515D4F253A5ED2535687362E"
+            },
+            {
+              "name": "/ASSInspector.dll",
+              "url": "@{fileBaseUrl}-win32.dll",
+              "platform": "Windows-x86",
+              "sha1": "7AFCE3FA6AC6A1A613C5974B6275770A6964EBD3"
+            },
+            {
+              "name": "/ASSInspector.dll",
+              "url": "@{fileBaseUrl}-win64.dll",
+              "platform": "Windows-x64",
+              "sha1": "D522672D1194F538C5AA563CF13E2F3244FAD169"
+            },
+            {
+              "name": "/libASSInspector.dylib",
+              "url": "@{fileBaseUrl}-osx-x86_64.dylib",
+              "platform": "OSX-x64",
+              "sha1": "AE9E5E9DC6D58AEEBCD48D0FA520E4B596167FC1"
+            }
+          ],
+          "requiredModules": [
+            {
+              "moduleName": "ffi"
+            }
+          ]
+        }
+      },
+      "changelog": {
+        "0.4.0": [
+          "Added solid field to ASSI_Rect.",
+        ],
+        "0.3.1": [
+          "Fixed hash reliability by not hashing junk memory."
+        ],
+        "0.3.0": [
+          "All inputs are hashed (CRC32) to provide a measure of uniqueness."
+        ]
+      }
+    },
+  }
+}
