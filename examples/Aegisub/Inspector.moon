@@ -1,15 +1,21 @@
 -- This library is unlicensed under CC0
 
+DependencyControl = require "l0.DependencyControl"
+
+versionRecord = DependencyControl{
+    name: "ASSInspector",
+    version: "0.4.0",
+    description: "Provides low level inspection and analysis of subtitles post-rasterization.",
+    author: "torque",
+    url: "https://github.com/TypesettingCartel/ASSInspector",
+    moduleName: "ASSInspector.Inspector",
+    feed: "https://raw.githubusercontent.com/TypesettingCartel/ASSInspector/master/DependencyControl.json",
+    {"ffi"}
+}
+
+ffi = versionRecord\requireModules!
+
 ASSIVersionCompat = 0x000400
-InspectorVersion  = 0x000400
-
-ffi = require( 'ffi' )
-bit = require( 'bit' )
-
-InspectorVersion_major = bit.rshift( ASSIVersionCompat, 16 )
-InspectorVersion_minor = bit.band( bit.rshift( ASSIVersionCompat, 8 ), 0xFF )
-InspectorVersion_patch = bit.band( ASSIVersionCompat, 0xFF )
-
 ASSIVersionCompat_major = bit.rshift( ASSIVersionCompat, 16 )
 ASSIVersionCompat_minor = bit.band( bit.rshift( ASSIVersionCompat, 8 ), 0xFF )
 ASSIVersionCompat_patch = bit.band( ASSIVersionCompat, 0xFF )
@@ -200,11 +206,8 @@ addStyles = ( line, scriptText, seenStyles ) =>
 				table.insert( scriptText, @styles[styleName] )
 				seenStyles[styleName] = true
 
-class Inspector
-	@version = InspectorVersion
-	@version_major = InspectorVersion_major
-	@version_minor = InspectorVersion_minor
-	@version_patch = InspectorVersion_patch
+class Inspectorversion_major
+	@version = versionRecord
 
 	new: ( subtitles, fontconfigConfig = aegisub.decode_path( libraryPath .. "/fonts.conf" ), fontDirectory = aegisub.decode_path( '?script/fonts' ) ) =>
 		assert subtitles, "You must provide the subtitles object."
@@ -326,4 +329,4 @@ class Inspector
 
 		return rects, times
 
-return Inspector
+return versionRecord\register Inspector
