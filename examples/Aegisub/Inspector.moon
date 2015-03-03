@@ -2,17 +2,22 @@
 
 DependencyControl = require "l0.DependencyControl"
 
-versionRecord = DependencyControl{
-    name: "ASSInspector",
-    version: "0.4.0",
-    description: "Provides low level inspection and analysis of subtitles post-rasterization.",
-    author: "torque",
-    url: "https://github.com/TypesettingCartel/ASSInspector",
-    moduleName: "ASSInspector.Inspector",
-    feed: "https://raw.githubusercontent.com/TypesettingCartel/ASSInspector/master/DependencyControl.json",
-    {"ffi"}
-}
-ASSIVersionCompat = DependencyControl moduleName: "ASSInspector.Compat", version: "0.4.0", virtual: true
+versionRecord = DependencyControl( {
+	name: "ASSInspector",
+	version: "0.4.0",
+	description: "Provides low level inspection and analysis of subtitles post-rasterization.",
+	author: "torque",
+	url: "https://github.com/TypesettingCartel/ASSInspector",
+	moduleName: "ASSInspector.Inspector",
+	feed: "https://raw.githubusercontent.com/TypesettingCartel/ASSInspector/master/DependencyControl.json",
+	{ "ffi" }
+} )
+
+ASSIVersionCompat = DependencyControl( {
+	moduleName: "ASSInspector.Compat",
+	version: "0.4.0",
+	virtual: true
+} )
 
 ffi = versionRecord\requireModules!
 
