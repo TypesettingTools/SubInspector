@@ -21,7 +21,7 @@
           "files": [
             {
               "name": ".moon",
-              "url": "https://raw.githubusercontent.com/TypesettingCartel/ASSInspector/v@{version}/examples/Aegisub@{fileName}",
+              "url": "https://raw.githubusercontent.com/TypesettingCartel/ASSInspector/d433f9095555f2b461049517bc95c4324fa71f73/examples/Aegisub@{fileName}",
               "sha1": ""
             },
             {
