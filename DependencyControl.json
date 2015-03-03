@@ -13,8 +13,8 @@
       "description": "Provides low level inspection and analysis of subtitles post-rasterization.",
       "channels": {
         "release": {
-          "version": "0.4.0",
-          "released": "2015-02-02",
+          "version": "0.5.0",
+          "released": "2015-03-03",
           "default": true,
           "platforms": ["Windows-x86", "Windows-x64", "OSX-x64"],
           "fileBaseUrl": "https://github.com/TypesettingCartel/ASSInspector/releases/download/v@{version}/@{name}",
@@ -56,8 +56,11 @@
         }
       },
       "changelog": {
+        "0.5.0": [
+          "DependencyControl integration."
+        ],
         "0.4.0": [
-          "Added solid field to ASSI_Rect.",
+          "Added solid field to ASSI_Rect."
         ],
         "0.3.1": [
           "Fixed hash reliability by not hashing junk memory."

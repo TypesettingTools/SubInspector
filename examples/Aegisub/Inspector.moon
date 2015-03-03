@@ -4,7 +4,7 @@ DependencyControl = require "l0.DependencyControl"
 
 versionRecord = DependencyControl( {
 	name: "ASSInspector",
-	version: "0.4.0",
+	version: "0.5.0",
 	description: "Provides low level inspection and analysis of subtitles post-rasterization.",
 	author: "torque",
 	url: "https://github.com/TypesettingCartel/ASSInspector",
