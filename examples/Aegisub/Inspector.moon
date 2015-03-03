@@ -12,13 +12,9 @@ versionRecord = DependencyControl{
     feed: "https://raw.githubusercontent.com/TypesettingCartel/ASSInspector/master/DependencyControl.json",
     {"ffi"}
 }
+ASSIVersionCompat = DependencyControl moduleName: "ASSInspector.Compat", version: "0.4.0", virtual: true
 
 ffi = versionRecord\requireModules!
-
-ASSIVersionCompat = 0x000400
-ASSIVersionCompat_major = bit.rshift( ASSIVersionCompat, 16 )
-ASSIVersionCompat_minor = bit.band( bit.rshift( ASSIVersionCompat, 8 ), 0xFF )
-ASSIVersionCompat_patch = bit.band( ASSIVersionCompat, 0xFF )
 
 ffi.cdef( [[
 typedef struct {
@@ -52,14 +48,11 @@ if not success
 -- Returns true if the versions are compatible and nil, "message" if
 -- they aren't.
 looseVersionCompare = ( ASSIVersion ) ->
-	ASSIVersion_major = bit.rshift( ASSIVersion, 16 )
-	ASSIVersion_minor = bit.band( bit.rshift( ASSIVersion, 8 ), 0xFF )
-	ASSIVersion_patch = bit.band( ASSIVersion, 0xFF )
-
-	if ASSIVersion_major > ASSIVersionCompat_major
-		return nil, ("Inspector.moon library is too old. Must be v%d.x.x")\format ASSIVersionCompat_major
-	elseif ASSIVersion_major < ASSIVersionCompat_major or ASSIVersion_minor < ASSIVersionCompat_minor
-		return nil, ("libASSInspector library is too old. Must be v%d.%d.x compatible.")\format ASSIVersionCompat_major, ASSIVersionCompat_minor
+	assiVer = DependencyControl moduleName: "ASSInspector.Lib", version: ASSIVersion, virtual: true
+	unless ASSIVersionCompat\checkVersion assiVer, "major"
+		return nil, ("Inspector.moon library is too old. Must be v%s.")\format assiVer\getVersionString nil, "major"
+	unless assiVer\checkVersion ASSIVersionCompat, "minor"
+		return nil, ("libASSInspector library is too old. Must be v%s compatible.")\format ASSIVersionCompat\getVersionString nil, "minor"
 
 	return true
 
@@ -206,7 +199,7 @@ addStyles = ( line, scriptText, seenStyles ) =>
 				table.insert( scriptText, @styles[styleName] )
 				seenStyles[styleName] = true
 
-class Inspectorversion_major
+class Inspector
 	@version = versionRecord
 
 	new: ( subtitles, fontconfigConfig = aegisub.decode_path( libraryPath .. "/fonts.conf" ), fontDirectory = aegisub.decode_path( '?script/fonts' ) ) =>
