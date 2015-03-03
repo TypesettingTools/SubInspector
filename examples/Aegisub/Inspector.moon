@@ -40,15 +40,22 @@ int         assi_calculateBounds( void*, ASSI_Rect*, const int32_t*, const uint3
 void        assi_cleanup( void* );
 ]] )
 
--- Figure out a better way to load this?
-extension = ('OSX' == ffi.os and '.dylib' or 'Windows' == ffi.os and '.dll' or '.so')
-libraryPath = "?user/automation/include/ASSInspector"
-success, ASSInspector = pcall( ffi.load, aegisub.decode_path( libraryPath .. "/libASSInspector" .. extension ) )
-if not success
-	libraryPath = "?data/automation/include/ASSInspector"
-	success, ASSInspector = pcall( ffi.load, aegisub.decode_path( libraryPath .. "/libASSInspector" .. extension ) )
-	if not success
-		error( "Could not load required libASSInspector library." )
+loadName = "ASSInspector"
+libraryName = "#{(ffi.os != 'Windows') and 'lib' or ''}#{loadName}.#{(OSX: 'dylib', Windows: 'dll')[ffi.os] or 'so'}"
+pathExt = "/automation/include/ASSInspector/Inspector/"
+libraryPaths = {
+	aegisub.decode_path( "?user" .. pathExt ),
+	aegisub.decode_path( "?data" .. pathExt )
+}
+
+local libraryPath
+for path in *libraryPaths
+	success, ASSInspector = pcall ffi.load, path .. libraryName
+	if success
+		libraryPath = path
+		break
+
+assert( success, "Could not load required ASSInspector C library." )
 
 -- Returns true if the versions are compatible and nil, "message" if
 -- they aren't.
@@ -207,7 +214,7 @@ addStyles = ( line, scriptText, seenStyles ) =>
 class Inspector
 	@version = versionRecord
 
-	new: ( subtitles, fontconfigConfig = aegisub.decode_path( libraryPath .. "/fonts.conf" ), fontDirectory = aegisub.decode_path( '?script/fonts' ) ) =>
+	new: ( subtitles, fontconfigConfig = aegisub.decode_path( libraryPath .. "fonts.conf" ), fontDirectory = aegisub.decode_path( '?script/fonts' ) ) =>
 		assert subtitles, "You must provide the subtitles object."
 
 		-- Does nothing if inspector is already initialized. The initialized
