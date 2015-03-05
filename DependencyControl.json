@@ -17,7 +17,7 @@
           "released": "2015-03-03",
           "default": true,
           "platforms": ["Windows-x86", "Windows-x64", "OSX-x64"],
-          "fileBaseUrl": "https://github.com/TypesettingCartel/ASSInspector/releases/download/v@{version}/@{name}",
+          "fileBaseUrl": "https://github.com/TypesettingCartel/ASSInspector/releases/download/v0.4.0/@{scriptName}",
           "files": [
             {
               "name": ".moon",
