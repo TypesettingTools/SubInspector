@@ -17,16 +17,16 @@
           "released": "2015-03-03",
           "default": true,
           "platforms": ["Windows-x86", "Windows-x64", "OSX-x64"],
-          "fileBaseUrl": "https://github.com/TypesettingCartel/ASSInspector/releases/download/v0.4.0/@{scriptName}",
+          "fileBaseUrl": "https://github.com/TypesettingCartel/@{scriptName}/releases/download/v0.4.0/@{scriptName}",
           "files": [
             {
               "name": ".moon",
-              "url": "https://raw.githubusercontent.com/TypesettingCartel/ASSInspector/7fcb73c2cff84d64eebb0fda7313504f230cb811/examples/Aegisub@{fileName}",
+              "url": "https://raw.githubusercontent.com/TypesettingCartel/@{scriptName}/7fcb73c2cff84d64eebb0fda7313504f230cb811/examples/Aegisub@{fileName}",
               "sha1": "27AE48328EA8D0BDEFA9272A06A76F670CB7B3AD"
             },
             {
               "name": "/fonts.conf",
-              "url": "https://raw.githubusercontent.com/TypesettingCartel/ASSInspector/v@{version}/examples@{fileName}",
+              "url": "https://raw.githubusercontent.com/TypesettingCartel/@{scriptName}/726ee093284bb6d31cd600c720a07774fed45023/examples@{fileName}",
               "sha1": "0505BEE4BF3C0A01515D4F253A5ED2535687362E"
             },
             {
