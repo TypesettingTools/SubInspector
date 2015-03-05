@@ -13,7 +13,7 @@
       "description": "Provides low level inspection and analysis of subtitles post-rasterization.",
       "channels": {
         "release": {
-          "version": "0.5.0",
+          "version": "0.5.1",
           "released": "2015-03-03",
           "default": true,
           "platforms": ["Windows-x86", "Windows-x64", "OSX-x64"],
@@ -21,8 +21,8 @@
           "files": [
             {
               "name": ".moon",
-              "url": "https://raw.githubusercontent.com/TypesettingCartel/ASSInspector/d433f9095555f2b461049517bc95c4324fa71f73/examples/Aegisub@{fileName}",
-              "sha1": ""
+              "url": "https://raw.githubusercontent.com/TypesettingCartel/ASSInspector/7fcb73c2cff84d64eebb0fda7313504f230cb811/examples/Aegisub@{fileName}",
+              "sha1": "27AE48328EA8D0BDEFA9272A06A76F670CB7B3AD"
             },
             {
               "name": "/fonts.conf",
