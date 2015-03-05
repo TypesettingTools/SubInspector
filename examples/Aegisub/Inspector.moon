@@ -4,7 +4,7 @@ DependencyControl = require "l0.DependencyControl"
 
 versionRecord = DependencyControl( {
 	name: "ASSInspector",
-	version: "0.5.0",
+	version: "0.5.1",
 	description: "Provides low level inspection and analysis of subtitles post-rasterization.",
 	author: "torque",
 	url: "https://github.com/TypesettingCartel/ASSInspector",
@@ -48,14 +48,14 @@ libraryPaths = {
 	aegisub.decode_path( "?data" .. pathExt )
 }
 
-local libraryPath
+libraryPath = false
 for path in *libraryPaths
 	success, ASSInspector = pcall ffi.load, path .. libraryName
 	if success
 		libraryPath = path
 		break
 
-assert( success, "Could not load required ASSInspector C library." )
+assert( libraryPath, "Could not load required ASSInspector C library." )
 
 -- Returns true if the versions are compatible and nil, "message" if
 -- they aren't.
