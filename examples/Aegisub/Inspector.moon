@@ -48,6 +48,7 @@ libraryPaths = {
 	aegisub.decode_path( "?data" .. pathExt )
 }
 
+local ASSInspector
 libraryPath = false
 for path in *libraryPaths
 	success, ASSInspector = pcall ffi.load, path .. libraryName
