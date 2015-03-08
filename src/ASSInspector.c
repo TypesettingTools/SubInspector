@@ -222,6 +222,10 @@ int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *ti
 		uint8_t solid = 0;
 
 		do {
+			if ( assImage->h == 0 || assImage->w  == 0 ) {
+				assImage = assImage->next;
+				continue;
+			}
 			if ( 0xFF != (assImage->color & 0xFF) ) {
 				solid = solid | checkBounds( assImage, &boundsRect );
 			}
