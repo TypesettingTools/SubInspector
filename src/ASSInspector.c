@@ -276,8 +276,8 @@ static uint8_t checkBounds( ASS_Image *assImage, ASSI_InternalRect *boundsRect )
 
 	const uint8_t  chunkSize   = sizeof(*chunk),
 	              *bitmapStart = assImage->bitmap,
-	              *bitmapEnd   = bitmapStart + (assImage->h - 1) * assImage->stride + assImage->w,
-	               rowPadding  = assImage->stride - assImage->w;
+	              *bitmapEnd   = assImage->bitmap + (assImage->h - 1) * assImage->stride + assImage->w;
+	const uint32_t rowPadding  = assImage->stride - assImage->w;
 
 	const uint32_t chunksPerRow      = assImage->w/chunkSize;
 
