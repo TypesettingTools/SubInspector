@@ -28,7 +28,7 @@
     <ProjectGuid>{1115530E-EBB6-486F-9261-17E70FE204CD}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ASSInspector</RootNamespace>
-    <ProjectName>libASSInspector</ProjectName>
+    <ProjectName>ASSInspector</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
