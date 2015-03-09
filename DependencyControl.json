@@ -13,16 +13,16 @@
       "description": "Provides low level inspection and analysis of subtitles post-rasterization.",
       "channels": {
         "release": {
-          "version": "0.5.1",
-          "released": "2015-03-03",
+          "version": "0.5.2",
+          "released": "2015-03-09",
           "default": true,
           "platforms": ["Windows-x86", "Windows-x64", "OSX-x64"],
-          "fileBaseUrl": "https://github.com/TypesettingCartel/@{scriptName}/releases/download/v0.4.0/@{scriptName}",
+          "fileBaseUrl": "https://github.com/TypesettingCartel/@{scriptName}/releases/download/v0.4.1/@{scriptName}",
           "files": [
             {
               "name": ".moon",
-              "url": "https://raw.githubusercontent.com/TypesettingCartel/@{scriptName}/7fcb73c2cff84d64eebb0fda7313504f230cb811/examples/Aegisub/Inspector@{fileName}",
-              "sha1": "27AE48328EA8D0BDEFA9272A06A76F670CB7B3AD"
+              "url": "https://raw.githubusercontent.com/TypesettingCartel/@{scriptName}/21bae640b129a342c1a1eb54697236939b763658/examples/Aegisub/Inspector@{fileName}",
+              "sha1": "1007DF857638C7BB1E6E64659AF2062E317BCFE0"
             },
             {
               "name": "/fonts.conf",
@@ -33,19 +33,19 @@
               "name": "/ASSInspector.dll",
               "url": "@{fileBaseUrl}-win32.dll",
               "platform": "Windows-x86",
-              "sha1": "7AFCE3FA6AC6A1A613C5974B6275770A6964EBD3"
+              "sha1": "88286171B1674658CA902EE17A4F2E2BCC2DB4FA"
             },
             {
               "name": "/ASSInspector.dll",
               "url": "@{fileBaseUrl}-win64.dll",
               "platform": "Windows-x64",
-              "sha1": "D522672D1194F538C5AA563CF13E2F3244FAD169"
+              "sha1": "23C18B801A030D326F85AE0E266E70797C8ECF5C"
             },
             {
               "name": "/libASSInspector.dylib",
-              "url": "@{fileBaseUrl}-osx-x86_64.dylib",
+              "url": "lib@{fileBaseUrl}-osx64.dylib",
               "platform": "OSX-x64",
-              "sha1": "AE9E5E9DC6D58AEEBCD48D0FA520E4B596167FC1"
+              "sha1": "22FA44EDB9FB03F7CF9413ED60C1E60862F188D2"
             }
           ],
           "requiredModules": [
@@ -56,6 +56,9 @@
         }
       },
       "changelog": {
+        "0.5.1": [
+          "Fix bounds calculation in weird cases."
+        ],
         "0.5.0": [
           "DependencyControl integration."
         ],
