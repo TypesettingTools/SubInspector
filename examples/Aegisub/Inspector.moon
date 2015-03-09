@@ -4,7 +4,7 @@ DependencyControl = require "l0.DependencyControl"
 
 versionRecord = DependencyControl( {
 	name: "ASSInspector",
-	version: "0.5.1",
+	version: "0.5.2",
 	description: "Provides low level inspection and analysis of subtitles post-rasterization.",
 	author: "torque",
 	url: "https://github.com/TypesettingCartel/ASSInspector",
@@ -15,7 +15,7 @@ versionRecord = DependencyControl( {
 
 ASSIVersionCompat = DependencyControl( {
 	moduleName: "ASSInspector.Compat",
-	version: "0.4.0",
+	version: "0.4.1",
 	virtual: true
 } )
 
@@ -40,23 +40,30 @@ int         assi_calculateBounds( void*, ASSI_Rect*, const int32_t*, const uint3
 void        assi_cleanup( void* );
 ]] )
 
-loadName = "ASSInspector"
-libraryName = "#{(ffi.os != 'Windows') and 'lib' or ''}#{loadName}.#{(OSX: 'dylib', Windows: 'dll')[ffi.os] or 'so'}"
-pathExt = "/automation/include/ASSInspector/Inspector/"
-libraryPaths = {
-	aegisub.decode_path( "?user" .. pathExt ),
-	aegisub.decode_path( "?data" .. pathExt )
-}
+packagePaths = ( namespace ) ->
+	paths = { }
+	-- fixedLibraryName = namespace .. "/" .. "#{(ffi.os != 'Windows') and 'lib' or ''}#{libraryName}.#{(OSX: 'dylib', Windows: 'dll')[ffi.os] or 'so'}"
+	package.path\gsub "([^;]+)", ( path ) ->
+		-- the init.lua paths are just dupes of other paths.
+		if path\match "/%?/init%.lua$"
+			return
 
-local ASSInspector
-libraryPath = false
+		path = path\gsub "//?%?%.lua$", "/"
+		table.insert paths, path .. namespace
+
+	return paths
+
+__name = "ASSInspector"
+libraryPaths = packagePaths "#{__name}/Inspector/"
+libraryName = "#{(ffi.os != 'Windows') and 'lib' or ''}#{__name}.#{(OSX: 'dylib', Windows: 'dll')[ffi.os] or 'so'}"
+local ASSInspector, libraryPath
 for path in *libraryPaths
 	success, ASSInspector = pcall ffi.load, path .. libraryName
 	if success
 		libraryPath = path
 		break
 
-assert( libraryPath, "Could not load required ASSInspector C library." )
+assert libraryPath, "Could not load #{__name} C library."
 
 -- Returns true if the versions are compatible and nil, "message" if
 -- they aren't.
@@ -215,7 +222,7 @@ addStyles = ( line, scriptText, seenStyles ) =>
 class Inspector
 	@version = versionRecord
 
-	new: ( subtitles, fontconfigConfig = aegisub.decode_path( libraryPath .. "fonts.conf" ), fontDirectory = aegisub.decode_path( '?script/fonts' ) ) =>
+	new: ( subtitles, fontconfigConfig = libraryPath .. "fonts.conf", fontDirectory = aegisub.decode_path( '?script/fonts' ) ) =>
 		assert subtitles, "You must provide the subtitles object."
 
 		-- Does nothing if inspector is already initialized. The initialized
