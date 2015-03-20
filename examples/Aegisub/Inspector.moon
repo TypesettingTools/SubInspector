@@ -3,19 +3,19 @@
 DependencyControl = require "l0.DependencyControl"
 
 versionRecord = DependencyControl( {
-	name: "ASSInspector",
-	version: "0.5.2",
+	name: "SubInspector",
+	version: "0.6.0",
 	description: "Provides low level inspection and analysis of subtitles post-rasterization.",
 	author: "torque",
-	url: "https://github.com/TypesettingCartel/ASSInspector",
-	moduleName: "ASSInspector.Inspector",
-	feed: "https://raw.githubusercontent.com/TypesettingCartel/ASSInspector/master/DependencyControl.json",
+	url: "https://github.com/TypesettingCartel/SubInspector",
+	moduleName: "SubInspector.Inspector",
+	feed: "https://raw.githubusercontent.com/TypesettingCartel/SubInspector/master/DependencyControl.json",
 	{ "ffi" }
 } )
 
-ASSIVersionCompat = DependencyControl( {
-	moduleName: "ASSInspector.Compat",
-	version: "0.4.1",
+SIVersionCompat = DependencyControl( {
+	moduleName: "SubInspector.Compat",
+	version: "0.5.0",
 	virtual: true
 } )
 
@@ -27,17 +27,17 @@ typedef struct {
 	unsigned int w, h;
 	uint32_t hash;
 	uint8_t solid;
-} ASSI_Rect;
+} SI_Rect;
 
-uint32_t    assi_getVersion( void );
-const char* assi_getErrorString( void* );
-void*       assi_init( int, int, const char*, const char* );
-void        assi_changeResolution( void*, int, int );
-void        assi_reloadFonts( void*, const char*, const char* );
-int         assi_setHeader( void*, const char*, size_t );
-int         assi_setScript( void*, const char*, size_t );
-int         assi_calculateBounds( void*, ASSI_Rect*, const int32_t*, const uint32_t );
-void        assi_cleanup( void* );
+uint32_t    si_getVersion( void );
+const char* si_getErrorString( void* );
+void*       si_init( int, int, const char*, const char* );
+void        si_changeResolution( void*, int, int );
+void        si_reloadFonts( void*, const char*, const char* );
+int         si_setHeader( void*, const char*, size_t );
+int         si_setScript( void*, const char*, size_t );
+int         si_calculateBounds( void*, SI_Rect*, const int32_t*, const uint32_t );
+void        si_cleanup( void* );
 ]] )
 
 packagePaths = ( namespace ) ->
@@ -53,12 +53,12 @@ packagePaths = ( namespace ) ->
 
 	return paths
 
-__name = "ASSInspector"
+__name = "SubInspector"
 libraryPaths = packagePaths "#{__name}/Inspector/"
 libraryName = "#{(ffi.os != 'Windows') and 'lib' or ''}#{__name}.#{(OSX: 'dylib', Windows: 'dll')[ffi.os] or 'so'}"
-local ASSInspector, libraryPath
+local SubInspector, libraryPath
 for path in *libraryPaths
-	success, ASSInspector = pcall ffi.load, path .. libraryName
+	success, SubInspector = pcall ffi.load, path .. libraryName
 	if success
 		libraryPath = path
 		break
@@ -68,17 +68,17 @@ assert libraryPath, "Could not load #{__name} C library."
 -- Returns true if the versions are compatible and nil, "message" if
 -- they aren't.
 looseVersionCompare = ( ASSIVersion ) ->
-	assiVer = DependencyControl moduleName: "ASSInspector.Lib", version: ASSIVersion, virtual: true
-	unless ASSIVersionCompat\checkVersion assiVer, "major"
-		return nil, ("Inspector.moon library is too old. Must be v%s.")\format assiVer\getVersionString nil, "major"
-	unless assiVer\checkVersion ASSIVersionCompat, "minor"
-		return nil, ("libASSInspector library is too old. Must be v%s compatible.")\format ASSIVersionCompat\getVersionString nil, "minor"
+	siVer = DependencyControl moduleName: "SubInspector.Lib", version: ASSIVersion, virtual: true
+	unless SIVersionCompat\checkVersion siVer, "major"
+		return nil, ("Inspector.moon library is too old. Must be v%s.")\format siVer\getVersionString nil, "major"
+	unless siVer\checkVersion SIVersionCompat, "minor"
+		return nil, ("libSubInspector library is too old. Must be v%s compatible.")\format SIVersionCompat\getVersionString nil, "minor"
 
 	return true
 
 -- Inspector is not actually a property of the class but a property of
 -- the script. Since we don't need to worry about concurrency or
--- anything silly like that, we can initialize ASSInspector once and
+-- anything silly like that, we can initialize SubInspector once and
 -- keep that reference alive until Aegisub is closed or scripts are all
 -- reloaded.
 state = {
@@ -148,14 +148,14 @@ collectHeader = ( subtitles ) =>
 
 initializeInspector = ( fontconfigConfig = state.fontconfigConfig, fontDirectory = state.fontDir ) ->
 	if nil == state.inspector
-		success, message = looseVersionCompare( ASSInspector.assi_getVersion! )
+		success, message = looseVersionCompare( SubInspector.si_getVersion! )
 		unless success
 			return nil, message
 
-		state.inspector = ffi.gc( ASSInspector.assi_init( 1, 1, fontconfigConfig, fontDirectory ), ASSInspector.assi_cleanup )
+		state.inspector = ffi.gc( SubInspector.si_init( 1, 1, fontconfigConfig, fontDirectory ), SubInspector.si_cleanup )
 
 		if nil == state.inspector
-			return nil, "ASSInspector library initialization failed."
+			return nil, "SubInspector library initialization failed."
 
 		state.resX = 1
 		state.resY = 1
@@ -190,7 +190,7 @@ defaultTimes = ( lines ) ->
 	if hasFrames
 		for line in *lines
 			with line
-				for frame = ffms( .start_time ), true == .assi_exhaustive and ffms( .end_time ) - 1 or ffms( .start_time )
+				for frame = ffms( .start_time ), true == .si_exhaustive and ffms( .end_time ) - 1 or ffms( .start_time )
 					frameTime = math.floor( 0.5*( msff( frame ) + msff( frame + 1 ) ) )
 					unless seenTimes[frameTime]
 						table.insert( times, frameTime )
@@ -226,7 +226,7 @@ class Inspector
 		assert subtitles, "You must provide the subtitles object."
 
 		-- Does nothing if inspector is already initialized. The initialized
-		-- ASSInspector is stored at the script scope, which means it
+		-- SubInspector is stored at the script scope, which means it
 		-- persists until either Aegisub quits, automation scripts are
 		-- reloaded, or forceLibraryReload is called.
 		success, message = initializeInspector( fontconfigConfig, fontDirectory )
@@ -243,17 +243,17 @@ class Inspector
 
 		if @resX != state.resX or @resY != state.resY
 			state.resX, state.resY = @resX, @resY
-			ASSInspector.assi_changeResolution( state.inspector, @resX, @resY )
+			SubInspector.si_changeResolution( state.inspector, @resX, @resY )
 
 		@reloadFonts!
 
-		if 0 < ASSInspector.assi_setHeader( state.inspector, @header, #@header )
-			return nil, "Failed to set header.\n" .. ffi.string( ASSInspector.assi_getErrorString( state.inspector ) )
+		if 0 < SubInspector.si_setHeader( state.inspector, @header, #@header )
+			return nil, "Failed to set header.\n" .. ffi.string( SubInspector.si_getErrorString( state.inspector ) )
 
 		return true
 
 	reloadFonts: ( fontconfigConfig = state.fontconfigConfig, fontDirectory = state.fontDir ) =>
-		ASSInspector.assi_reloadFonts( state.inspector, fontconfigConfig, fontDirectory )
+		SubInspector.si_reloadFonts( state.inspector, fontconfigConfig, fontDirectory )
 
 	forceLibraryReload: ( subtitles, fontconfigConfig, fontDirectory ) =>
 		if nil == subtitles
@@ -279,7 +279,7 @@ class Inspector
 
 	-- times: a table of times (in milliseconds) to render the line at.
 	--        Defaults to the start time of the line unless there is a video
-	--        loaded and the line contains the field line.assi_exhaustive =
+	--        loaded and the line contains the field line.si_exhaustive =
 	--        true, in which case it defaults to every single frame that the
 	--        line is displayed.
 
@@ -323,18 +323,18 @@ class Inspector
 			table.insert( scriptText, line.raw )
 
 		scriptString = table.concat( scriptText, '\n' )
-		if 0 < ASSInspector.assi_setScript( state.inspector, scriptString, #scriptString )
-			return nil, "Could not set script" .. ffi.string( ASSInspector.assi_getErrorString( state.inspector ) )
+		if 0 < SubInspector.si_setScript( state.inspector, scriptString, #scriptString )
+			return nil, "Could not set script" .. ffi.string( SubInspector.si_getErrorString( state.inspector ) )
 
 		renderCount = #times
 		cTimes = ffi.new( 'int32_t[?]', renderCount )
-		cRects = ffi.new( 'ASSI_Rect[?]', renderCount )
+		cRects = ffi.new( 'SI_Rect[?]', renderCount )
 
 		for i = 0, renderCount - 1
 			cTimes[i] = times[i + 1]
 
-		if 0 < ASSInspector.assi_calculateBounds( state.inspector, cRects, cTimes, renderCount )
-			return nil, "Error calculating bounds" .. ffi.string( ASSInspector.assi_getErrorString( state.inspector ) )
+		if 0 < SubInspector.si_calculateBounds( state.inspector, cRects, cTimes, renderCount )
+			return nil, "Error calculating bounds" .. ffi.string( SubInspector.si_getErrorString( state.inspector ) )
 
 		rects = { }
 		for i = 0, renderCount - 1

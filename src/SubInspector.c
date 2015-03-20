@@ -1,8 +1,8 @@
-/* ASSInspector is free software. You can redistribute it and/or modify
+/* SubInspector is free software. You can redistribute it and/or modify
  * it under the terms of the MIT license. See COPYING or do a google
  * search for details. */
 
-#include "ASSInspector.h"
+#include "SubInspector.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -37,41 +37,41 @@
 	#include <zlib.h>
 #endif // NO_ZLIB
 
-struct ASSI_State_priv {
+struct SI_State_priv {
 	ASS_Library  *assLibrary;
 	ASS_Renderer *assRenderer;
 	char         *header,
 	             *currentScript;
 	size_t        headerLength,
 	              scriptLength;
-	ASSI_Rect     lastRect;
+	SI_Rect     lastRect;
 	char          error[128];
 };
 
 typedef struct {
 	int x1, y1, x2, y2;
-} ASSI_InternalRect;
+} SI_InternalRect;
 
-static uint8_t checkBounds( ASS_Image*, ASSI_InternalRect* );
+static uint8_t checkBounds( ASS_Image*, SI_InternalRect* );
 
 static void msgCallback( int level, const char *fmt, va_list va, void *data ) {
 	if ( level < 4 ) {
-		ASSI_State *state = data;
+		SI_State *state = data;
 		int levelLength = sprintf( state->error, "%d: ", level );
 		vsnprintf( state->error + levelLength, sizeof(state->error) - levelLength, fmt, va );
 	}
 }
 
-uint32_t assi_getVersion( void ) {
-	return ASSI_VERSION;
+uint32_t si_getVersion( void ) {
+	return SI_VERSION;
 }
 
-const char* assi_getErrorString( ASSI_State *state ) {
+const char* si_getErrorString( SI_State *state ) {
 	return state->error;
 }
 
-ASSI_State* assi_init( int width, int height, const char *fontConfigConfig, const char *fontDir ) {
-	ASSI_State *state = calloc( 1, sizeof(*state) );
+SI_State* si_init( int width, int height, const char *fontConfigConfig, const char *fontDir ) {
+	SI_State *state = calloc( 1, sizeof(*state) );
 	if ( NULL == state ) {
 		return NULL;
 	}
@@ -90,20 +90,20 @@ ASSI_State* assi_init( int width, int height, const char *fontConfigConfig, cons
 		return NULL;
 	}
 
-	assi_changeResolution( state, width, height );
-	assi_reloadFonts( state, fontConfigConfig, fontDir );
+	si_changeResolution( state, width, height );
+	si_reloadFonts( state, fontConfigConfig, fontDir );
 
 	return state;
 }
 
-void assi_changeResolution( ASSI_State *state, int width, int height ) {
+void si_changeResolution( SI_State *state, int width, int height ) {
 	if ( NULL == state ) {
 		return;
 	}
 	ass_set_frame_size( state->assRenderer, width, height );
 }
 
-void assi_reloadFonts( ASSI_State *state, const char *fontConfigConfig, const char *fontDir ) {
+void si_reloadFonts( SI_State *state, const char *fontConfigConfig, const char *fontDir ) {
 	if ( NULL == state ) {
 		return;
 	}
@@ -111,7 +111,7 @@ void assi_reloadFonts( ASSI_State *state, const char *fontConfigConfig, const ch
 	ass_set_fonts( state->assRenderer, NULL, "Sans", 1, fontConfigConfig, 1 );
 }
 
-int assi_setHeader( ASSI_State *state, const char *header, size_t headerLength ) {
+int si_setHeader( SI_State *state, const char *header, size_t headerLength ) {
 	if ( !state ) {
 		return 1;
 	}
@@ -139,7 +139,7 @@ int assi_setHeader( ASSI_State *state, const char *header, size_t headerLength )
 	return 0;
 }
 
-int assi_setScript( ASSI_State *state, const char *scriptBody, size_t bodyLength ) {
+int si_setScript( SI_State *state, const char *scriptBody, size_t bodyLength ) {
 	if ( !state ) {
 		return 1;
 	}
@@ -173,7 +173,7 @@ int assi_setScript( ASSI_State *state, const char *scriptBody, size_t bodyLength
 	return 0;
 }
 
-int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *times, const uint32_t renderCount ) {
+int si_calculateBounds( SI_State *state, SI_Rect *rects, const int32_t *times, const uint32_t renderCount ) {
 	if ( !state ) {
 		return 1;
 	}
@@ -212,7 +212,7 @@ int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *ti
 
 		// Set initial conditions.
 
-		ASSI_InternalRect boundsRect = {
+		SI_InternalRect boundsRect = {
 			assImage->dst_x + assImage->w,
 			assImage->dst_y + assImage->h,
 			0,
@@ -257,7 +257,7 @@ int assi_calculateBounds( ASSI_State *state, ASSI_Rect *rects, const int32_t *ti
 	return 0;
 }
 
-void assi_cleanup( ASSI_State *state ) {
+void si_cleanup( SI_State *state ) {
 	if ( state ) {
 		free( state->header );
 		free( state->currentScript );
@@ -267,7 +267,7 @@ void assi_cleanup( ASSI_State *state ) {
 	}
 }
 
-static uint8_t checkBounds( ASS_Image *assImage, ASSI_InternalRect *boundsRect ) {
+static uint8_t checkBounds( ASS_Image *assImage, SI_InternalRect *boundsRect ) {
 	uint8_t       *byte = assImage->bitmap,
 	               addHeight,
 	               solid = 0;

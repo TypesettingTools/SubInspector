@@ -1,7 +1,7 @@
 # Not actually sure what the minimum required version is.
 cmake_minimum_required(VERSION 2.8)
 
-project(ASSInspector C)
+project(SubInspector C)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/.cmake/Modules" ${CMAKE_MODULE_PATH})
 set(CMAKE_VERBOSE_MAKEFILE OFF)

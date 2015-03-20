@@ -1,23 +1,23 @@
 {
   "dependencyControlFeedFormatVersion": "0.1.0",
-  "name": "ASSInspector",
-  "description": "Official ASSInspector repository",
-  "baseUrl": "https://github.com/TypesettingCartel/ASSInspector",
+  "name": "SubInspector",
+  "description": "Official SubInspector repository",
+  "baseUrl": "https://github.com/TypesettingCartel/SubInspector",
   "url": "@{baseUrl}",
   "maintainer": "torque",
   "modules": {
-    "ASSInspector.Inspector": {
+    "SubInspector.Inspector": {
       "url": "@{baseUrl}",
       "author": "torque",
-      "name": "ASSInspector",
+      "name": "SubInspector",
       "description": "Provides low level inspection and analysis of subtitles post-rasterization.",
       "channels": {
         "release": {
-          "version": "0.5.2",
-          "released": "2015-03-09",
+          "version": "0.6.0",
+          "released": "2015-03-20",
           "default": true,
           "platforms": ["Windows-x86", "Windows-x64", "OSX-x64"],
-          "fileBaseUrl": "https://github.com/TypesettingCartel/@{scriptName}/releases/download/v0.4.1/@{scriptName}",
+          "fileBaseUrl": "https://github.com/TypesettingCartel/@{scriptName}/releases/download/v0.5.0/@{scriptName}",
           "files": [
             {
               "name": ".moon",
@@ -30,19 +30,19 @@
               "sha1": "0505BEE4BF3C0A01515D4F253A5ED2535687362E"
             },
             {
-              "name": "/ASSInspector.dll",
+              "name": "/SubInspector.dll",
               "url": "@{fileBaseUrl}-win32.dll",
               "platform": "Windows-x86",
               "sha1": "88286171B1674658CA902EE17A4F2E2BCC2DB4FA"
             },
             {
-              "name": "/ASSInspector.dll",
+              "name": "/SubInspector.dll",
               "url": "@{fileBaseUrl}-win64.dll",
               "platform": "Windows-x64",
               "sha1": "23C18B801A030D326F85AE0E266E70797C8ECF5C"
             },
             {
-              "name": "/libASSInspector.dylib",
+              "name": "/libSubInspector.dylib",
               "url": "lib@{fileBaseUrl}-osx64.dylib",
               "platform": "OSX-x64",
               "sha1": "22FA44EDB9FB03F7CF9413ED60C1E60862F188D2"
@@ -56,6 +56,9 @@
         }
       },
       "changelog": {
+        "0.6.0": [
+          "Rebrand as SubInspector."
+        ],
         "0.5.1": [
           "Fix bounds calculation in weird cases."
         ],

@@ -14,7 +14,7 @@ ADDITIONAL := -std=c99
 LIBS := -lass
 CFLAGS := $(WARNINGS) $(OPTIMIZATION) $(DEFINES) $(ADDITIONAL)
 LFLAGS := $(LIBS)
-LIB_NAME := libASSInspector
+LIB_NAME := libSubInspector
 
 # Modifications
 ifeq ($(DEBUG),1)
@@ -28,7 +28,7 @@ ifeq ($(OS),Windows_NT)
 		CFLAGS += -DBUILD_DLL
 		LIB_EXT :=.dll
 	else
-		CFLAGS += -DASS_INSPECTOR_STATIC
+		CFLAGS += -DSUB_INSPECTOR_STATIC
 		LIB_EXT :=.a
 	endif
 else

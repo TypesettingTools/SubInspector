@@ -7,7 +7,8 @@
 *.dll
 
 # Packaging results
-ASSInspector
+SubInspector
+deps
 *.zip
 
 # Visual Studio junk

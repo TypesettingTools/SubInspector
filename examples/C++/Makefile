@@ -11,10 +11,10 @@ AR  := ar
 WARNINGS :=-Wall -Wunreachable-code -Wfloat-equal -Wredundant-decls -Winit-self -Wpedantic
 OPTIMIZATION :=-O3
 ADDITIONAL :=-std=c++11 -stdlib=libc++
-LIBS :=-L../.. -lASSInspector
+LIBS :=-L../.. -lSubInspector
 CXXFLAGS := $(WARNINGS) $(OPTIMIZATIONS) $(DEFINES) $(ADDITIONAL)
 LFLAGS := $(LIBS)
-NAME := ASSI_example
+NAME := SI_example
 
 # Modifications
 ifeq ($(DEBUG),1)
