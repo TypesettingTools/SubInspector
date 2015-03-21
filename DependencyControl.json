@@ -14,15 +14,15 @@
       "channels": {
         "release": {
           "version": "0.6.0",
-          "released": "2015-03-20",
+          "released": "2015-03-21",
           "default": true,
           "platforms": ["Windows-x86", "Windows-x64", "OSX-x64"],
           "fileBaseUrl": "https://github.com/TypesettingCartel/@{scriptName}/releases/download/v0.5.0/@{scriptName}",
           "files": [
             {
               "name": ".moon",
-              "url": "https://raw.githubusercontent.com/TypesettingCartel/@{scriptName}/21bae640b129a342c1a1eb54697236939b763658/examples/Aegisub/Inspector@{fileName}",
-              "sha1": "1007DF857638C7BB1E6E64659AF2062E317BCFE0"
+              "url": "https://raw.githubusercontent.com/TypesettingCartel/@{scriptName}/7a19935bc07ffdc3198363b7ffa4fa5ddf21d691/examples/Aegisub/Inspector@{fileName}",
+              "sha1": "6F2D1A4ADB8D9C13E828D7F3763F3BF095FAA091"
             },
             {
               "name": "/fonts.conf",
