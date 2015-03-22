@@ -33,19 +33,19 @@
               "name": "/SubInspector.dll",
               "url": "@{fileBaseUrl}-win32.dll",
               "platform": "Windows-x86",
-              "sha1": "88286171B1674658CA902EE17A4F2E2BCC2DB4FA"
+              "sha1": "A3BBDFC9481C981D77614282008D3E8C610C4218"
             },
             {
               "name": "/SubInspector.dll",
               "url": "@{fileBaseUrl}-win64.dll",
               "platform": "Windows-x64",
-              "sha1": "23C18B801A030D326F85AE0E266E70797C8ECF5C"
+              "sha1": "0561284AB11854E0BEFCE057F6C36C5BD7B50F26"
             },
             {
               "name": "/libSubInspector.dylib",
               "url": "lib@{fileBaseUrl}-osx64.dylib",
               "platform": "OSX-x64",
-              "sha1": "22FA44EDB9FB03F7CF9413ED60C1E60862F188D2"
+              "sha1": "2164621D395AAA5A4106AC4B648A19F11BCFBBED"
             }
           ],
           "requiredModules": [
