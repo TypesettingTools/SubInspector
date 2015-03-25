@@ -33,13 +33,13 @@
               "name": "/SubInspector.dll",
               "url": "@{fileBaseUrl}-win32.dll",
               "platform": "Windows-x86",
-              "sha1": "A3BBDFC9481C981D77614282008D3E8C610C4218"
+              "sha1": "7516E8F996AB7C9D41759BE8D692E01294FC286F"
             },
             {
               "name": "/SubInspector.dll",
               "url": "@{fileBaseUrl}-win64.dll",
               "platform": "Windows-x64",
-              "sha1": "0561284AB11854E0BEFCE057F6C36C5BD7B50F26"
+              "sha1": "C32CFE50EA2F6F3E0E726489AEA30DE69F071CE3"
             },
             {
               "name": "/libSubInspector.dylib",
