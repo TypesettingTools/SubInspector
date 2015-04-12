@@ -21,7 +21,7 @@
 	#define SI_EXPORT
 #endif // _WIN32
 
-#define SI_VERSION 0x000500
+#define SI_VERSION 0x000501
 
 typedef struct SI_State_priv SI_State;
 
