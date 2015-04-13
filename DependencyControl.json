@@ -13,39 +13,52 @@
       "description": "Provides low level inspection and analysis of subtitles post-rasterization.",
       "channels": {
         "release": {
-          "version": "0.6.0",
-          "released": "2015-03-21",
+          "version": "0.6.1",
+          "released": "2015-04-13",
           "default": true,
           "platforms": ["Windows-x86", "Windows-x64", "OSX-x64"],
-          "fileBaseUrl": "https://github.com/TypesettingCartel/@{scriptName}/releases/download/v0.5.0/@{scriptName}",
+          "fileBaseUrl": "https://github.com/TypesettingCartel/@{scriptName}/releases/download/v0.5.1/@{scriptName}",
           "files": [
             {
               "name": ".moon",
               "url": "https://raw.githubusercontent.com/TypesettingCartel/@{scriptName}/7a19935bc07ffdc3198363b7ffa4fa5ddf21d691/examples/Aegisub/Inspector@{fileName}",
-              "sha1": "6F2D1A4ADB8D9C13E828D7F3763F3BF095FAA091"
+              "sha1": "0636355768125533C08F856BE8D9D15CF06EAA30"
             },
             {
               "name": "/fonts.conf",
-              "url": "https://raw.githubusercontent.com/TypesettingCartel/@{scriptName}/726ee093284bb6d31cd600c720a07774fed45023/examples@{fileName}",
+              "url": "https://github.com/TypesettingCartel/@{scriptName}/releases/download/v0.5.1/fonts-win.conf",
+              "platform": "Windows-x86",
               "sha1": "0505BEE4BF3C0A01515D4F253A5ED2535687362E"
+            },
+            {
+              "name": "/fonts.conf",
+              "url": "https://github.com/TypesettingCartel/@{scriptName}/releases/download/v0.5.1/fonts-win.conf",
+              "platform": "Windows-x64",
+              "sha1": "0505BEE4BF3C0A01515D4F253A5ED2535687362E"
+            },
+            {
+              "name": "/fonts.conf",
+              "url": "https://github.com/TypesettingCartel/@{scriptName}/releases/download/v0.5.1/fonts-osx.conf",
+              "platform": "OSX-x64",
+              "sha1": "71ECFBA793AD0F8E6408E03B06DBE5E357B4A76C"
             },
             {
               "name": "/SubInspector.dll",
               "url": "@{fileBaseUrl}-win32.dll",
               "platform": "Windows-x86",
-              "sha1": "7516E8F996AB7C9D41759BE8D692E01294FC286F"
+              "sha1": "7713E42BA23E44EADAA874678C09C5B56F4BA8BA"
             },
             {
               "name": "/SubInspector.dll",
               "url": "@{fileBaseUrl}-win64.dll",
               "platform": "Windows-x64",
-              "sha1": "C32CFE50EA2F6F3E0E726489AEA30DE69F071CE3"
+              "sha1": "E317B9D0044862E757FDE6B20750301451A3994C"
             },
             {
               "name": "/libSubInspector.dylib",
               "url": "lib@{fileBaseUrl}-osx64.dylib",
               "platform": "OSX-x64",
-              "sha1": "2164621D395AAA5A4106AC4B648A19F11BCFBBED"
+              "sha1": "3DF0451FD9C3308214632FBCC5B6970268421863"
             }
           ],
           "requiredModules": [
@@ -56,6 +69,9 @@
         }
       },
       "changelog": {
+        "0.6.1": [
+          "Improve hash reliability as a measure of visual sameness."
+        ],
         "0.6.0": [
           "Rebrand as SubInspector."
         ],
