@@ -290,10 +290,10 @@ static uint8_t checkBounds( ASS_Image *assImage, SI_InternalRect *boundsRect, ui
 
 		while ( chunk < endChunk ) {
 			if ( *chunk ) {
-				*pixelHash = crc32( *pixelHash, (void *)chunk, chunkSize );
 				// printf( "Chunk: %p; Value: %016lX, End: %p\n", chunk, *chunk, chunk + 1 );
 				for( byte = (uint8_t *)chunk; byte < (uint8_t *)(chunk + 1); byte++ ) {
 					if ( *byte ) {
+						*pixelHash = crc32( *pixelHash, (void *)byte, 1 );
 						if ( *byte == 255 ) {
 							solid = 1;
 						}
