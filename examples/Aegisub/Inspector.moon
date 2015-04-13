@@ -4,7 +4,7 @@ DependencyControl = require "l0.DependencyControl"
 
 versionRecord = DependencyControl( {
 	name: "SubInspector",
-	version: "0.6.0",
+	version: "0.6.1",
 	description: "Provides low level inspection and analysis of subtitles post-rasterization.",
 	author: "torque",
 	url: "https://github.com/TypesettingCartel/SubInspector",
@@ -15,7 +15,7 @@ versionRecord = DependencyControl( {
 
 SIVersionCompat = DependencyControl( {
 	moduleName: "SubInspector.Compat",
-	version: "0.5.0",
+	version: "0.5.1",
 	virtual: true
 } )
 
