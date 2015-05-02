@@ -17,7 +17,7 @@
           "released": "2015-04-13",
           "default": true,
           "platforms": ["Windows-x86", "Windows-x64", "OSX-x64"],
-          "fileBaseUrl": "https://github.com/TypesettingTools/@{scriptName}/releases/download/v0.5.1/@{scriptName}",
+          "fileBaseUrl": "https://github.com/TypesettingTools/@{scriptName}/releases/download/v0.5.1/",
           "files": [
             {
               "name": ".moon",
@@ -44,19 +44,19 @@
             },
             {
               "name": "/SubInspector.dll",
-              "url": "@{fileBaseUrl}-win32.dll",
+              "url": "@{fileBaseUrl}@{scriptName}-win32.dll",
               "platform": "Windows-x86",
               "sha1": "7713E42BA23E44EADAA874678C09C5B56F4BA8BA"
             },
             {
               "name": "/SubInspector.dll",
-              "url": "@{fileBaseUrl}-win64.dll",
+              "url": "@{fileBaseUrl}@{scriptName}-win64.dll",
               "platform": "Windows-x64",
               "sha1": "E317B9D0044862E757FDE6B20750301451A3994C"
             },
             {
               "name": "/libSubInspector.dylib",
-              "url": "lib@{fileBaseUrl}-osx64.dylib",
+              "url": "@{fileBaseUrl}lib@{scriptName}-osx64.dylib",
               "platform": "OSX-x64",
               "sha1": "3DF0451FD9C3308214632FBCC5B6970268421863"
             }
@@ -91,6 +91,6 @@
           "All inputs are hashed (CRC32) to provide a measure of uniqueness."
         ]
       }
-    },
+    }
   }
 }
