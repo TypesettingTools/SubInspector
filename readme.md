@@ -13,7 +13,7 @@ are provided for Aegisub that include the SubInspector library.
 
 ### Build
 
-1. Clone the repository with `git clone https://github.com/TypesettingCartel/SubInspector.git --recursive`.
+1. Clone the repository with `git clone https://github.com/TypesettingTools/SubInspector.git --recursive`.
 1. If you already have the repository cloned, use `git submodule update --init --recursive`
 
 #### Windows
@@ -38,4 +38,4 @@ Talk to `torque` on `irc.rizon.net`.
 
 [libass]: https://github.com/libass/libass
 
-[releases]: https://github.com/TypesettingCartel/SubInspector/releases
+[releases]: https://github.com/TypesettingTools/SubInspector/releases

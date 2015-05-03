@@ -7,9 +7,9 @@ versionRecord = DependencyControl( {
 	version: "0.6.1",
 	description: "Provides low level inspection and analysis of subtitles post-rasterization.",
 	author: "torque",
-	url: "https://github.com/TypesettingCartel/SubInspector",
+	url: "https://github.com/TypesettingTools/SubInspector",
 	moduleName: "SubInspector.Inspector",
-	feed: "https://raw.githubusercontent.com/TypesettingCartel/SubInspector/master/DependencyControl.json",
+	feed: "https://raw.githubusercontent.com/TypesettingTools/SubInspector/master/DependencyControl.json",
 	{ "ffi" }
 } )
 
