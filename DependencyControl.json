@@ -21,8 +21,8 @@
           "files": [
             {
               "name": ".moon",
-              "url": "https://raw.githubusercontent.com/TypesettingTools/@{scriptName}/f214df72512d1026adc9161057b4a4f75a66cba4/examples/Aegisub/Inspector@{fileName}",
-              "sha1": "0636355768125533C08F856BE8D9D15CF06EAA30"
+              "url": "https://raw.githubusercontent.com/TypesettingTools/@{scriptName}/6b52ebc88aa470cdd6a702314287cc1a88103084/examples/Aegisub/Inspector@{fileName}",
+              "sha1": "8CBED8199FAE2F3B42267F73139D3FB7B2CB5CC2"
             },
             {
               "name": "/fonts.conf",
