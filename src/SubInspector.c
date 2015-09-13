@@ -44,7 +44,7 @@ struct SI_State_priv {
 	             *currentScript;
 	size_t        headerLength,
 	              scriptLength;
-	SI_Rect     lastRect;
+	SI_Rect       lastRect;
 	char          error[128];
 };
 
@@ -121,15 +121,17 @@ int si_setHeader( SI_State *state, const char *header, size_t headerLength ) {
 		state->header = NULL;
 		state->headerLength = 0;
 	}
+
 	if ( NULL == header ) {
 		return 0;
 	}
+
 	if ( headerLength ) {
 		state->headerLength = headerLength;
 	} else {
 		state->headerLength = strlen( header );
 	}
-	// Copy terminating null byte too.
+
 	state->header = malloc( state->headerLength );
 	if ( NULL == state->header ) {
 		strcpy( state->error, "Memory allocation failure." );
