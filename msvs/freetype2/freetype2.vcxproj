@@ -153,7 +153,6 @@
     <ClCompile Include="..\..\deps\freetype2\src\base\ftsynth.c" />
     <ClCompile Include="..\..\deps\freetype2\src\base\fttype1.c" />
     <ClCompile Include="..\..\deps\freetype2\src\base\ftwinfnt.c" />
-    <ClCompile Include="..\..\deps\freetype2\src\base\ftxf86.c" />
     <ClCompile Include="..\..\deps\freetype2\src\bdf\bdf.c" />
     <ClCompile Include="..\..\deps\freetype2\src\cache\ftcache.c" />
     <ClCompile Include="..\..\deps\freetype2\src\cff\cff.c" />
