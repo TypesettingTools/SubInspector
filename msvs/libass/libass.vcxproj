@@ -155,10 +155,13 @@ copy "$(SolutionDir)\deps\libass\libass\ass.h" "$(OutDir)\ass\ass.h"</Command>
   <ItemGroup>
     <ClCompile Include="..\..\deps\libass\libass\ass.c" />
     <ClCompile Include="..\..\deps\libass\libass\ass_bitmap.c" />
+    <ClCompile Include="..\..\deps\libass\libass\ass_blur.c" />
     <ClCompile Include="..\..\deps\libass\libass\ass_cache.c" />
+    <ClCompile Include="..\..\deps\libass\libass\ass_directwrite.c" />
     <ClCompile Include="..\..\deps\libass\libass\ass_drawing.c" />
     <ClCompile Include="..\..\deps\libass\libass\ass_font.c" />
     <ClCompile Include="..\..\deps\libass\libass\ass_fontconfig.c" />
+    <ClCompile Include="..\..\deps\libass\libass\ass_fontselect.c" />
     <ClCompile Include="..\..\deps\libass\libass\ass_library.c" />
     <ClCompile Include="..\..\deps\libass\libass\ass_parse.c" />
     <ClCompile Include="..\..\deps\libass\libass\ass_rasterizer.c" />
@@ -166,6 +169,7 @@ copy "$(SolutionDir)\deps\libass\libass\ass.h" "$(OutDir)\ass\ass.h"</Command>
     <ClCompile Include="..\..\deps\libass\libass\ass_render.c" />
     <ClCompile Include="..\..\deps\libass\libass\ass_render_api.c" />
     <ClCompile Include="..\..\deps\libass\libass\ass_shaper.c" />
+    <ClCompile Include="..\..\deps\libass\libass\ass_string.c" />
     <ClCompile Include="..\..\deps\libass\libass\ass_strtod.c" />
     <ClCompile Include="..\..\deps\libass\libass\ass_utils.c" />
   </ItemGroup>
