@@ -26,3 +26,4 @@ deps
 *.opensdf
 *.vcxproj.filters
 *.vcxproj.user
+Release

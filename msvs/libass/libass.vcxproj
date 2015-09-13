@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -26,19 +26,19 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>
     </CharacterSet>
@@ -48,7 +48,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet />
     <UseOfMfc />
@@ -121,6 +121,7 @@ copy "$(SolutionDir)\deps\libass\libass\ass.h" "$(OutDir)\ass\ass.h"</Command>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)\include;$(SolutionDir)\deps\fontconfig-win\win32\include;$(SolutionDir)\deps\fontconfig-win\src;$(SolutionDir)\deps\fontconfig-win;$(SolutionDir)\deps\freetype2\include;$(SolutionDir)\deps\fribidi\lib;$(SolutionDir)\msvs\fribidi\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>inline=__inline;FRIBIDI_ENTRY=;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -141,6 +142,7 @@ copy "$(SolutionDir)\deps\libass\libass\ass.h" "$(OutDir)\ass\ass.h"</Command>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)\include;$(SolutionDir)\deps\fontconfig-win\win32\include;$(SolutionDir)\deps\fontconfig-win\src;$(SolutionDir)\deps\fontconfig-win;$(SolutionDir)\deps\freetype2\include;$(SolutionDir)\deps\fribidi\lib;$(SolutionDir)\msvs\fribidi\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>inline=__inline;FRIBIDI_ENTRY=;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -153,11 +155,17 @@ copy "$(SolutionDir)\deps\libass\libass\ass.h" "$(OutDir)\ass\ass.h"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\deps\libass\libass\ass.c" />
+    <ClCompile Include="..\..\deps\libass\libass\ass.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Default</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Default</CompileAs>
+    </ClCompile>
     <ClCompile Include="..\..\deps\libass\libass\ass_bitmap.c" />
     <ClCompile Include="..\..\deps\libass\libass\ass_blur.c" />
     <ClCompile Include="..\..\deps\libass\libass\ass_cache.c" />
-    <ClCompile Include="..\..\deps\libass\libass\ass_directwrite.c" />
+    <ClCompile Include="..\..\deps\libass\libass\ass_directwrite.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+    </ClCompile>
     <ClCompile Include="..\..\deps\libass\libass\ass_drawing.c" />
     <ClCompile Include="..\..\deps\libass\libass\ass_font.c" />
     <ClCompile Include="..\..\deps\libass\libass\ass_fontconfig.c" />
@@ -172,6 +180,9 @@ copy "$(SolutionDir)\deps\libass\libass\ass.h" "$(OutDir)\ass\ass.h"</Command>
     <ClCompile Include="..\..\deps\libass\libass\ass_string.c" />
     <ClCompile Include="..\..\deps\libass\libass\ass_strtod.c" />
     <ClCompile Include="..\..\deps\libass\libass\ass_utils.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\deps\libass\libass\ass_compat.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
