@@ -1,10 +1,13 @@
 {
-  "dependencyControlFeedFormatVersion": "0.1.0",
+  "dependencyControlFeedFormatVersion": "0.2.0",
   "name": "SubInspector",
   "description": "Official SubInspector repository",
   "baseUrl": "https://github.com/TypesettingTools/SubInspector",
   "url": "@{baseUrl}",
   "maintainer": "torque",
+  "knownFeeds": {
+    "ffi-experiments": "https://raw.githubusercontent.com/torque/ffi-experiments/master/DependencyControl.json"
+  },
   "modules": {
     "SubInspector.Inspector": {
       "url": "@{baseUrl}",
@@ -66,9 +69,54 @@
               "moduleName": "ffi"
             }
           ]
+        },
+        "testing": {
+          "version": "0.7.0",
+          "released": "2015-09-14",
+          "default": true,
+          "platforms": ["Windows-x86", "Windows-x64", "OSX-x64"],
+          "fileBaseUrl": "https://github.com/TypesettingTools/@{scriptName}/releases/download/v0.5.1/",
+          "files": [
+            {
+              "name": ".moon",
+              "url": "https://raw.githubusercontent.com/TypesettingTools/@{scriptName}/9f2af01bd961fc134da24fbbe132de0b5e1bcc43/examples/Aegisub/Inspector@{fileName}",
+              "sha1": "F90290D481202E52496245A37378F25225854496"
+            },
+            {
+              "name": "/SubInspector.dll",
+              "url": "@{fileBaseUrl}@{scriptName}-win32-@{channel}.dll",
+              "platform": "Windows-x86",
+              "sha1": "089EE7748110F68D2D15D03BF2F1A5F8B2C05A51"
+            },
+            {
+              "name": "/SubInspector.dll",
+              "url": "@{fileBaseUrl}@{scriptName}-win64-@{channel}.dll",
+              "platform": "Windows-x64",
+              "sha1": "A2B934A9653C9ECB5E58C6C70844FEC564C21FF2"
+            },
+            {
+              "name": "/libSubInspector.dylib",
+              "url": "@{fileBaseUrl}lib@{scriptName}-osx64-@{channel}.dylib",
+              "platform": "OSX-x64",
+              "sha1": "2C435A1D46AB2F262A282ED27897D25D6B7E3053"
+            }
+          ],
+          "requiredModules": [
+            {
+              "moduleName": "ffi"
+            },
+            {
+              "moduleName": "requireffi.requireffi",
+              "version": "0.1.0",
+              "feed": "@{feed:ffi-experiments}"
+            }
+          ]
         }
       },
       "changelog": {
+        "0.7.0": [
+          "Fix Inspector.moon for libass with DirectWrite."
+        ],
         "0.6.1": [
           "Improve hash reliability as a measure of visual sameness."
         ],
