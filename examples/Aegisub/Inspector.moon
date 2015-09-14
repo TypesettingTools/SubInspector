@@ -1,6 +1,6 @@
 -- This library is unlicensed under CC0
 local requireffi, ffi, looseVersionCompare
-versionRecord = '0.6.2'
+versionRecord = '0.7.0'
 
 haveDepCtrl, DependencyControl = pcall require, 'l0.DependencyControl'
 
@@ -75,18 +75,8 @@ void        si_cleanup( void* );
 
 SubInspector, libraryPath = requireffi( 'SubInspector.Inspector.SubInspector' )
 
--- Inspector is not actually a property of the class but a property of
--- the script. Since we don't need to worry about concurrency or
--- anything silly like that, we can initialize SubInspector once and
--- keep that reference alive until Aegisub is closed or scripts are all
--- reloaded.
-state = {
-	inspector:        nil
-	fontconfigConfig: nil
-	fontDir:          nil
-	resX:             nil
-	resY:             nil
-}
+log = ( message, ... ) ->
+	aegisub.log 2, message .. '\n', ...
 
 collectHeader = ( subtitles ) =>
 	scriptHeader = {
@@ -119,16 +109,16 @@ collectHeader = ( subtitles ) =>
 		with line = subtitles[index]
 			if "info" == .class
 				if infoFields[.key]
-					table.insert( scriptHeader, .raw )
+					table.insert scriptHeader, .raw
 
 				if "PlayResX" == .key
-					resX = tonumber( .value )
+					resX = tonumber .value
 				elseif "PlayResY" == .key
-					resY = tonumber( .value )
+					resY = tonumber .value
 
 			elseif "style" == .class
 				unless seenStyles
-					table.insert( scriptHeader, "[V4+ Styles]\n" )
+					table.insert scriptHeader, "[V4+ Styles]\n"
 					seenStyles = true
 
 				styles[.name] = .raw
@@ -138,38 +128,23 @@ collectHeader = ( subtitles ) =>
 
 	-- If a video is loaded, use its resolution instead of the script's
 	-- resolution. Don't use low-resolution workraws for typesetting!
-	vidResX, vidResY = aegisub.video_size( )
+	vidResX, vidResY = aegisub.video_size!
+	if vidResX and (vidResX != resX or vidResY != resY)
+		@logFunc "Script and loaded video resolution mismatch, preferring video."
+
 	@resX = vidResX or resX
 	@resY = vidResY or resY
 
-	@header = table.concat( scriptHeader, '\n' )
+	@header = table.concat scriptHeader, '\n'
 	@styles = styles
-
-initializeInspector = ( fontconfigConfig = state.fontconfigConfig, fontDirectory = state.fontDir ) ->
-	if nil == state.inspector
-		success, message = looseVersionCompare( SubInspector.si_getVersion! )
-		unless success
-			return nil, message
-
-		state.inspector = ffi.gc( SubInspector.si_init( 1, 1, fontconfigConfig, fontDirectory ), SubInspector.si_cleanup )
-
-		if nil == state.inspector
-			return nil, "SubInspector library initialization failed."
-
-		state.resX = 1
-		state.resY = 1
-		state.fontDir = fontDirectory
-		state.fontconfigConfig = fontconfigConfig
-
-	return true
 
 validateRect = ( rect ) ->
 	bounds = {
-		x: tonumber( rect.x )
-		y: tonumber( rect.y )
-		w: tonumber( rect.w )
-		h: tonumber( rect.h )
-		hash: tonumber( rect.hash )
+		x: tonumber rect.x
+		y: tonumber rect.y
+		w: tonumber rect.w
+		h: tonumber rect.h
+		hash: tonumber rect.hash
 		solid: (rect.solid == 1)
 	}
 
@@ -184,21 +159,21 @@ defaultTimes = ( lines ) ->
 
 	seenTimes = { }
 	times = { }
-	hasFrames = ffms( 0 )
+	hasFrames = ffms 0
 
 	if hasFrames
 		for line in *lines
 			with line
 				for frame = ffms( .start_time ), true == .si_exhaustive and ffms( .end_time ) - 1 or ffms( .start_time )
-					frameTime = math.floor( 0.5*( msff( frame ) + msff( frame + 1 ) ) )
+					frameTime = math.floor 0.5*( msff( frame ) + msff( frame + 1 ) )
 					unless seenTimes[frameTime]
-						table.insert( times, frameTime )
+						table.insert times, frameTime
 						seenTimes[frameTime] = true
 	else
 		for line in *lines
 			with line
 				unless seenTimes[.start_time]
-					table.insert( times, .start_time )
+					table.insert times, .start_time
 					seenTimes[.start_time] = true
 
 	-- This will only happen if all lines are displayed for 0 frames.
@@ -209,62 +184,53 @@ defaultTimes = ( lines ) ->
 
 addStyles = ( line, scriptText, seenStyles ) =>
 	if @styles[line.style] and not seenStyles[line.style]
-		table.insert( scriptText, @styles[line.style] )
+		table.insert scriptText, @styles[line.style]
 		seenStyles[line.style] = true
 
 	line.text\gsub "{(.-)}", ( tagBlock ) ->
 		tagBlock\gsub "\\r([^\\}]*)", ( styleName ) ->
 			if 0 < #styleName and @styles[styleName] and not seenStyles[styleName]
-				table.insert( scriptText, @styles[styleName] )
+				table.insert scriptText, @styles[styleName]
 				seenStyles[styleName] = true
 
 class Inspector
 	@version = versionRecord
 
-	new: ( subtitles, fontconfigConfig = libraryPath .. "fonts.conf", fontDirectory = aegisub.decode_path( '?script/fonts' ) ) =>
-		assert subtitles, "You must provide the subtitles object."
+	new: ( subtitles = error( "You must provide the subtitles object." ), fcConfig = libraryPath .. "fonts.conf", fontDir = aegisub.decode_path( '?script/fonts' ), logFunc = log ) =>
 
-		-- Does nothing if inspector is already initialized. The initialized
-		-- SubInspector is stored at the script scope, which means it
-		-- persists until either Aegisub quits, automation scripts are
-		-- reloaded, or forceLibraryReload is called.
-		success, message = initializeInspector( fontconfigConfig, fontDirectory )
-		assert success, message
+		success, message = looseVersionCompare SubInspector.si_getVersion!
+		unless success
+			return nil, message
 
-		success, message = @updateHeader( subtitles )
+		inspectorFree = ( inspector ) -> SubInspector.si_cleanup inspector
+
+		@inspector = ffi.gc SubInspector.si_init( 1, 1, fcConfig, fontDir ), inspectorFree
+
+		assert @inspector, "SubInspector C initialization failed."
+
+		@fontDir = fontDir
+		@fcConfig = fcConfig
+		@logFunc = logFunc
+
+		success, message = @updateHeader subtitles
 		assert success, message
 
 	updateHeader: ( subtitles ) =>
 		if nil == subtitles
 			return nil, "You must provide the subtitles object."
 
-		collectHeader( @, subtitles )
+		collectHeader @, subtitles
+		SubInspector.si_changeResolution @inspector, @resX, @resY
 
-		if @resX != state.resX or @resY != state.resY
-			state.resX, state.resY = @resX, @resY
-			SubInspector.si_changeResolution( state.inspector, @resX, @resY )
-
-		@reloadFonts!
-
-		if 0 < SubInspector.si_setHeader( state.inspector, @header, #@header )
-			return nil, "Failed to set header.\n" .. ffi.string( SubInspector.si_getErrorString( state.inspector ) )
+		if SubInspector.si_setHeader( @inspector, @header, #@header ) != 0
+			return nil, "Failed to set header.\n" .. ffi.string SubInspector.si_getErrorString @inspector
 
 		return true
 
-	reloadFonts: ( fontconfigConfig = state.fontconfigConfig, fontDirectory = state.fontDir ) =>
-		SubInspector.si_reloadFonts( state.inspector, fontconfigConfig, fontDirectory )
-
-	forceLibraryReload: ( subtitles, fontconfigConfig, fontDirectory ) =>
-		if nil == subtitles
-			return nil, "You must provide the subtitles object."
-
-		state.inspector = nil
-		-- let initializeInspector handle the default arguments.
-		success, message = initializeInspector( fontconfigConfig, fontDirectory )
-		if nil == success
-			return success, message
-
-		@updateHeader( subtitles )
+	reloadFonts: ( fcConfig = @fcConfig, fontDir = @fontDir ) =>
+		SubInspector.si_reloadFonts @inspector, fcConfig, fontDir
+		@fontDir = fontDir
+		@fcConfig = fcConfig
 
 	-- Arguments:
 	-- subtitles: the subtitles object that Aegisub passes to the macro.
@@ -295,7 +261,7 @@ class Inspector
 	-- they actually compare result to nil and false, rather than just
 	-- checking that the result is not falsy.
 
-	getBounds: ( lines, times = defaultTimes( lines ) ) =>
+	getBounds: ( lines, times = defaultTimes lines ) =>
 		unless times
 			return nil, "The render times table was empty."
 
@@ -311,33 +277,33 @@ class Inspector
 		seenStyles = { }
 		if @styles.Default
 			seenStyles.Default = true
-			table.insert( scriptText, @styles.Default )
+			table.insert scriptText, @styles.Default
 
 		for line in *lines
-			addStyles( @, line, scriptText, seenStyles )
+			addStyles @, line, scriptText, seenStyles
 
-		table.insert( scriptText, '[Events]' )
+		table.insert scriptText, '[Events]'
 
 		for line in *lines
-			table.insert( scriptText, line.raw )
+			table.insert scriptText, line.raw
 
-		scriptString = table.concat( scriptText, '\n' )
-		if 0 < SubInspector.si_setScript( state.inspector, scriptString, #scriptString )
-			return nil, "Could not set script" .. ffi.string( SubInspector.si_getErrorString( state.inspector ) )
+		scriptString = table.concat scriptText, '\n'
+		if 0 < SubInspector.si_setScript @inspector, scriptString, #scriptString
+			return nil, "Could not set script" .. ffi.string SubInspector.si_getErrorString @inspector
 
 		renderCount = #times
-		cTimes = ffi.new( 'int32_t[?]', renderCount )
-		cRects = ffi.new( 'SI_Rect[?]', renderCount )
+		cTimes = ffi.new 'int32_t[?]', renderCount
+		cRects = ffi.new 'SI_Rect[?]', renderCount
 
 		for i = 0, renderCount - 1
 			cTimes[i] = times[i + 1]
 
-		if 0 < SubInspector.si_calculateBounds( state.inspector, cRects, cTimes, renderCount )
-			return nil, "Error calculating bounds" .. ffi.string( SubInspector.si_getErrorString( state.inspector ) )
+		if 0 < SubInspector.si_calculateBounds @inspector, cRects, cTimes, renderCount
+			return nil, "Error calculating bounds" .. ffi.string SubInspector.si_getErrorString @inspector
 
 		rects = { }
 		for i = 0, renderCount - 1
-			table.insert( rects, validateRect( cRects[i] ) )
+			table.insert rects, validateRect cRects[i]
 
 		return rects, times
 
