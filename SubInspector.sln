@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fontconfig", "msvs\fontconfig\fontconfig.vcxproj", "{0DA25B3E-BB37-4C9D-8C48-FBC811738248}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -85,6 +85,14 @@ Global
 		{800578E8-0B52-4272-B758-0DD14398AD46}.Release|Win32.Build.0 = Release|Win32
 		{800578E8-0B52-4272-B758-0DD14398AD46}.Release|x64.ActiveCfg = Release|x64
 		{800578E8-0B52-4272-B758-0DD14398AD46}.Release|x64.Build.0 = Release|x64
+		{0AD316DC-F404-45F4-96A3-8A118062A045}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0AD316DC-F404-45F4-96A3-8A118062A045}.Debug|Win32.Build.0 = Debug|Win32
+		{0AD316DC-F404-45F4-96A3-8A118062A045}.Debug|x64.ActiveCfg = Debug|x64
+		{0AD316DC-F404-45F4-96A3-8A118062A045}.Debug|x64.Build.0 = Debug|x64
+		{0AD316DC-F404-45F4-96A3-8A118062A045}.Release|Win32.ActiveCfg = Release|Win32
+		{0AD316DC-F404-45F4-96A3-8A118062A045}.Release|Win32.Build.0 = Release|Win32
+		{0AD316DC-F404-45F4-96A3-8A118062A045}.Release|x64.ActiveCfg = Release|x64
+		{0AD316DC-F404-45F4-96A3-8A118062A045}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

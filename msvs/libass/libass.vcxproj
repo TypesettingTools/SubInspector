@@ -88,6 +88,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)\include;$(SolutionDir)\deps\fontconfig-win\win32\include;$(SolutionDir)\deps\fontconfig-win\src;$(SolutionDir)\deps\fontconfig-win;$(SolutionDir)\deps\freetype2\include;$(SolutionDir)\deps\fribidi\lib;$(SolutionDir)\msvs\fribidi\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -103,6 +104,7 @@ copy "$(SolutionDir)\deps\libass\libass\ass.h" "$(OutDir)\ass\ass.h"</Command>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)\include;$(SolutionDir)\deps\fontconfig-win\win32\include;$(SolutionDir)\deps\fontconfig-win\src;$(SolutionDir)\deps\fontconfig-win;$(SolutionDir)\deps\freetype2\include;$(SolutionDir)\deps\fribidi\lib;$(SolutionDir)\msvs\fribidi\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -122,6 +124,7 @@ copy "$(SolutionDir)\deps\libass\libass\ass.h" "$(OutDir)\ass\ass.h"</Command>
       <AdditionalIncludeDirectories>$(ProjectDir)\include;$(SolutionDir)\deps\fontconfig-win\win32\include;$(SolutionDir)\deps\fontconfig-win\src;$(SolutionDir)\deps\fontconfig-win;$(SolutionDir)\deps\freetype2\include;$(SolutionDir)\deps\fribidi\lib;$(SolutionDir)\msvs\fribidi\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>inline=__inline;FRIBIDI_ENTRY=;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CompileAs>CompileAsC</CompileAs>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -143,6 +146,7 @@ copy "$(SolutionDir)\deps\libass\libass\ass.h" "$(OutDir)\ass\ass.h"</Command>
       <AdditionalIncludeDirectories>$(ProjectDir)\include;$(SolutionDir)\deps\fontconfig-win\win32\include;$(SolutionDir)\deps\fontconfig-win\src;$(SolutionDir)\deps\fontconfig-win;$(SolutionDir)\deps\freetype2\include;$(SolutionDir)\deps\fribidi\lib;$(SolutionDir)\msvs\fribidi\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>inline=__inline;FRIBIDI_ENTRY=;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CompileAs>CompileAsC</CompileAs>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

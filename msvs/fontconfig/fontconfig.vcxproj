@@ -95,6 +95,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\deps\fontconfig-win\win32\include;$(SolutionDir)\deps\fontconfig-win\src;$(SolutionDir)\deps\fontconfig-win;$(SolutionDir)\deps\freetype2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4345</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -106,6 +107,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)\deps\fontconfig-win\win32\include;$(SolutionDir)\deps\fontconfig-win\src;$(SolutionDir)\deps\freetype2\include;$(SolutionDir)\deps\fontconfig-win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -125,6 +127,7 @@
       <DisableSpecificWarnings>4345</DisableSpecificWarnings>
       <AdditionalOptions>/Gw</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -146,6 +149,7 @@
       <DisableSpecificWarnings>4345</DisableSpecificWarnings>
       <AdditionalOptions>/Gw</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
