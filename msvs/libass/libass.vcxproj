@@ -21,19 +21,26 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A3334695-BFEA-450B-B00C-4B1481B71167}</ProjectGuid>
     <RootNamespace>libass</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>
+    </CharacterSet>
+    <UseOfMfc />
+    <CLRSupport />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>
+    </CharacterSet>
+    <UseOfMfc />
+    <CLRSupport />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -72,15 +79,21 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)\$(Configuration)\$(Platform)\</OutDir>
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)\$(Configuration)\$(Platform)\</OutDir>
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -97,6 +110,9 @@
       <Command>mkdir "$(OutDir)\ass"
 copy "$(SolutionDir)\deps\libass\libass\ass.h" "$(OutDir)\ass\ass.h"</Command>
     </PostBuildEvent>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetFileName)</OutputFile>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -113,6 +129,9 @@ copy "$(SolutionDir)\deps\libass\libass\ass.h" "$(OutDir)\ass\ass.h"</Command>
       <Command>mkdir "$(OutDir)\ass"
 copy "$(SolutionDir)\deps\libass\libass\ass.h" "$(OutDir)\ass\ass.h"</Command>
     </PostBuildEvent>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetFileName)</OutputFile>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -135,6 +154,9 @@ copy "$(SolutionDir)\deps\libass\libass\ass.h" "$(OutDir)\ass\ass.h"</Command>
       <Command>mkdir "$(OutDir)\ass"
 copy "$(SolutionDir)\deps\libass\libass\ass.h" "$(OutDir)\ass\ass.h"</Command>
     </PostBuildEvent>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetFileName)</OutputFile>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -157,6 +179,9 @@ copy "$(SolutionDir)\deps\libass\libass\ass.h" "$(OutDir)\ass\ass.h"</Command>
       <Command>mkdir "$(OutDir)\ass"
 copy "$(SolutionDir)\deps\libass\libass\ass.h" "$(OutDir)\ass\ass.h"</Command>
     </PostBuildEvent>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetFileName)</OutputFile>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\deps\libass\libass\ass.c">
