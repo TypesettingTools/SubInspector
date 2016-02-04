@@ -16,63 +16,8 @@
       "description": "Provides low level inspection and analysis of subtitles post-rasterization.",
       "channels": {
         "release": {
-          "version": "0.6.1",
-          "released": "2015-04-13",
-          "default": true,
-          "platforms": ["Windows-x86", "Windows-x64", "OSX-x64"],
-          "fileBaseUrl": "https://github.com/TypesettingTools/@{scriptName}/releases/download/v0.5.1/",
-          "files": [
-            {
-              "name": ".moon",
-              "url": "https://raw.githubusercontent.com/TypesettingTools/@{scriptName}/6b52ebc88aa470cdd6a702314287cc1a88103084/examples/Aegisub/Inspector@{fileName}",
-              "sha1": "8CBED8199FAE2F3B42267F73139D3FB7B2CB5CC2"
-            },
-            {
-              "name": "/fonts.conf",
-              "url": "https://github.com/TypesettingTools/@{scriptName}/releases/download/v0.5.1/fonts-win.conf",
-              "platform": "Windows-x86",
-              "sha1": "0505BEE4BF3C0A01515D4F253A5ED2535687362E"
-            },
-            {
-              "name": "/fonts.conf",
-              "url": "https://github.com/TypesettingTools/@{scriptName}/releases/download/v0.5.1/fonts-win.conf",
-              "platform": "Windows-x64",
-              "sha1": "0505BEE4BF3C0A01515D4F253A5ED2535687362E"
-            },
-            {
-              "name": "/fonts.conf",
-              "url": "https://github.com/TypesettingTools/@{scriptName}/releases/download/v0.5.1/fonts-osx.conf",
-              "platform": "OSX-x64",
-              "sha1": "71ECFBA793AD0F8E6408E03B06DBE5E357B4A76C"
-            },
-            {
-              "name": "/SubInspector.dll",
-              "url": "@{fileBaseUrl}@{scriptName}-win32.dll",
-              "platform": "Windows-x86",
-              "sha1": "7713E42BA23E44EADAA874678C09C5B56F4BA8BA"
-            },
-            {
-              "name": "/SubInspector.dll",
-              "url": "@{fileBaseUrl}@{scriptName}-win64.dll",
-              "platform": "Windows-x64",
-              "sha1": "E317B9D0044862E757FDE6B20750301451A3994C"
-            },
-            {
-              "name": "/libSubInspector.dylib",
-              "url": "@{fileBaseUrl}lib@{scriptName}-osx64.dylib",
-              "platform": "OSX-x64",
-              "sha1": "3DF0451FD9C3308214632FBCC5B6970268421863"
-            }
-          ],
-          "requiredModules": [
-            {
-              "moduleName": "ffi"
-            }
-          ]
-        },
-        "testing": {
           "version": "0.7.0",
-          "released": "2015-09-14",
+          "released": "2015-04-13",
           "default": true,
           "platforms": ["Windows-x86", "Windows-x64", "OSX-x64"],
           "fileBaseUrl": "https://github.com/TypesettingTools/@{scriptName}/releases/download/v0.5.1/",
@@ -84,21 +29,21 @@
             },
             {
               "name": "/SubInspector.dll",
-              "url": "@{fileBaseUrl}@{scriptName}-win32-@{channel}.dll",
+              "url": "@{fileBaseUrl}@{scriptName}-win32.dll",
               "platform": "Windows-x86",
-              "sha1": "5130DFDC977106B447443DF2C4D76086E8BA901F"
+              "sha1": "E9A75D53FFE6DD5DBE35451B2DEA336AD2104C66"
             },
             {
               "name": "/SubInspector.dll",
-              "url": "@{fileBaseUrl}@{scriptName}-win64-@{channel}.dll",
+              "url": "@{fileBaseUrl}@{scriptName}-win64.dll",
               "platform": "Windows-x64",
-              "sha1": "A43AAEF3EF106D69E763E7F3AF5099AE975B0BE6"
+              "sha1": "719A281B1FCDF73EF058FF210CBC3674CB1A6831"
             },
             {
               "name": "/libSubInspector.dylib",
-              "url": "@{fileBaseUrl}lib@{scriptName}-osx64-@{channel}.dylib",
+              "url": "@{fileBaseUrl}lib@{scriptName}.dylib",
               "platform": "OSX-x64",
-              "sha1": "2C435A1D46AB2F262A282ED27897D25D6B7E3053"
+              "sha1": "6A2721A536C50915AF603097DFF847DB68348533"
             }
           ],
           "requiredModules": [
@@ -107,7 +52,7 @@
             },
             {
               "moduleName": "requireffi.requireffi",
-              "version": "0.1.0",
+              "version": "0.1.2",
               "feed": "@{feed:ffi-experiments}"
             }
           ]
@@ -115,7 +60,7 @@
       },
       "changelog": {
         "0.7.0": [
-          "Fix Inspector.moon for libass with DirectWrite."
+          "Fix Inspector.moon for libass with DirectWrite. No more XP support."
         ],
         "0.6.1": [
           "Improve hash reliability as a measure of visual sameness."
