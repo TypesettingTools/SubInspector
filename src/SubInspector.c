@@ -90,6 +90,7 @@ SI_State* si_init( int width, int height, const char *fontConfigConfig, const ch
 		return NULL;
 	}
 
+	ass_set_cache_limits(state->assRenderer, 1000, 1000 );
 	si_changeResolution( state, width, height );
 	si_reloadFonts( state, fontConfigConfig, fontDir );
 
