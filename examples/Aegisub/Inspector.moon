@@ -1,6 +1,6 @@
 -- This library is unlicensed under CC0
 local requireffi, ffi, looseVersionCompare
-versionRecord = '0.7.0'
+versionRecord = '0.7.1'
 
 haveDepCtrl, DependencyControl = pcall require, 'l0.DependencyControl'
 
@@ -130,7 +130,7 @@ collectHeader = ( subtitles ) =>
 	-- resolution. Don't use low-resolution workraws for typesetting!
 	vidResX, vidResY = aegisub.video_size!
 	if vidResX and (vidResX != resX or vidResY != resY)
-		@logFunc "Script and loaded video resolution mismatch, preferring video."
+		@.logFunc "Script and loaded video resolution mismatch, preferring video."
 
 	@resX = vidResX or resX
 	@resY = vidResY or resY
