@@ -16,16 +16,16 @@
       "description": "Provides low level inspection and analysis of subtitles post-rasterization.",
       "channels": {
         "release": {
-          "version": "0.7.0",
-          "released": "2015-04-13",
+          "version": "0.7.1",
+          "released": "2016-04-11",
           "default": true,
           "platforms": ["Windows-x86", "Windows-x64", "OSX-x64"],
           "fileBaseUrl": "https://github.com/TypesettingTools/@{scriptName}/releases/download/v0.5.1/",
           "files": [
             {
               "name": ".moon",
-              "url": "https://raw.githubusercontent.com/TypesettingTools/@{scriptName}/9f2af01bd961fc134da24fbbe132de0b5e1bcc43/examples/Aegisub/Inspector@{fileName}",
-              "sha1": "F90290D481202E52496245A37378F25225854496"
+              "url": "https://raw.githubusercontent.com/TypesettingTools/@{scriptName}/e60b365360eb43c10f967b5d9b8b18d6d8a95b4d/examples/Aegisub/Inspector@{fileName}",
+              "sha1": "7F42467BE41C7EC13539A1BEAA887640485AB69D"
             },
             {
               "name": "/SubInspector.dll",
@@ -59,6 +59,9 @@
         }
       },
       "changelog": {
+        "0.7.1": [
+          "Fix Inspector.moon log function invocation."
+        ],
         "0.7.0": [
           "Fix Inspector.moon for libass with DirectWrite. No more XP support."
         ],
