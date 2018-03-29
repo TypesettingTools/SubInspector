@@ -1,18 +1,15 @@
 [submodule "deps/freetype2"]
 	path = deps/freetype2
-	url = git://git.sv.gnu.org/freetype/freetype2.git
+	url = git://git.savannah.gnu.org/freetype/freetype2.git
 [submodule "deps/fribidi"]
 	path = deps/fribidi
-	url = https://github.com/behdad/fribidi.git
+	url = https://github.com/fribidi/fribidi.git
 [submodule "deps/harfbuzz"]
 	path = deps/harfbuzz
-	url = https://github.com/behdad/harfbuzz.git
+	url = https://github.com/harfbuzz/harfbuzz.git
 [submodule "deps/libass"]
 	path = deps/libass
 	url = https://github.com/libass/libass.git
-[submodule "deps/fontconfig-win"]
-	path = deps/fontconfig-win
-	url = https://github.com/tgoyne/fontconfig.git
 [submodule "deps/fontconfig"]
 	path = deps/fontconfig
-	url = git://anongit.freedesktop.org/fontconfig
+	url = https://github.com/freedesktop/fontconfig.git
