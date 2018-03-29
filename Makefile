@@ -11,8 +11,9 @@ AR := ar
 WARNINGS := -Wall -Wunreachable-code -Wfloat-equal -Wredundant-decls -Winit-self -Wpedantic
 OPTIMIZATION := -O3
 ADDITIONAL := -std=c99
-LIBS := -lass
-CFLAGS := $(WARNINGS) $(OPTIMIZATION) $(DEFINES) $(ADDITIONAL)
+DEPSDIR := deps/build/lib
+LIBS := $(DEPSDIR)/libass.a $(DEPSDIR)/libharfbuzz.a $(DEPSDIR)/libfribidi.a $(DEPSDIR)/libfreetype.a -lz -lbz2 -liconv /usr/local/lib/libpng.a -framework CoreText -framework CoreFoundation
+CFLAGS := $(WARNINGS) $(OPTIMIZATION) $(DEFINES) $(ADDITIONAL) -Ideps/build/include
 LFLAGS := $(LIBS)
 LIB_NAME := libSubInspector
 
