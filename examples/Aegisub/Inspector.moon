@@ -1,6 +1,6 @@
 -- This library is unlicensed under CC0
 local requireffi, ffi, looseVersionCompare
-versionRecord = '0.7.1'
+versionRecord = '0.7.2'
 
 haveDepCtrl, DependencyControl = pcall require, 'l0.DependencyControl'
 
@@ -42,7 +42,7 @@ else
 	SIVersionCompat = 0x000501
 
 	versionComponents = ( version ) ->
-		return (version / 65536) % 256, (version / 256) % 256, version % 256
+		return math.floor(version / 65536) % 256, math.floor(version / 256) % 256, version % 256
 
 	looseVersionCompare = ( ASSIVersion ) ->
 		lmajor, lminor, lpatch = versionComponents ASSIVersion
@@ -201,8 +201,7 @@ class Inspector
 	new: ( subtitles = error( "You must provide the subtitles object." ), fcConfig = libraryPath .. "fonts.conf", fontDir = aegisub.decode_path( '?script/fonts' ), logFunc = log ) =>
 
 		success, message = looseVersionCompare SubInspector.si_getVersion!
-		unless success
-			return nil, message
+		assert success, message
 
 		inspectorFree = ( inspector ) -> SubInspector.si_cleanup inspector
 
