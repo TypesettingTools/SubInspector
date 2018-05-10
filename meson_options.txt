@@ -1,0 +1,2 @@
+option('static', type: 'boolean', value: false, description: 'Build statically linked library')
+option('enable_zlib', type: 'boolean', value: true, description: 'Use zlib for crc computation if available')
