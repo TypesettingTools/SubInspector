@@ -13,8 +13,16 @@ b_static = get_option('static')
 
 deps = []
 
+deps += cc.find_library('bz2', required : false)
+deps += cc.find_library('iconv', required: false)
+deps += dependency('libpng', required: false)
+
+if host_machine.system() == 'darwin'
+    deps += dependency('appleframeworks', modules: ['CoreFoundation, CoreText'])
+endif
+
 if b_static
-    deps_dir = [join_paths(meson.source_root(), 'deps/build')]
+    deps_dir = [join_paths(meson.source_root(), 'deps', 'build')]
     deps += cc.find_library('fribidi', dirs: deps_dir)
     deps += cc.find_library('harfbuzz', dirs: deps_dir)
     deps += cc.find_library('freetype', dirs: deps_dir)
@@ -25,7 +33,7 @@ else
 endif
 
 if enable_zlib
-    deps += dependency('zlib', version: '>=1.2.11', static: b_static)
+    deps += dependency('zlib', version: '>=1.2.8', static: b_static)
 else
     add_project_arguments('-DNO_ZLIB')
 endif
