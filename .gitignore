@@ -10,6 +10,7 @@
 SubInspector
 deps
 *.zip
+build
 
 # Visual Studio junk
 *.pdb
