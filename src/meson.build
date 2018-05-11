@@ -2,4 +2,4 @@ subinspector_src = files(
     'SubInspector.c'
 )
 
-subinspector = shared_library('subinspector', subinspector_src, dependencies: deps)
+subinspector = shared_library('SubInspector', subinspector_src, dependencies: deps)
