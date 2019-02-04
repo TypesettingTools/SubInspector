@@ -31,6 +31,10 @@ ninja
 
 Requires Microsoft Visual Studio 2013 Update 4 or newer.
 
+First, add a Windows `dirent.h` implementation somewhere on your path.
+[This implementation](https://github.com/tronkko/dirent) is known to work.
+See that project's README for specifics on where you can put the file.
+
 Launch the relevant VS native tools command prompt. Be sure that if you
 want a 64-bit built, you're using the one labeled x64. Then run the
 following:
