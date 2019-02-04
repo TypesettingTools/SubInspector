@@ -13,28 +13,40 @@ are provided for Aegisub that include the SubInspector library.
 
 ### Build
 
-1. Clone the repository with `git clone https://github.com/TypesettingTools/SubInspector.git --recursive`.
-1. If you already have the repository cloned, use `git submodule update --init --recursive`
+Requires meson version 0.49.0 or higher.
+
+1. Clone the repository with `git clone https://github.com/TypesettingTools/SubInspector.git`.
+
+#### Unix-like Operating Systems
+
+Building on OSX and Linux should be as simple as running the following:
+```
+cd /path/to/SubInspector
+meson build
+cd build
+ninja
+```
 
 #### Windows
 
 Requires Microsoft Visual Studio 2013 Update 4 or newer.
 
-1. Open SubInspector.sln and build the libSubInspector target. You must use the `Release` profile, as the `Debug` profile is broken.
-1. The library is placed in `Release\<Architecture>\libSubInspector.dll`
+Launch the relevant VS native tools command prompt. Be sure that if you
+want a 64-bit built, you're using the one labeled x64. Then run the
+following:
+```
+powershell
+cd C:\Path\To\SubInspector
+meson build
+cd build
+ninja
+```
 
-#### Unix-like Operating Systems
-
-Requires cmake 2.8 or newer.
-
-1. Install your system's libass development package
-1. `mkdir build && cd build` from the root of the source.
-1. `cmake ..` in the build directory you just created.
-1. `make`. `libSubInspector.(dylib|so)` will be placed in the build directory.
+Should you prefer a Visual Studio solution, just pass `--backend=vs` along with `meson build`, and then launch and build the resulting solution.
 
 ### Help and Support
 
-Talk to `torque` on `irc.rizon.net`.
+Talk to `CoffeeFlux` on `irc.rizon.net`.
 
 [libass]: https://github.com/libass/libass
 
