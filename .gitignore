@@ -28,3 +28,6 @@ build
 *.vcxproj.filters
 *.vcxproj.user
 Release
+
+# Meson
+subprojects
