@@ -233,7 +233,7 @@ int si_calculateBounds( SI_State *state, SI_Rect *rects, const int32_t *times, c
 			if ( 0xFF != (assImage->color & 0xFF) ) {
 				solid = solid | checkBounds( assImage, &boundsRect, &pixelHash );
 			}
-			rects[i].hash = crc32( pixelHash, (void*)&assImage->color, sizeof(assImage->color) );
+			pixelHash = crc32( pixelHash, (void*)&assImage->color, sizeof(assImage->color) );
 
 			assImage = assImage->next;
 		} while ( assImage );
@@ -246,7 +246,7 @@ int si_calculateBounds( SI_State *state, SI_Rect *rects, const int32_t *times, c
 		rects[i].w = boundsRect.x2 - boundsRect.x1;
 		rects[i].h = boundsRect.y2 - boundsRect.y1;
 		rects[i].solid = solid;
-		rects[i].hash = crc32( rects[i].hash, (void*)&rects[i], sizeof(rects[i]) );
+		rects[i].hash = crc32(pixelHash, (void*)&rects[i], sizeof(rects[i]) );
 
 		state->lastRect = rects[i];
 	}
