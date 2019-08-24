@@ -1,7 +1,7 @@
 project('SubInspector', 'c',
     license: 'MIT',
     meson_version: '>=0.49.0',
-    version: '0.5.2',
+    version: '0.5.3',
     default_options: ['c_std=c99', 'default_library=static', 'buildtype=release']
 )
 

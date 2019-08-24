@@ -16,34 +16,28 @@
       "description": "Provides low level inspection and analysis of subtitles post-rasterization.",
       "channels": {
         "release": {
-          "version": "0.7.2",
-          "released": "2018-04-0.6",
+          "version": "0.7.3",
+          "released": "2019-08-24",
           "default": true,
-          "platforms": ["Windows-x86", "Windows-x64", "OSX-x64"],
-          "fileBaseUrl": "https://github.com/TypesettingTools/@{scriptName}/releases/download/v0.5.1/",
+          "platforms": ["Windows-x64", "OSX-x64"],
+          "fileBaseUrl": "https://github.com/TypesettingTools/@{scriptName}/releases/download/v0.5.3/",
           "files": [
             {
               "name": ".moon",
-              "url": "https://raw.githubusercontent.com/TypesettingTools/@{scriptName}/c2db2971c9f959b6dcd84ea8438eef8e5702f400/examples/Aegisub/Inspector@{fileName}",
-              "sha1": "112009C60FFF28FD56B47AE51F562E306272AFF6"
-            },
-            {
-              "name": "/SubInspector.dll",
-              "url": "@{fileBaseUrl}@{scriptName}-win32.dll",
-              "platform": "Windows-x86",
-              "sha1": "E9A75D53FFE6DD5DBE35451B2DEA336AD2104C66"
+              "url": "https://raw.githubusercontent.com/TypesettingTools/@{scriptName}/v0.5.3/examples/Aegisub/Inspector@{fileName}",
+              "sha1": "A36FA544A0F26D76D19170E2DD7C0B5D24582495"
             },
             {
               "name": "/SubInspector.dll",
               "url": "@{fileBaseUrl}@{scriptName}-win64.dll",
               "platform": "Windows-x64",
-              "sha1": "719A281B1FCDF73EF058FF210CBC3674CB1A6831"
+              "sha1": "6522B5323A524DA991E9E3F8597F4571F995B6EE"
             },
             {
               "name": "/libSubInspector.dylib",
-              "url": "https://github.com/TypesettingTools/SubInspector/releases/download/v0.5.2/libSubInspector.dylib",
+              "url": "@{fileBaseUrl}@libSubInspector.dylib",
               "platform": "OSX-x64",
-              "sha1": "CE34B98F880FD7BB0DD6BDDCDC6484C7781EEF71"
+              "sha1": "TODO"
             }
           ],
           "requiredModules": [
@@ -59,6 +53,9 @@
         }
       },
       "changelog": {
+        "0.7.3": [
+          "Fixed composite image hash ignoring the colors of all but the last/topmost layers, which caused hash collisions on lines w/ different \\3c, \\4c, \\3a, \\4a."
+        ],
         "0.7.2": [
           "Fix Inspector.moon C library version compatibility check in some cases."
         ],
