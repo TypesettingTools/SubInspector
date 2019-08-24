@@ -1,5 +1,5 @@
 [wrap-git]
 directory = harfbuzz
 # Change this URL once upstreamed!
-url = https://github.com/centricular/harfbuzz.git
+url = https://github.com/boxerab/harfbuzz.git
 revision = meson
