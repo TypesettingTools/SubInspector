@@ -1,5 +1,7 @@
 [wrap-git]
 directory = harfbuzz
-# Change this URL once upstreamed!
-url = https://github.com/boxerab/harfbuzz.git
-revision = meson
+# The old boxerab/harfbuzz "meson" branch fork was deleted upstream;
+# harfbuzz ships its own meson.build since 2.6.5, so track a stable tag.
+url = https://github.com/harfbuzz/harfbuzz.git
+revision = 2.6.5
+clone-depth = 1

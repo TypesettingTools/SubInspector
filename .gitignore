@@ -29,5 +29,12 @@ build
 *.vcxproj.user
 Release
 
+# macOS junk
+.DS_Store
+.cache/
+
 # Meson
-subprojects
+build-static
+subprojects/*
+!subprojects/*.wrap
+!subprojects/packagefiles/
