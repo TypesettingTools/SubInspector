@@ -27,6 +27,29 @@ cd build
 ninja
 ```
 
+On macOS, install the dependencies with Homebrew first:
+
+```
+brew install meson ninja libass
+```
+
+The libass dependency is looked up with `static: true`, so with Homebrew's
+libass installed the resulting `libSubInspector.dylib` statically links
+libass and its dependencies and references only system libraries — it can
+be distributed to any Mac of the same architecture without requiring
+Homebrew at runtime.
+
+Homebrew ships no static `graphite2` (a harfbuzz dependency), so on macOS
+this build always compiles it from source via `subprojects/graphite2.wrap`
+plus an injected meson build file under `subprojects/packagefiles/graphite2/`
+(upstream graphite2 ships CMake only). `-Wl,-dead_strip_dylibs` drops any
+leftover dylib load commands.
+
+Note that the *full* wrap fallback (building libass itself from source via
+the wrap files) does not currently work on macOS: libass pulls in glib,
+whose meson build fails there. A system libass is required on macOS; the
+wrap fallback path works on Linux.
+
 #### Windows
 
 Requires Microsoft Visual Studio 2013 Update 4 or newer.
