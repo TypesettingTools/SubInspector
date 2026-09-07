@@ -45,7 +45,7 @@ brew install meson ninja libass
 Clone the repository:
 
 ```
-git clone https://github.com/<you>/SubInspector.git
+git clone https://github.com/ZahicAtypical/SubInspector.git
 cd SubInspector
 ```
 
