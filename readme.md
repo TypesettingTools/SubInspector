@@ -61,7 +61,11 @@ The result is `build/src/libSubInspector.dylib` (macOS) or
 
 If a system libass is found (e.g. via `pkg-config`), it is used; otherwise
 meson downloads and builds libass and its dependencies from the wrap files
-in `subprojects/`.
+in `subprojects/`. Caveat: the *full* wrap fallback (no system libass at
+all) is fragile — on macOS it fails because libass pulls in glib, whose
+meson build is broken there, and a freetype↔harfbuzz subproject recursion
+can bite when neither is installed system-wide. Install libass (and ideally
+freetype/harfbuzz) via your package manager first.
 
 #### Self-contained dylib (macOS)
 
