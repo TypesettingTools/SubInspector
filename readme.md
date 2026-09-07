@@ -65,7 +65,10 @@ in `subprojects/`. Caveat: the *full* wrap fallback (no system libass at
 all) is fragile — on macOS it fails because libass pulls in glib, whose
 meson build is broken there, and a freetype↔harfbuzz subproject recursion
 can bite when neither is installed system-wide. Install libass (and ideally
-freetype/harfbuzz) via your package manager first.
+freetype/harfbuzz) via your package manager first. The wraps are still kept
+because they are the zero-dependency path on Linux, they pin exact
+dependency versions for reproducible builds, and on macOS they supply
+graphite2 even in the normal Homebrew build (see below).
 
 #### Self-contained dylib (macOS)
 
@@ -80,11 +83,19 @@ ninja -C build
 
 the resulting `libSubInspector.dylib` contains libass and its dependencies
 and references only system libraries — it can be distributed to any Mac of
-the same architecture. Homebrew does not ship a static `graphite2` (a
-harfbuzz dependency), so `subprojects/graphite2.wrap` and an injected meson
-build file under `subprojects/packagefiles/graphite2/` compile it from
-source automatically; `-Wl,-dead_strip_dylibs` drops any leftover dylib
-load commands.
+the same architecture.
+
+One dependency needs special handling: **graphite2**. It has always been in
+the chain (Homebrew's harfbuzz is built with its Graphite2 shaper enabled),
+but with the upstream *dynamic* build it is invisible — `libass.dylib` →
+`libharfbuzz.dylib` → `libgraphite2.dylib` is resolved by the dynamic loader
+at runtime, so meson never has to name it. Static linking changes that:
+pulling in `libharfbuzz.a` leaves unresolved `gr_*` symbols the linker must
+satisfy, and Homebrew ships only a *dynamic* graphite2. This fork therefore
+builds it from source via
+`subprojects/graphite2.wrap` plus an injected meson build file under
+`subprojects/packagefiles/graphite2/` (upstream graphite2 ships CMake only).
+`-Wl,-dead_strip_dylibs` then drops any leftover dylib load commands.
 
 ### Windows
 
