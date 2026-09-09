@@ -32,7 +32,9 @@ It targets the Advanced SubStation Alpha subtitle format (ASS) and uses
 - [meson][meson] >= 0.49.0 and [ninja][ninja]
 - A C99 compiler (clang or MSVC 2013 Update 4+)
 - libass >= 0.14.0 — either provided by the system / Homebrew, or built from
-  source automatically via the `subprojects/*.wrap` fallbacks
+  source automatically via the `subprojects/*.wrap` fallbacks (including a
+  fully source-only build, see
+  [No-Homebrew build](#no-homebrew-build-pure-source-fallback))
 
 On macOS with Homebrew:
 
@@ -59,16 +61,33 @@ ninja -C build
 The result is `build/src/libSubInspector.dylib` (macOS) or
 `build/src/libSubInspector.so` (Linux).
 
-If a system libass is found (e.g. via `pkg-config`), it is used; otherwise
-meson downloads and builds libass and its dependencies from the wrap files
-in `subprojects/`. Caveat: the *full* wrap fallback (no system libass at
-all) is fragile — on macOS it fails because libass pulls in glib, whose
-meson build is broken there, and a freetype↔harfbuzz subproject recursion
-can bite when neither is installed system-wide. Install libass (and ideally
-freetype/harfbuzz) via your package manager first. The wraps are still kept
-because they are the zero-dependency path on Linux, they pin exact
-dependency versions for reproducible builds, and on macOS they supply
-graphite2 even in the normal Homebrew build (see below).
+If no system libass is found, meson builds it and its dependencies from
+the `subprojects/*.wrap` sources (mirroring the [Aegisub wrap set][aegisub-wraps]).
+For a build with no system libraries at all, see
+[No-Homebrew build](#no-homebrew-build-pure-source-fallback).
+
+#### No-Homebrew build (pure source fallback)
+
+Builds everything (libass, freetype2, harfbuzz, fribidi, graphite2, zlib,
+libpng) from source — no system libraries required:
+
+```bash
+meson setup build-nohb --wrap-mode=forcefallback \
+  -Dharfbuzz:freetype=enabled \
+  -Dharfbuzz:glib=disabled \
+  -Dharfbuzz:icu=disabled \
+  -Dharfbuzz:cairo=disabled \
+  -Dharfbuzz:gobject=disabled \
+  -Dfreetype2:harfbuzz=disabled
+ninja -C build-nohb
+```
+
+Why: freetype2 ⇄ harfbuzz are mutually dependent; freetype2 disables
+harfbuzz's FreeType support (`hb-ft`, required by libass) to break the
+cycle, so the two options re-enable it while making freetype2 skip its
+optional harfbuzz integration. The glib/icu/cairo/gobject flags drop
+harfbuzz's optional features (glib's wrapdb libffi fails to compile on
+recent Apple clang); none are needed by libass.
 
 #### Self-contained dylib (macOS)
 
@@ -85,17 +104,12 @@ the resulting `libSubInspector.dylib` contains libass and its dependencies
 and references only system libraries — it can be distributed to any Mac of
 the same architecture.
 
-One dependency needs special handling: **graphite2**. It has always been in
-the chain (Homebrew's harfbuzz is built with its Graphite2 shaper enabled),
-but with the upstream *dynamic* build it is invisible — `libass.dylib` →
-`libharfbuzz.dylib` → `libgraphite2.dylib` is resolved by the dynamic loader
-at runtime, so meson never has to name it. Static linking changes that:
-pulling in `libharfbuzz.a` leaves unresolved `gr_*` symbols the linker must
-satisfy, and Homebrew ships only a *dynamic* graphite2. This fork therefore
-builds it from source via
-`subprojects/graphite2.wrap` plus an injected meson build file under
-`subprojects/packagefiles/graphite2/` (upstream graphite2 ships CMake only).
-`-Wl,-dead_strip_dylibs` then drops any leftover dylib load commands.
+One dependency needs special handling: **graphite2**. Homebrew ships only a
+*dynamic* graphite2, so when static linking pulls in `libharfbuzz.a` the
+unresolved `gr_*` symbols can't be satisfied. This fork therefore builds it
+from source via `subprojects/graphite2.wrap` plus an injected meson build
+file under `subprojects/packagefiles/graphite2/` (upstream ships CMake
+only), and `-Wl,-dead_strip_dylibs` drops leftover dylib load commands.
 
 ### Windows
 
@@ -197,10 +211,11 @@ local rects, err = inspector:getBounds(lines, times)
 - **DependencyControl keeps offering to "update" SubInspector** — it matches
   the upstream feed by platform; keep the local `Inspector.moon` and ignore
   the prompt (do not let it reinstall an x64 binary).
-- **Wrap download failures (savannah 502, dead forks)** — this fork already
-  points the wraps at working sources (SourceForge mirror for FreeType,
-  official repos for harfbuzz/zlib). If a URL rots again, drop the tarball
-  into `subprojects/packagecache/` with the name in the `.wrap` file.
+- **Wrap download failures** — the fallback wraps mirror the officially
+  maintained [Aegisub wrap set][aegisub-wraps] (freetype/fribidi via git
+  from their upstream repos, harfbuzz/libpng/zlib via wrapdb v2). If a URL
+  rots again, drop the tarball into `subprojects/packagecache/` with the
+  name in the `.wrap` file.
 
 ## Project layout
 
@@ -228,3 +243,4 @@ MIT — see [COPYING](COPYING).
 [upstream]: https://github.com/TypesettingTools/SubInspector
 [assfoundation]: https://github.com/TypesettingTools/ASSFoundation
 [depcontrol]: https://aegi.vmoe.info/docs/3.2/Dependency_Control/
+[aegisub-wraps]: https://github.com/TypesettingTools/Aegisub/tree/master/subprojects
