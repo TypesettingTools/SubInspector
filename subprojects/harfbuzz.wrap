@@ -1,12 +1,10 @@
-[wrap-git]
-directory = harfbuzz
-# The old boxerab/harfbuzz "meson" branch fork was deleted upstream;
-# harfbuzz ships its own meson.build since 2.6.5, so track a stable tag.
-url = https://github.com/harfbuzz/harfbuzz.git
-revision = 2.6.5
-clone-depth = 1
-# Note: do NOT add default_options with freetype=disabled — libass needs
-# harfbuzz's FreeType interop (hb_ft_font_create) to render glyphs.
-# The full wrap fallback chain (without a system libass) does not work on
-# macOS because libass requires glib, whose meson build fails here; install
-# libass via Homebrew instead. On Linux the fallback chain works.
+[wrap-file]
+directory = harfbuzz-13.0.1
+source_url = https://github.com/harfbuzz/harfbuzz/releases/download/13.0.1/harfbuzz-13.0.1.tar.xz
+source_filename = harfbuzz-13.0.1.tar.xz
+source_hash = 3553d943401c34ab9b8c75f35cdb8452ca660233b0e9d4a22395ce5245484bd7
+source_fallback_url = https://wrapdb.mesonbuild.com/v2/harfbuzz_13.0.1-1/get_source/harfbuzz-13.0.1.tar.xz
+wrapdb_version = 13.0.1-1
+
+[provide]
+dependency_names = harfbuzz, harfbuzz-cairo, harfbuzz-gobject, harfbuzz-icu, harfbuzz-subset
