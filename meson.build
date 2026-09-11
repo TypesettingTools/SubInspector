@@ -1,6 +1,6 @@
 project('SubInspector', 'c',
     license: 'MIT',
-    meson_version: '>=0.49.0',
+    meson_version: '>=0.64.0',
     version: '0.5.2',
     default_options: ['c_std=c99', 'default_library=static', 'buildtype=release']
 )
@@ -24,7 +24,8 @@ zlib_dep = dependency('zlib', version: '>=1.2.8', required: get_option('zlib'),
 if zlib_dep.found()
     deps += zlib_dep
 else
-    add_project_arguments('-DNO_ZLIB')
+    add_project_arguments('-DNO_ZLIB', language: 'c')
 endif
 
 subdir('src')
+subdir('tests')

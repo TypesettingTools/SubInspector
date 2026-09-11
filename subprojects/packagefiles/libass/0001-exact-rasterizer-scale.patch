@@ -1,0 +1,12 @@
+--- a/libass/ass_rasterizer.c
++++ b/libass/ass_rasterizer.c
+@@ -191,8 +191,6 @@
+     line->a *= 1 << shift;
+     line->b *= 1 << shift;
+     line->c *= 1 << shift;
+-    line->scale = (uint64_t) 0x53333333 * (uint32_t) (max_ab * (uint64_t) max_ab >> 32) >> 32;
+-    line->scale += 0x8810624D - (0xBBC6A7EF * (uint64_t) max_ab >> 32);
+-    //line->scale = ((uint64_t) 1 << 61) / max_ab;
++    line->scale = ((uint64_t) 1 << 61) / max_ab;
+     return true;
+ }

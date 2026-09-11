@@ -11,6 +11,7 @@ SubInspector
 deps
 *.zip
 build
+build-*
 
 # Visual Studio junk
 *.pdb
@@ -30,4 +31,6 @@ build
 Release
 
 # Meson
-subprojects
+subprojects/*
+!subprojects/*.wrap
+!subprojects/packagefiles/
