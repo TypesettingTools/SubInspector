@@ -16,8 +16,35 @@ deps = []
 deps += cc.find_library('bz2', required: false)
 deps += cc.find_library('iconv', required: false)
 
+# Keep bundled builds focused on subtitle rendering. These defaults can be
+# overridden with -D<subproject>:<option>=<value>.
+libass_options = [
+    'test=disabled',
+    'compare=disabled',
+    'profile=disabled',
+    'fuzz=disabled',
+    'checkasm=disabled',
+    'libunibreak=disabled',
+    'freetype2:brotli=disabled',
+    'freetype2:bzip2=disabled',
+    'freetype2:png=enabled',
+    'freetype2:zlib=enabled',
+    'harfbuzz:icu=disabled',
+    'harfbuzz:utilities=disabled',
+    'harfbuzz:subset=disabled',
+    'harfbuzz:raster=disabled',
+    'harfbuzz:vector=disabled',
+    'harfbuzz:gpu=disabled',
+]
+if host_machine.system() == 'darwin'
+    libass_options += ['coretext=enabled', 'fontconfig=disabled']
+elif host_machine.system() == 'windows'
+    libass_options += ['directwrite=enabled', 'fontconfig=disabled']
+endif
+
 deps += dependency('libass', version: '>=0.14.0',
-                   fallback: ['libass', 'libass_dep'])
+                   fallback: ['libass', 'libass_dep'],
+                   default_options: libass_options)
 
 zlib_dep = dependency('zlib', version: '>=1.2.8', required: get_option('zlib'),
                       fallback: ['zlib', 'zlib_dep'])
