@@ -22,7 +22,8 @@ static const char header[] =
 
 static SI_Rect render(SI_State *state, const char *script) {
     const int32_t times[] = {0, 500, 2500};
-    SI_Rect rects[3] = {{0}};
+    SI_Rect rects[3];
+    memset(rects, 0xa5, sizeof(rects));
     CHECK(si_setScript(state, script, 0) == 0);
     CHECK(si_calculateBounds(state, rects, times, 3) == 0);
     CHECK(rects[0].w > 0 && rects[0].h > 0);
@@ -30,6 +31,19 @@ static SI_Rect render(SI_State *state, const char *script) {
     CHECK(rects[0].w == rects[1].w && rects[0].h == rects[1].h);
     CHECK(rects[0].hash == rects[1].hash);
     CHECK(rects[2].w == 0 && rects[2].h == 0);
+    CHECK(rects[2].x == 0 && rects[2].y == 0);
+    CHECK(rects[2].hash == 0 && rects[2].solid == 0);
+
+    /* Reuse the populated output array, then exercise the unchanged-frame
+       cache with an output buffer containing different bytes. */
+    CHECK(si_calculateBounds(state, rects, times, 3) == 0);
+    SI_Rect repeated;
+    memset(&repeated, 0x5a, sizeof(repeated));
+    CHECK(si_calculateBounds(state, &repeated, times, 1) == 0);
+    CHECK(rects[0].hash == repeated.hash);
+    memset(&repeated, 0x3c, sizeof(repeated));
+    CHECK(si_calculateBounds(state, &repeated, times, 1) == 0);
+    CHECK(rects[0].hash == repeated.hash);
     return rects[0];
 }
 
@@ -46,6 +60,15 @@ int main(void) {
     CHECK(rect.solid == 1);
     CHECK(render(state, shape).hash == rect.hash);
 
+    /* A script without events can leave libass's previous image cache in
+       place. Clear its result without losing the cached visible rectangle. */
+    CHECK(si_setScript(state, "\n", 0) == 0);
+    const int32_t time = 0;
+    SI_Rect empty = rect;
+    CHECK(si_calculateBounds(state, &empty, &time, 1) == 0);
+    CHECK(empty.w == 0 && empty.h == 0 && empty.hash == 0);
+    CHECK(render(state, shape).hash == rect.hash);
+
     /* Change only the first of two rendered images. This catches the old
        bug where only the final image contributed to the pixel hash. */
     const char *two_shapes =
@@ -60,6 +83,38 @@ int main(void) {
         "{\\an7\\pos(200,100)\\p1}m 0 0 l 20 0 20 20 0 20\n";
     SI_Rect original = render(state, two_shapes);
     SI_Rect changed = render(state, changed_first);
+    CHECK(original.x == changed.x && original.y == changed.y);
+    CHECK(original.w == changed.w && original.h == changed.h);
+    CHECK(original.hash != changed.hash);
+
+    /* Moving an interior image must change the hash even though neither
+       its bitmap nor the combined bounds change. */
+    const char three_shapes[] =
+        "Dialogue: 0,0:00:00.00,0:00:02.00,Default,,0,0,0,,"
+        "{\\an7\\pos(100,100)\\p1}m 0 0 l 20 0 20 20 0 20\n"
+        "Dialogue: 1,0:00:00.00,0:00:02.00,Default,,0,0,0,,"
+        "{\\an7\\pos(140,100)\\p1}m 0 0 l 20 0 20 20 0 20\n"
+        "Dialogue: 2,0:00:00.00,0:00:02.00,Default,,0,0,0,,"
+        "{\\an7\\pos(200,100)\\p1}m 0 0 l 20 0 20 20 0 20\n";
+    char moved_middle[sizeof(three_shapes)];
+    strcpy(moved_middle, three_shapes);
+    char *position = strstr(moved_middle, "140,100");
+    CHECK(position != NULL);
+    memcpy(position, "160,100", 7);
+    original = render(state, three_shapes);
+    changed = render(state, moved_middle);
+    CHECK(original.x == changed.x && original.y == changed.y);
+    CHECK(original.w == changed.w && original.h == changed.h);
+    CHECK(original.hash != changed.hash);
+
+    /* Equal-area drawings with the same bounds but different gaps must
+       differ too: hashing only nonzero pixels loses their arrangement. */
+    original = render(state,
+        "Dialogue: 0,0:00:00.00,0:00:02.00,Default,,0,0,0,,"
+        "{\\an7\\pos(100,100)\\p1}m 0 0 l 8 0 8 4 0 4 m 12 8 l 20 8 20 12 12 12\n");
+    changed = render(state,
+        "Dialogue: 0,0:00:00.00,0:00:02.00,Default,,0,0,0,,"
+        "{\\an7\\pos(100,100)\\p1}m 12 0 l 20 0 20 4 12 4 m 0 8 l 8 8 8 12 0 12\n");
     CHECK(original.x == changed.x && original.y == changed.y);
     CHECK(original.w == changed.w && original.h == changed.h);
     CHECK(original.hash != changed.hash);

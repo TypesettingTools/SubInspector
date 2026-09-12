@@ -198,6 +198,7 @@ int si_calculateBounds( SI_State *state, SI_Rect *rects, const int32_t *times, c
 
 		ASS_Image *assImage = ass_render_frame( state->assRenderer, assTrack, times[i], &lineChanged );
 		if ( NULL == assImage ) {
+			rects[i] = (SI_Rect){0};
 			continue;
 		}
 
@@ -231,6 +232,8 @@ int si_calculateBounds( SI_State *state, SI_Rect *rects, const int32_t *times, c
 				continue;
 			}
 			if ( 0xFF != (assImage->color & 0xFF) ) {
+				const int imageBounds[] = {assImage->dst_x, assImage->dst_y, assImage->w, assImage->h};
+				pixelHash = crc32( pixelHash, (const void *)imageBounds, sizeof(imageBounds) );
 				solid = solid | checkBounds( assImage, &boundsRect, &pixelHash );
 			}
 			pixelHash = crc32( pixelHash, (void*)&assImage->color, sizeof(assImage->color) );
@@ -246,7 +249,9 @@ int si_calculateBounds( SI_State *state, SI_Rect *rects, const int32_t *times, c
 		rects[i].w = boundsRect.x2 - boundsRect.x1;
 		rects[i].h = boundsRect.y2 - boundsRect.y1;
 		rects[i].solid = solid;
-		rects[i].hash = crc32( pixelHash, (void*)&rects[i], sizeof(rects[i]) );
+		// All rendered image data is already hashed; never hash output storage,
+		// which contains the caller's previous hash and possibly unset padding.
+		rects[i].hash = pixelHash;
 
 		state->lastRect = rects[i];
 	}
@@ -280,6 +285,9 @@ static uint8_t checkBounds( ASS_Image *assImage, SI_InternalRect *boundsRect, ui
 	const uint32_t chunksPerRow      = assImage->w/chunkSize;
 
 	while ( byte < bitmapEnd ) {
+		// Include zero pixels so that gaps and row boundaries retain their
+		// positions. Exclude stride padding, including the unpadded last row.
+		*pixelHash = crc32( *pixelHash, byte, assImage->w );
 		chunk = (uintptr_t *)byte;
 		addHeight = 0;
 
@@ -296,7 +304,6 @@ static uint8_t checkBounds( ASS_Image *assImage, SI_InternalRect *boundsRect, ui
 				// printf( "Chunk: %p; Value: %016lX, End: %p\n", chunk, *chunk, chunk + 1 );
 				for( byte = (uint8_t *)chunk; byte < (uint8_t *)(chunk + 1); byte++ ) {
 					if ( *byte ) {
-						*pixelHash = crc32( *pixelHash, (void *)byte, 1 );
 						if ( *byte == 255 ) {
 							solid = 1;
 						}
@@ -320,8 +327,6 @@ static uint8_t checkBounds( ASS_Image *assImage, SI_InternalRect *boundsRect, ui
 		byte = (uint8_t *)chunk;
 		while ( byte < endByte ) {
 			if ( *byte ) {
-				*pixelHash = crc32( *pixelHash, (void *)byte, 1 );
-
 				if ( *byte == 255 ) {
 					solid = 1;
 				}

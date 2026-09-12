@@ -4,6 +4,13 @@ render_test = executable('render-test', 'render.c',
 test('render', render_test)
 
 if not meson.is_cross_build()
+    python = import('python').find_installation()
+    if add_languages('cpp', required: false, native: false)
+        example = executable('si-example', '../examples/C++/example.cpp',
+            override_options: ['cpp_std=c++11'], link_with: subinspector)
+        test('example-line-endings', python,
+            args: [files('example.py'), example.full_path()], depends: example)
+    endif
     luajit = find_program('luajit', required: false)
     moonc = find_program('moonc', required: false)
     if luajit.found() and moonc.found()
@@ -11,7 +18,6 @@ if not meson.is_cross_build()
             input: '../examples/Aegisub/Inspector.moon',
             output: 'Inspector.lua',
             command: [moonc, '-o', '@OUTPUT@', '@INPUT@'])
-        python = import('python').find_installation()
         test('aegisub-wrapper', python,
             args: [files('wrapper.py'), luajit.full_path(), wrapper,
                    subinspector.full_path(), files('wrapper.lua')],

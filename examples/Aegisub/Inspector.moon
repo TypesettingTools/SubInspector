@@ -103,14 +103,17 @@ collectHeader = ( subtitles ) =>
 		"[Script Info]"
 	}
 
-	-- These are the only header fields that actually affect the way ASS
-	-- is rendered. I don't actually know if ScriptType matters.
+	-- Preserve script settings that affect libass rendering.
 	infoFields = {
 		PlayResX:   true
 		PlayResY:   true
 		WrapStyle:  true
 		ScriptType: true
 		ScaledBorderAndShadow: true
+		Kerning: true
+		Language: true
+		LayoutResX: true
+		LayoutResY: true
 	}
 
 	styles = { }
