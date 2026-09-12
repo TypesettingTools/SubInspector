@@ -1,4 +1,9 @@
-[wrap-git]
-directory = libass
-url = https://github.com/TypesettingTools/libass.git
-revision = meson-no-rasterizer-approximation
+[wrap-file]
+directory = libass-0.17.5
+source_url = https://github.com/libass/libass/releases/download/0.17.5/libass-0.17.5.tar.xz
+source_filename = libass-0.17.5.tar.xz
+source_hash = 2dca25c0e0c837ddf00b52011b3f82cac1e4ddd3ad018227806b0c2288864acc
+diff_files = libass/0001-exact-rasterizer-scale.patch
+
+[provide]
+dependency_names = libass
