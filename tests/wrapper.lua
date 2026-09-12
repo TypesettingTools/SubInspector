@@ -95,7 +95,8 @@ for _, depctrl in ipairs({false, true}) do
         end,
     }, {__index = ffi})
     local Inspector = load_wrapper(test_ffi, include .. '/?.lua', depctrl)
-    assert(loaded_path:find(include .. '/SubInspector/Inspector/', 1, true) == 1)
+    local expected_root = include:gsub('\\', '/') .. '/SubInspector/Inspector/'
+    assert(loaded_path:find(expected_root, 1, true) == 1)
     local subtitles = {
         {class = 'info', key = 'ScriptType', value = 'v4.00+', raw = 'ScriptType: v4.00+'},
         {class = 'info', key = 'PlayResX', value = '640', raw = 'PlayResX: 640'},

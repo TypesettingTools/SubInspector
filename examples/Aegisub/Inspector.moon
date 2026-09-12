@@ -218,7 +218,7 @@ addStyles = ( line, scriptText, seenStyles ) =>
 class Inspector
 	@version = versionRecord
 
-	new: ( subtitles = error( "You must provide the subtitles object." ), fcConfig = nil, fontDir = aegisub.decode_path( '?script/fonts' ), logFunc = log ) =>
+	new: ( subtitles = error( "You must provide the subtitles object." ), fcConfig, fontDir = aegisub.decode_path( '?script/fonts' ), logFunc = log ) =>
 
 		success, message = looseVersionCompare SubInspector.si_getVersion!
 		assert success, message
