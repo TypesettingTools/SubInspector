@@ -3,6 +3,13 @@ render_test = executable('render-test', 'render.c',
     link_with: subinspector)
 test('render', render_test)
 
+if build_machine.system() == 'darwin' and host_machine.system() == 'darwin'
+    python = import('python').find_installation()
+    test('macos-release-tools', python,
+        args: [files('osx-release.py'), subinspector.full_path()],
+        depends: subinspector)
+endif
+
 if not meson.is_cross_build()
     python = import('python').find_installation()
     if add_languages('cpp', required: false, native: false)

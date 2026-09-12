@@ -46,6 +46,8 @@ Should you prefer a Visual Studio solution, just pass `--backend=vs` along with 
 
 ### Help and Support
 
+For macOS releases, see the [signing instructions](docs/releasing.md).
+
 Talk to `CoffeeFlux` on `irc.rizon.net`.
 
 [libass]: https://github.com/libass/libass

@@ -94,6 +94,9 @@ jobs:
         if: runner.os != 'macOS' || matrix.arch != 'x86_64'
         shell: bash
         run: meson test -C build --list | grep -q aegisub-wrapper
+      - name: Check macOS release tests are enabled
+        if: runner.os == 'macOS'
+        run: meson test -C build --list | grep -q macos-release-tools
       - name: Test
         run: meson test -C build --print-errorlogs
       - name: Check binary architecture and runtime dependencies
