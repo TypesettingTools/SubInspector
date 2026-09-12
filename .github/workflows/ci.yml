@@ -42,12 +42,6 @@ jobs:
             args: --wrap-mode=forcefallback -Dzlib=enabled -Dlibass:asm=enabled -Db_vscrt=mt
             binary: SubInspector.dll
             artifact: SubInspector-windows-x64
-          - name: Windows x86
-            os: windows-2025
-            arch: x86
-            args: --wrap-mode=forcefallback -Dzlib=enabled -Dlibass:asm=enabled -Db_vscrt=mt
-            binary: SubInspector.dll
-            artifact: SubInspector-windows-x86
           - name: Linux (system dependencies)
             os: ubuntu-24.04
             args: --wrap-mode=nofallback -Dbuildtype=debugoptimized -Dzlib=enabled

@@ -25,7 +25,7 @@ elif sys.platform == 'win32':
     if data[pe_offset:pe_offset + 4] != b'PE\0\0':
         sys.exit('Not a PE binary')
     machine = struct.unpack_from('<H', data, pe_offset + 4)[0]
-    if machine != {'x86': 0x14c, 'x64': 0x8664}[arch]:
+    if arch != 'x64' or machine != 0x8664:
         sys.exit(f'Unexpected PE machine type: {machine:#x}')
     output = subprocess.check_output(['dumpbin', '/dependents', binary], text=True)
     print(output)
