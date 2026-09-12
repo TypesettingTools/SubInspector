@@ -5,9 +5,7 @@
   "baseUrl": "https://github.com/TypesettingTools/SubInspector",
   "url": "@{baseUrl}",
   "maintainer": "torque",
-  "knownFeeds": {
-    "ffi-experiments": "https://raw.githubusercontent.com/TypesettingTools/ffi-experiments/master/DependencyControl.json"
-  },
+  "knownFeeds": {},
   "modules": {
     "SubInspector.Inspector": {
       "url": "@{baseUrl}",
@@ -16,49 +14,55 @@
       "description": "Provides low level inspection and analysis of subtitles post-rasterization.",
       "channels": {
         "release": {
-          "version": "0.7.2",
-          "released": "2018-04-0.6",
+          "version": "0.8.0",
+          "released": "2026-09-12",
           "default": true,
-          "platforms": ["Windows-x86", "Windows-x64", "OSX-x64"],
-          "fileBaseUrl": "https://github.com/TypesettingTools/@{scriptName}/releases/download/v0.5.1/",
+          "platforms": [
+            "Windows-x64",
+            "OSX-x64",
+            "OSX-arm64"
+          ],
+          "fileBaseUrl": "@{baseUrl}/releases/download/v0.6.0/",
           "files": [
             {
               "name": ".moon",
-              "url": "https://raw.githubusercontent.com/TypesettingTools/@{scriptName}/c2db2971c9f959b6dcd84ea8438eef8e5702f400/examples/Aegisub/Inspector@{fileName}",
-              "sha1": "112009C60FFF28FD56B47AE51F562E306272AFF6"
+              "url": "@{fileBaseUrl}Inspector.moon",
+              "sha1": "FFFC4A2B039E490C18CBC4BAFEDCC5C0381D9C34"
             },
             {
               "name": "/SubInspector.dll",
-              "url": "@{fileBaseUrl}@{scriptName}-win32.dll",
-              "platform": "Windows-x86",
-              "sha1": "E9A75D53FFE6DD5DBE35451B2DEA336AD2104C66"
-            },
-            {
-              "name": "/SubInspector.dll",
-              "url": "@{fileBaseUrl}@{scriptName}-win64.dll",
+              "url": "@{fileBaseUrl}SubInspector-windows-x64.dll",
               "platform": "Windows-x64",
-              "sha1": "719A281B1FCDF73EF058FF210CBC3674CB1A6831"
+              "sha1": "B2A8274022CC084DFDD2913852D1D5E170F97D2C"
             },
             {
               "name": "/libSubInspector.dylib",
-              "url": "https://github.com/TypesettingTools/SubInspector/releases/download/v0.5.2/libSubInspector.dylib",
+              "url": "@{fileBaseUrl}libSubInspector-macos-x86_64.dylib",
               "platform": "OSX-x64",
-              "sha1": "CE34B98F880FD7BB0DD6BDDCDC6484C7781EEF71"
+              "sha1": "68E6F34C8B3F953F52DD75BDBF17BE820BD7DAD8"
+            },
+            {
+              "name": "/libSubInspector.dylib",
+              "url": "@{fileBaseUrl}libSubInspector-macos-arm64.dylib",
+              "platform": "OSX-arm64",
+              "sha1": "6FA1B10FD1D835A0A2A864100F27563DC4F4E750"
             }
           ],
           "requiredModules": [
             {
               "moduleName": "ffi"
-            },
-            {
-              "moduleName": "requireffi.requireffi",
-              "version": "0.1.2",
-              "feed": "@{feed:ffi-experiments}"
             }
           ]
         }
       },
       "changelog": {
+        "0.8.0": [
+          "Update the native library to 0.6.0 and refresh dependencies.",
+          "Add Apple Silicon support and signed, notarized macOS binaries (macOS 11+).",
+          "Fix rendering hashes, empty-frame bounds, and handling of ASS script settings.",
+          "Remove the ffi-experiments / requireffi dependency.",
+          "Drop Windows x86 support."
+        ],
         "0.7.2": [
           "Fix Inspector.moon C library version compatibility check in some cases."
         ],
