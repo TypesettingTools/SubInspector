@@ -1,5 +1,5 @@
 -- This library is unlicensed under CC0
-local requireffi, ffi, looseVersionCompare
+local ffi, looseVersionCompare
 versionRecord = '0.7.2'
 
 haveDepCtrl, DependencyControl = pcall require, 'l0.DependencyControl'
@@ -15,7 +15,6 @@ if haveDepCtrl
 		feed: "https://raw.githubusercontent.com/TypesettingTools/SubInspector/master/DependencyControl.json",
 		{
 			{ "ffi" }
-			{ "requireffi.requireffi", version: "0.1.1" }
 		}
 	} )
 
@@ -34,11 +33,10 @@ if haveDepCtrl
 
 		return true
 
-	ffi, requireffi = versionRecord\requireModules!
+	ffi = versionRecord\requireModules!
 
 else
 	ffi  = require 'ffi'
-	requireffi = require 'requireffi.requireffi'
 	SIVersionCompat = 0x000501
 
 	versionComponents = ( version ) ->
@@ -73,7 +71,29 @@ int         si_calculateBounds( void*, SI_Rect*, const int32_t*, const uint32_t 
 void        si_cleanup( void* );
 ]] )
 
-SubInspector, libraryPath = requireffi( 'SubInspector.Inspector.SubInspector' )
+loadLibrary = ->
+	filename = switch ffi.os
+		when 'Windows' then 'SubInspector.dll'
+		when 'OSX' then 'libSubInspector.dylib'
+		else 'libSubInspector.so'
+
+	paths = { }
+	for template in package.path\gmatch '[^;]+'
+		template = template\gsub '\\', '/'
+		root = template\match('^(.-)%?%.lua$') or template\match('^(.-)%?%.moon$')
+		if root
+			table.insert paths, root .. 'SubInspector/Inspector/' .. filename
+	-- Package-manager installs can use the system's native library search path.
+	table.insert paths, 'SubInspector'
+
+	errors = { 'Could not load the SubInspector library:' }
+	for path in *paths
+		success, library = pcall ffi.load, path
+		return library if success
+		table.insert errors, '  ' .. path .. ': ' .. tostring library
+	error table.concat errors, '\n'
+
+SubInspector = loadLibrary!
 
 log = ( message, ... ) ->
 	aegisub.log 2, message .. '\n', ...
@@ -198,7 +218,7 @@ addStyles = ( line, scriptText, seenStyles ) =>
 class Inspector
 	@version = versionRecord
 
-	new: ( subtitles = error( "You must provide the subtitles object." ), fcConfig = libraryPath .. "fonts.conf", fontDir = aegisub.decode_path( '?script/fonts' ), logFunc = log ) =>
+	new: ( subtitles = error( "You must provide the subtitles object." ), fcConfig, fontDir = aegisub.decode_path( '?script/fonts' ), logFunc = log ) =>
 
 		success, message = looseVersionCompare SubInspector.si_getVersion!
 		assert success, message

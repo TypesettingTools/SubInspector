@@ -82,11 +82,18 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential pkg-config nasm libass-dev fonts-dejavu-core
+      - name: Install Lua wrapper test tools
+        if: runner.os != 'macOS' || matrix.arch != 'x86_64'
+        run: python tools/ci/setup-lua.py
 
       - name: Configure
         run: meson setup build ${{ matrix.args }}
       - name: Build
         run: meson compile -C build
+      - name: Check Lua wrapper tests are enabled
+        if: runner.os != 'macOS' || matrix.arch != 'x86_64'
+        shell: bash
+        run: meson test -C build --list | grep -q aegisub-wrapper
       - name: Test
         run: meson test -C build --print-errorlogs
       - name: Check binary architecture and runtime dependencies
