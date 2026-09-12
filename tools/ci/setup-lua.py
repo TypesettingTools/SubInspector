@@ -18,13 +18,13 @@ paths = []
 
 if sys.platform == 'linux':
     run('sudo', 'apt-get', 'install', '-y', 'luajit', 'luarocks', 'liblua5.1-0-dev')
-    run('sudo', 'luarocks', '--lua-version=5.1', 'install', 'moonscript', '0.6.0')
+    run('sudo', 'luarocks', '--lua-version=5.1', 'install', 'moonscript', '0.7.0')
 elif sys.platform == 'darwin':
     run('brew', 'install', 'luajit', 'luarocks')
     luajit = subprocess.check_output(['brew', '--prefix', 'luajit'], text=True).strip()
     tree = temporary / 'luarocks'
     run('luarocks', '--lua-version=5.1', f'--lua-dir={luajit}', f'--tree={tree}',
-        'install', 'moonscript', '0.6.0')
+        'install', 'moonscript', '0.7.0')
     paths.append(tree / 'bin')
 elif sys.platform == 'win32':
     luajit = temporary / 'luajit'
@@ -35,10 +35,10 @@ elif sys.platform == 'win32':
 
     archive = temporary / 'moonscript.zip'
     urllib.request.urlretrieve(
-        'https://github.com/leafo/moonscript/releases/download/v0.6.0/'
-        'moonscript-v0.6.0-windows-x86_64.zip', archive)
+        'https://github.com/leafo/moonscript/releases/download/v0.7.0/'
+        'moonscript-v0.7.0-windows-x86_64.zip', archive)
     if hashlib.sha256(archive.read_bytes()).hexdigest() != (
-            'd91b2aec25caf71a551268c1d50d635708e556641ba0e19dd7f24d4a68d93e7c'):
+            '36c41ae1faaff1423e100df667a498df61607470b0588663adc14e9db536eb17'):
         sys.exit('MoonScript archive checksum mismatch')
     with zipfile.ZipFile(archive) as compiler:
         compiler.extractall(temporary / 'moonscript')
