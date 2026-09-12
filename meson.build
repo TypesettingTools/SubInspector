@@ -42,9 +42,9 @@ elif host_machine.system() == 'windows'
     libass_options += ['directwrite=enabled', 'fontconfig=disabled']
 endif
 
-deps += dependency('libass', version: '>=0.14.0',
-                   fallback: ['libass', 'libass_dep'],
-                   default_options: libass_options)
+# System libass lacks the exact rasterizer scaling required by SubInspector.
+libass = subproject('libass', default_options: libass_options)
+deps += libass.get_variable('libass_dep')
 
 zlib_dep = dependency('zlib', version: '>=1.2.8', required: get_option('zlib'),
                       fallback: ['zlib', 'zlib_dep'])
