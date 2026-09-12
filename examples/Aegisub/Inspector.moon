@@ -1,6 +1,6 @@
 -- This library is unlicensed under CC0
 local ffi, looseVersionCompare
-versionRecord = '0.7.2'
+versionRecord = '0.8.0'
 
 haveDepCtrl, DependencyControl = pcall require, 'l0.DependencyControl'
 
@@ -20,7 +20,7 @@ if haveDepCtrl
 
 	SIVersionCompat = DependencyControl( {
 		moduleName: "SubInspector.Compat",
-		version: "0.5.1",
+		version: "0.6.0",
 		virtual: true
 	} )
 
@@ -37,7 +37,7 @@ if haveDepCtrl
 
 else
 	ffi  = require 'ffi'
-	SIVersionCompat = 0x000501
+	SIVersionCompat = 0x000600
 
 	versionComponents = ( version ) ->
 		return math.floor(version / 65536) % 256, math.floor(version / 256) % 256, version % 256
