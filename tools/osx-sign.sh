@@ -30,7 +30,7 @@ fi
 codesign --verify --strict --verbose=2 "${LIBRARY}"
 
 # Signing changes only the dylib. Preserve the checksums of the other files.
-CHECKSUMS=$(mktemp "${TMPDIR:-/tmp}/subinspector-checksums.XXXXXX")
+CHECKSUMS=$(mktemp './.SHA256SUMS.XXXXXX')
 trap 'rm -f "${CHECKSUMS}"' EXIT
 trap 'exit 1' HUP INT TERM
 SIGNED_CHECKSUM=$(shasum -a 256 "${LIBRARY}")
@@ -38,6 +38,7 @@ awk -v signed="${SIGNED_CHECKSUM}" '
   $2 == "libSubInspector.dylib" { $0 = signed }
   { print }
 ' SHA256SUMS > "${CHECKSUMS}"
-cat "${CHECKSUMS}" > SHA256SUMS
+chmod 644 "${CHECKSUMS}"
+mv -f "${CHECKSUMS}" SHA256SUMS
 shasum -a 256 -c SHA256SUMS
 echo "Signed ${LIBRARY} and updated SHA256SUMS"

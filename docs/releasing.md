@@ -14,13 +14,17 @@ gh run download RUN_ID --name SubInspector-macos-arm64 --dir build/SubInspector-
 gh run download RUN_ID --name SubInspector-macos-x86_64 --dir build/SubInspector-macos-x86_64
 
 export SUBINSPECTOR_SIGNATURE='Developer ID Application: Your Name (TEAMID)'
-export SUBINSPECTOR_NOTARY_PROFILE=aegisub-release
+export SUBINSPECTOR_TEAM_ID=TEAMID
+export SUBINSPECTOR_NOTARY_PROFILE=aegisub-notary
 ```
 
 You can reuse Aegisub's existing notary profile. To create a new one, run
 `xcrun notarytool store-credentials "$SUBINSPECTOR_NOTARY_PROFILE"` once.
 For non-default keychains, set `SUBINSPECTOR_SIGNING_KEYCHAIN` and/or
 `SUBINSPECTOR_NOTARY_KEYCHAIN`. `SUBINSPECTOR_NOTARY_TIMEOUT` defaults to `30m`.
+Set `SUBINSPECTOR_TEAM_ID` to the 10-character `TeamIdentifier` shown by
+`codesign --display --verbose=4 /path/to/Aegisub.app`. Notarization verifies
+that the dylib is signed by that team before submitting it to Apple.
 
 ```sh
 for arch in arm64 x86_64; do
@@ -31,9 +35,11 @@ done
 ```
 
 Signing verifies the downloaded checksums, signs the dylib with a secure
-timestamp, and updates `SHA256SUMS`. The notarization script checks the signed
-package and produces the requested ZIP only after Apple returns `Accepted`.
-It refuses to overwrite an existing output. On failure it prints the submission
+timestamp, and atomically replaces `SHA256SUMS`. The notarization script checks
+the signed package and produces the requested ZIP only after Apple returns `Accepted`.
+The ZIP's top-level folder matches its filename without `.zip`, regardless of
+the input directory's name. It refuses to overwrite an existing output, including
+one created while awaiting notarization. On failure it prints the submission
 ID/status and requests Apple's log when an ID is available; rerun after fixing
 the issue. `SUBINSPECTOR_SIGNATURE=-` permits local ad-hoc signing tests, but
 those artifacts cannot pass the notarization script's Developer ID check.

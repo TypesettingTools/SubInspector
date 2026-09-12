@@ -9,6 +9,10 @@ if test -z "${SUBINSPECTOR_NOTARY_PROFILE:-}"; then
   echo "Set SUBINSPECTOR_NOTARY_PROFILE to a notarytool Keychain profile" >&2
   exit 1
 fi
+if ! printf '%s\n' "${SUBINSPECTOR_TEAM_ID:-}" | grep -Eq '^[A-Z0-9]{10}$'; then
+  echo "Set SUBINSPECTOR_TEAM_ID to Aegisub's 10-character signing Team ID" >&2
+  exit 1
+fi
 
 ARTIFACT_DIR=$(cd "$1" && pwd)
 OUTPUT_DIR=$(cd "$(dirname "$2")" && pwd)
@@ -17,7 +21,7 @@ case "${OUTPUT_ZIP}" in
   *.zip) ;;
   *) echo "OUTPUT_ZIP must end in .zip" >&2; exit 1 ;;
 esac
-if test -e "${OUTPUT_ZIP}"; then
+if test -e "${OUTPUT_ZIP}" || test -L "${OUTPUT_ZIP}"; then
   echo "${OUTPUT_ZIP} already exists" >&2
   exit 1
 fi
@@ -27,14 +31,17 @@ trap 'rm -rf "${WORK_DIR}"' EXIT
 trap 'exit 1' HUP INT TERM
 
 # Validate a private copy, then submit exactly those files.
-PACKAGE_DIR="${WORK_DIR}/$(basename "${ARTIFACT_DIR}")"
+PACKAGE_DIR="${WORK_DIR}/$(basename "${OUTPUT_ZIP}" .zip)"
 ditto "${ARTIFACT_DIR}" "${PACKAGE_DIR}"
 (
   cd "${PACKAGE_DIR}"
-  grep -Eq '^[[:xdigit:]]{64}  libSubInspector[.]dylib$' SHA256SUMS
+  if ! grep -Eq '^[[:xdigit:]]{64}  libSubInspector[.]dylib$' SHA256SUMS; then
+    echo "Expected a macOS CI artifact with libSubInspector.dylib in SHA256SUMS" >&2
+    exit 1
+  fi
   shasum -a 256 -c SHA256SUMS
   codesign --verify --strict --verbose=2 \
-    -R='anchor apple generic and certificate leaf[field.1.2.840.113635.100.6.1.13] exists' \
+    -R="anchor apple generic and certificate leaf[field.1.2.840.113635.100.6.1.13] exists and certificate leaf[subject.OU] = \"${SUBINSPECTOR_TEAM_ID}\"" \
     libSubInspector.dylib
   SIGNATURE=$(codesign --display --verbose=4 libSubInspector.dylib 2>&1)
   if ! printf '%s\n' "${SIGNATURE}" | grep -q '^Timestamp='; then
@@ -81,6 +88,15 @@ if test "${SUBMIT_EXIT}" -ne 0 || test "${STATUS}" != Accepted; then
 fi
 
 # Apple issues tickets for dylibs, but neither dylibs nor ZIPs support stapling.
-mv "${ARCHIVE}" "${OUTPUT_ZIP}"
+# The destination may have appeared while we waited for Apple.
+if test -e "${OUTPUT_ZIP}" || test -L "${OUTPUT_ZIP}"; then
+  echo "${OUTPUT_ZIP} appeared during notarization; leaving it untouched" >&2
+  exit 1
+fi
+mv -n "${ARCHIVE}" "${OUTPUT_ZIP}"
+if test -e "${ARCHIVE}"; then
+  echo "Could not publish ${OUTPUT_ZIP} without overwriting an existing file" >&2
+  exit 1
+fi
 shasum -a 256 "${OUTPUT_ZIP}"
 echo "Notarized ${OUTPUT_ZIP}"
