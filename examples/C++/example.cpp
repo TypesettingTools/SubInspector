@@ -16,6 +16,14 @@ struct DialogLine {
 	std::string line;
 };
 
+static std::istream& readLine( std::istream &stream, std::string &line ) {
+	std::getline( stream, line );
+	if ( !line.empty( ) && line.back( ) == '\r' ) {
+		line.pop_back( );
+	}
+	return stream;
+}
+
 class ScriptWrapper {
 		std::string headerBuffer;
 		std::fstream &fileStream;
@@ -42,7 +50,7 @@ ScriptWrapper::~ScriptWrapper( void ) {
 
 void ScriptWrapper::readFile( int &width, int &height ) {
 	std::string line;
-	std::getline( fileStream, line );
+	readLine( fileStream, line );
 	if ( "[Script Info]" != line ) {
 		// BOM?
 		if ( "[Script Info]" != line.substr( 3 ) ) {
@@ -54,7 +62,7 @@ void ScriptWrapper::readFile( int &width, int &height ) {
 	// This is pretty terrible.
 	std::cout << "Reading headers." << std::endl;
 	while ( true ) {
-		std::getline( fileStream, line );
+		readLine( fileStream, line );
 		if ( '[' == line[0] ) {
 			break;
 		}
@@ -95,7 +103,7 @@ void ScriptWrapper::readFile( int &width, int &height ) {
 		if ( !fileStream.good( ) )
 			goto fail;
 
-		std::getline( fileStream, line );
+		readLine( fileStream, line );
 		switch ( line[0] ) {
 			case 'S':
 				if ( 0 == line.compare( 0, 6, "Style:" ) ) {

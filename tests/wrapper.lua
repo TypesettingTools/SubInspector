@@ -78,13 +78,13 @@ assert(message:find('wrong architecture', 1, true))
 -- with and without DependencyControl registration.
 local declared = false
 for _, depctrl in ipairs({false, true}) do
-    local loaded_path, config
+    local loaded_path, config, library
     local test_ffi = setmetatable({
         cdef = function(definitions)
             if not declared then ffi.cdef(definitions); declared = true end
         end,
         load = function(path)
-            local library = ffi.load(path)
+            library = ffi.load(path)
             loaded_path = path
             return setmetatable({
                 si_init = function(width, height, font_config, fonts)
@@ -118,6 +118,43 @@ for _, depctrl in ipairs({false, true}) do
     assert(rects[1].hash == rects[2].hash)
     local configured = Inspector(subtitles, 'custom-fonts.conf')
     assert(config == 'custom-fonts.conf' and configured.fcConfig == config)
+
+    -- Compare rendering settings with a native render of the complete
+    -- script, so the wrapper cannot silently change subtitle appearance.
+    local settings = {
+        {'Kerning', 'yes'}, {'Language', 'tr'},
+        {'LayoutResX', '1280'}, {'LayoutResY', '720'},
+    }
+    for _, setting in ipairs(settings) do
+        table.insert(subtitles, #subtitles, {
+            class = 'info', key = setting[1], value = setting[2],
+            raw = setting[1] .. ': ' .. setting[2],
+        })
+    end
+    assert(inspector:updateHeader(subtitles))
+    local full_header = {'[Script Info]'}
+    for _, line in ipairs(subtitles) do
+        if line.class == 'style' then
+            table.insert(full_header, '[V4+ Styles]')
+        else
+            assert(inspector.header:find(line.raw, 1, true))
+        end
+        table.insert(full_header, line.raw)
+    end
+    table.insert(full_header, '[Events]\n')
+    local native = ffi.gc(library.si_init(640, 480, nil, nil), library.si_cleanup)
+    assert(native ~= nil)
+    local header = table.concat(full_header, '\n')
+    assert(library.si_setHeader(native, header, #header) == 0)
+    local text = '{\\an7\\pos(100,100)\\fs80\\bord2\\blur2}AVAVAV'
+    local raw = 'Dialogue: 0,0:00:00.00,0:00:02.00,Default,,0,0,0,,' .. text
+    assert(library.si_setScript(native, raw, #raw) == 0)
+    local expected = ffi.new('SI_Rect[1]')
+    assert(library.si_calculateBounds(native, expected, ffi.new('int32_t[1]', 0), 1) == 0)
+    local actual = assert(inspector:getBounds({{style = 'Default', text = text, raw = raw}}, {0}))[1]
+    for _, field in ipairs({'x', 'y', 'w', 'h', 'hash'}) do
+        assert(actual[field] == tonumber(expected[0][field]), field .. ' differs from native rendering')
+    end
 end
 
 print('Library discovery, errors, DependencyControl registration, and wrapper rendering passed.')
